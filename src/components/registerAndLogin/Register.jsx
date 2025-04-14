@@ -1,13 +1,12 @@
+// src/components/registerAndLogin/Register.jsx
+
 import React, { useState } from 'react';
 
 export default function Register() {
-
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  
   const [venueManager, setVenueManager] = useState(false);
-
   const [user, setUser] = useState(null);
   const [error, setError] = useState('');
 
@@ -15,13 +14,7 @@ export default function Register() {
     e.preventDefault();
     setError('');
 
-    const payload = {
-      name,
-      email,
-      password,
-      venueManager,  
-    };
-
+    const payload = { name, email, password, venueManager };
     const baseUrl = import.meta.env.VITE_API_BASE_URL;
     const options = {
       method: 'POST',
@@ -40,6 +33,8 @@ export default function Register() {
       }
       const responseData = await response.json();
       setUser(responseData.data);
+
+      // navigate("/profile"); // For å videresende hvis du vil
     } catch (err) {
       setError(err.message);
     }
@@ -91,6 +86,7 @@ export default function Register() {
         </div>
         <button type="submit">Registrer</button>
       </form>
+
       {error && <p style={{ color: 'red' }}>{error}</p>}
       {user && (
         <div>
