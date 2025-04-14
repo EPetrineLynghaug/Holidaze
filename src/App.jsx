@@ -1,16 +1,21 @@
 import { useState } from 'react'
+import Login from './components/registerAndLogin/Login';
+import Register from './components/registerAndLogin/Register';
 
 
 
 function App() {
-  const [count, setCount] = useState(0)
+
+  const [showLogin, setShowLogin] = useState(true);
 
   return (
-    <>
-      <h1>hallo world</h1>
-
-    </>
-  )
+    <div>
+      <div style={{ marginBottom: '20px' }}>
+        <button onClick={() => setShowLogin(true)}>Login</button>
+        <button onClick={() => setShowLogin(false)}>Register</button>
+      </div>
+      {showLogin ? <Login /> : <Register />}
+    </div>
+  );
 }
-
 export default App
