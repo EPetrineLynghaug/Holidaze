@@ -5,7 +5,7 @@ export default function Layout() {
   return (
     <div>
       <header>
-        {/* Enkel navigasjon i headeren */}
+ 
         <nav>
           <Link to="/">Hjem</Link>{" "}
           <Link to="/login">Login</Link>{" "}
@@ -15,7 +15,7 @@ export default function Layout() {
         </nav>
       </header>
       <main>
-        {/* <Outlet /> viser barne-komponenten for den ruten du er på */}
+      
         <Outlet />
       </main>
     </div>
