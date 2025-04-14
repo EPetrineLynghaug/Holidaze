@@ -1,5 +1,3 @@
-// src/components/registerAndLogin/Register.jsx
-
 import React, { useState } from 'react';
 
 export default function Register() {

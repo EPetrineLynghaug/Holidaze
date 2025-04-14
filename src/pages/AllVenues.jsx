@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { VENUES_URL } from "../constans/api"; 
+import { VENUES_URL } from "../components/constans/api"; 
 
 export default function AllVenues() {
   const [venues, setVenues] = useState([]);

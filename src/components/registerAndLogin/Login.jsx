@@ -1,10 +1,10 @@
-
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
+import { UserContext } from '../context/UserContext';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [user, setUser] = useState(null);
+  const { setUser } = useContext(UserContext);
   const [error, setError] = useState('');
 
   const handleLogin = async (e) => {
@@ -25,10 +25,11 @@ export default function Login() {
         throw new Error('Innlogging mislyktes');
       }
       const responseData = await response.json();
+
+   
       setUser(responseData.data);
 
-      // Hvis du ønsker å videresende til en ny side, bruk for eksempel:
-      // navigate("/profile"); // husk isåfall useNavigate()
+     
     } catch (err) {
       setError(err.message);
     }
@@ -61,19 +62,6 @@ export default function Login() {
         <button type="submit">Logg Inn</button>
       </form>
       {error && <p style={{ color: 'red' }}>{error}</p>}
-      {user && (
-        <div>
-          <h3>Velkommen, {user.name}!</h3>
-          <p>Email: {user.email}</p>
-          {user.avatar && (
-            <img
-              src={user.avatar.url}
-              alt={user.avatar.alt}
-              style={{ width: '100px', height: '100px' }}
-            />
-          )}
-        </div>
-      )}
     </div>
   );
 }
