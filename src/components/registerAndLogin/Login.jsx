@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 
 export default function Login() {
@@ -11,8 +12,6 @@ export default function Login() {
     setError('');
 
     const payload = { email, password };
-
-    // Henter base-URL fra .env via Vite
     const baseUrl = import.meta.env.VITE_API_BASE_URL;
     const options = {
       method: 'POST',
@@ -27,6 +26,9 @@ export default function Login() {
       }
       const responseData = await response.json();
       setUser(responseData.data);
+
+      // Hvis du ønsker å videresende til en ny side, bruk for eksempel:
+      // navigate("/profile"); // husk isåfall useNavigate()
     } catch (err) {
       setError(err.message);
     }
