@@ -8,6 +8,7 @@ import Layout from './components/constans/layout';
 import Home from './pages/Home';
 import AllVenues from './pages/AllVenues';
 import Profile from './pages/Profile';
+import VenueDetail from './pages/VenueDetail';
 
 
 import Login from './components/registerAndLogin/Login';
@@ -23,7 +24,13 @@ function App() {
           <Route index element={<Home />} />
 
        
-          <Route path="venues" element={<AllVenues />} />
+        {/* Venues-ruter */}
+        <Route path="venues">
+            <Route index element={<AllVenues />} />
+            {/* Dynamisk route for single venue detail */}
+            <Route path=":id" element={<VenueDetail />} />
+          </Route>
+          
           <Route path="profile" element={<Profile />} />
 
      
