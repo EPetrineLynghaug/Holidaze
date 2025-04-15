@@ -1,6 +1,6 @@
-
 import React, { useState, useEffect } from "react";
-import { VENUES_URL } from "../components/constans/api"; 
+import { Link } from "react-router";
+import { VENUES_URL } from "../components/constans/api";
 
 export default function AllVenues() {
   const [venues, setVenues] = useState([]);
@@ -8,21 +8,20 @@ export default function AllVenues() {
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
 
-
   const limit = 100;
-
 
   const fetchVenues = async (page) => {
     setLoading(true);
     try {
-   
       const response = await fetch(`${VENUES_URL}?limit=${limit}&page=${page}`);
       if (!response.ok) {
         throw new Error("Noe gikk galt med henting av venues");
       }
       const json = await response.json();
- 
-      setVenues((prevVenues) => [...prevVenues, ...json.data]);
+      
+      // Hvis API-et returnerer eldste først, snu rekkefølgen for å få nyeste først.
+      const sortedVenues = [...json.data].reverse();
+      setVenues((prevVenues) => [...prevVenues, ...sortedVenues]);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -30,18 +29,16 @@ export default function AllVenues() {
     }
   };
 
-
   useEffect(() => {
     fetchVenues(page);
   }, [page]);
-
 
   const handleReadMore = () => {
     setPage((prevPage) => prevPage + 1);
   };
 
   return (
-    <div>
+    <div style={{ padding: "20px" }}>
       <h1>All Venues</h1>
       {error && <div style={{ color: "red" }}>Error: {error}</div>}
       <div
@@ -93,15 +90,38 @@ export default function AllVenues() {
                   : "Ukjent sted"}
               </p>
               <p style={{ fontWeight: "bold" }}>Pris: {venue.price} NOK</p>
-             
-              <a href={`/venues/${venue.id}`}>Se profil</a>
+              <Link
+                to={`/venues/${venue.id}`}
+                style={{
+                  display: "inline-block",
+                  marginTop: "10px",
+                  padding: "8px 12px",
+                  backgroundColor: "#5b3cc4",
+                  color: "#fff",
+                  textDecoration: "none",
+                  borderRadius: "4px",
+                }}
+              >
+                Read Post
+              </Link>
             </div>
           );
         })}
       </div>
       <div style={{ textAlign: "center", margin: "20px 0" }}>
-        <button onClick={handleReadMore} disabled={loading}>
-          {loading ? "Laster..." : "Read More"}
+        <button
+          onClick={handleReadMore}
+          disabled={loading}
+          style={{
+            padding: "10px 20px",
+            backgroundColor: "#5b3cc4",
+            color: "#fff",
+            border: "none",
+            borderRadius: "4px",
+            cursor: loading ? "not-allowed" : "pointer",
+          }}
+        >
+          {loading ? "Loading..." : "Read More"}
         </button>
       </div>
     </div>
