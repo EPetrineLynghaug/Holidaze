@@ -1,1 +1,23 @@
-@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&display=swap');
+
+/* Tailwind v4 imports */
+@import "tailwindcss/preflight";
+/* @import "tailwindcss/components"; */
+@import "tailwindcss/utilities";
+
+:root {
+ 
+  --color-BGcolor: #fafafa;
+}
+
+
+@layer base {
+  body {
+   
+    font-family: 'Figtree', sans-serif;
+    background-color: var(--color-BGcolor);
+
+    letter-spacing: 0.1em;
+  }
+}
