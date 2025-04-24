@@ -11,7 +11,7 @@ import Profile from './pages/Profile';
 import VenueDetail from './pages/VenueDetail';
 
 
-import Login from './components/registerAndLogin/Login';
+import Login from './pages/Login';
 import Register from './components/registerAndLogin/Register';
 
 function App() {
