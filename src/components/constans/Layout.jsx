@@ -1,10 +1,9 @@
 import React, { useContext } from "react";
-import { Outlet, Link } from "react-router";
+import { Outlet, NavLink } from "react-router";
 import { UserContext } from "../context/UserContext";
 
 export default function Layout() {
   const { user, setUser } = useContext(UserContext);
-  console.log("Logged in user:", user);
 
   const handleLogout = () => {
     setUser(null);
@@ -13,23 +12,38 @@ export default function Layout() {
   return (
     <div>
       <header>
-        <nav>
-          <Link to="/">Hjem</Link>{" "}
+        <nav style={{ display: 'flex', gap: '1rem', padding: '1rem', borderBottom: '1px solid #ddd' }}>
+          <NavLink to="/" end style={({ isActive }) => ({ fontWeight: isActive ? 'bold' : 'normal' })}>
+            Hjem
+          </NavLink>
+
           {user ? (
             <>
-              <Link to="/profile">Profile</Link>{" "}
-              <button onClick={handleLogout}>Logg ut</button>{" "}
+              <NavLink to="/profile" style={({ isActive }) => ({ fontWeight: isActive ? 'bold' : 'normal' })}>
+                Profil
+              </NavLink>
+              <button onClick={handleLogout} style={{ marginLeft: 'auto' }}>
+                Logg ut
+              </button>
             </>
           ) : (
             <>
-              <Link to="/login">Login</Link>{" "}
-              <Link to="/register">Register</Link>{" "}
+              <NavLink to="/login" style={({ isActive }) => ({ fontWeight: isActive ? 'bold' : 'normal' })}>
+                Logg inn
+              </NavLink>
+              <NavLink to="/register" style={({ isActive }) => ({ fontWeight: isActive ? 'bold' : 'normal' })}>
+                Registrer
+              </NavLink>
             </>
           )}
-          <Link to="/venues">All Venues</Link>
+
+          <NavLink to="/venues" style={({ isActive }) => ({ fontWeight: isActive ? 'bold' : 'normal' })}>
+            All Venues
+          </NavLink>
         </nav>
       </header>
-      <main>
+
+      <main style={{ padding: '1rem' }}>
         <Outlet />
       </main>
     </div>

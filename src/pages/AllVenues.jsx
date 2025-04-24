@@ -1,27 +1,27 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router";
+// src/pages/AllVenues.jsx
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router";
 import { VENUES_URL } from "../components/constans/api";
 
 export default function AllVenues() {
   const [venues, setVenues] = useState([]);
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [page, setPage] = useState(1);
+  const limit = 100; 
+  const navigate = useNavigate();
+  const isFirstRender = useRef(true);
 
-  const limit = 100;
-
-  const fetchVenues = async (page) => {
+  const fetchVenues = async ({ pageNum = 1, replace = false }) => {
     setLoading(true);
+    setError(null);
     try {
-      const response = await fetch(`${VENUES_URL}?limit=${limit}&page=${page}`);
-      if (!response.ok) {
-        throw new Error("Noe gikk galt med henting av venues");
-      }
-      const json = await response.json();
-      
-      // Hvis API-et returnerer eldste først, snu rekkefølgen for å få nyeste først.
-      const sortedVenues = [...json.data].reverse();
-      setVenues((prevVenues) => [...prevVenues, ...sortedVenues]);
+      const url = `${VENUES_URL}?limit=${limit}&page=${pageNum}&sort=created&sortOrder=desc`;
+      console.log("Fetching venues:", url);
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`Error ${res.status}`);
+      const { data } = await res.json();
+      setVenues(prev => (replace ? data : [...prev, ...data]));
     } catch (err) {
       setError(err.message);
     } finally {
@@ -30,100 +30,97 @@ export default function AllVenues() {
   };
 
   useEffect(() => {
-    fetchVenues(page);
+   
+    if (isFirstRender.current) {
+      fetchVenues({ pageNum: 1, replace: true });
+      isFirstRender.current = false;
+    } else {
+      fetchVenues({ pageNum: page, replace: page === 1 });
+    }
   }, [page]);
 
-  const handleReadMore = () => {
-    setPage((prevPage) => prevPage + 1);
+  const handleRefresh = () => {
+    // Force refresh selv om side er 1
+    fetchVenues({ pageNum: 1, replace: true });
+    setPage(1);
   };
+
+  const handleLoadMore = () => {
+    setPage(prev => prev + 1);
+  };
+
+  if (loading && page === 1) return <p>Loading venues...</p>;
+  if (error) return <p style={{ color: "red" }}>Error: {error}</p>;
 
   return (
     <div style={{ padding: "20px" }}>
       <h1>All Venues</h1>
-      {error && <div style={{ color: "red" }}>Error: {error}</div>}
-      <div
-        className="venues-container"
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "20px",
-        }}
-      >
-        {venues.map((venue, index) => {
-          const imageUrl =
-            venue.media && venue.media[0] && venue.media[0].url
-              ? venue.media[0].url
-              : "https://via.placeholder.com/300x200?text=No+Image";
-          const imageAlt =
-            venue.media && venue.media[0] && venue.media[0].alt
-              ? venue.media[0].alt
-              : "Placeholder image";
-
-          return (
-            <div
-              key={`${venue.id}-${index}`}
-              className="venue-card"
-              style={{
-                border: "1px solid #ccc",
-                borderRadius: "8px",
-                width: "300px",
-                padding: "10px",
-                boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
-              }}
-            >
-              <img
-                src={imageUrl}
-                alt={imageAlt}
-                style={{
-                  width: "100%",
-                  height: "200px",
-                  objectFit: "cover",
-                  borderRadius: "4px",
-                }}
-              />
-              <h2 style={{ fontSize: "1.2rem", margin: "10px 0" }}>
-                {venue.name}
-              </h2>
-              <p style={{ color: "#666" }}>
-                {venue.location && venue.location.city
-                  ? venue.location.city
-                  : "Ukjent sted"}
-              </p>
-              <p style={{ fontWeight: "bold" }}>Pris: {venue.price} NOK</p>
-              <Link
-                to={`/venues/${venue.id}`}
-                style={{
-                  display: "inline-block",
-                  marginTop: "10px",
-                  padding: "8px 12px",
-                  backgroundColor: "#5b3cc4",
-                  color: "#fff",
-                  textDecoration: "none",
-                  borderRadius: "4px",
-                }}
-              >
-                Read Post
-              </Link>
-            </div>
-          );
-        })}
-      </div>
-      <div style={{ textAlign: "center", margin: "20px 0" }}>
+      <div style={{ margin: "1rem 0" }}>
+        <button onClick={handleRefresh} disabled={loading && page === 1}>
+          {loading && page === 1 ? "Refreshing..." : "Refresh"}
+        </button>
         <button
-          onClick={handleReadMore}
+          onClick={handleLoadMore}
           disabled={loading}
-          style={{
-            padding: "10px 20px",
-            backgroundColor: "#5b3cc4",
-            color: "#fff",
-            border: "none",
-            borderRadius: "4px",
-            cursor: loading ? "not-allowed" : "pointer",
-          }}
+          style={{ marginLeft: 10 }}
         >
-          {loading ? "Loading..." : "Read More"}
+          {loading && page > 1 ? "Loading more..." : "Load Next 100"}
         </button>
       </div>
+
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 20 }}>
+        {venues.map(v => (
+          <div
+            key={v.id}
+            style={{
+              border: "1px solid #ccc",
+              borderRadius: 8,
+              width: 300,
+              padding: 10,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between'
+            }}
+          >
+            <div>
+              <img
+                src={
+                  v.media?.[0]?.url ||
+                  "https://via.placeholder.com/300x200?text=No+Image"
+                }
+                alt={v.media?.[0]?.alt || "No image"}
+                style={{
+                  width: "100%",
+                  height: 200,
+                  objectFit: "cover",
+                  borderRadius: 4,
+                }}
+              />
+              <h2 style={{ margin: "10px 0" }}>{v.name}</h2>
+              <p style={{ color: "#666" }}>
+                {v.location?.city || "Unknown location"}
+              </p>
+              <p style={{ fontWeight: "bold" }}>Price: {v.price} NOK</p>
+            </div>
+            <button
+              onClick={() => navigate(`/venues/${v.id}`)}
+              style={{
+                marginTop: 10,
+                padding: '8px 12px',
+                border: 'none',
+                backgroundColor: '#007bff',
+                color: '#fff',
+                borderRadius: 4,
+                cursor: 'pointer'
+              }}
+            >
+              See Venue
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {loading && page > 1 && <p>Loading more venues…</p>}
     </div>
   );
 }
