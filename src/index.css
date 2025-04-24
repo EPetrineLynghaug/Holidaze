@@ -1,0 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&display=swap');
+
+/* Tailwind v4 */
+@import "tailwindcss";
+/* @import "tailwindcss/preflight";
+@import "tailwindcss/utilities"; */
+
+:root {
+  --color-BGcolor: #fafafa;
+  --color-btn-light: #5C50FF;
+  --color-btn-dark: #3E35A2;
+  --color-border: rgba(130, 136, 152, 0.5);
+}
+
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Figtree', sans-serif;
+    background-color: var(--color-BGcolor);
+    letter-spacing: 0.1em;
+  }
+}
