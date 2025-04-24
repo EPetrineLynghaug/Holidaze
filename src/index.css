@@ -1,8 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&display=swap');
 
 /* Tailwind v4 */
-@import "tailwindcss/preflight";
-@import "tailwindcss/utilities";
+@import "tailwindcss";
+/* @import "tailwindcss/preflight";
+@import "tailwindcss/utilities"; */
 
 :root {
   --color-BGcolor: #fafafa;
