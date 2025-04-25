@@ -1,49 +1,17 @@
-import React, { useContext } from "react";
-import { Outlet, NavLink } from "react-router";
-import { UserContext } from "../context/UserContext";
+import React from "react";
+import { Outlet, useLocation } from "react-router";
+import MainNavigation from "../navigation/MainMobileMenu";
 
 export default function Layout() {
-  const { user, setUser } = useContext(UserContext);
-
-  const handleLogout = () => {
-    setUser(null);
-  };
+  const location = useLocation();
+  const hideNavOn = ["/login", "/register"];
+  const shouldHideNav = hideNavOn.includes(location.pathname);
 
   return (
-    <div>
-      <header>
-        <nav style={{ display: 'flex', gap: '1rem', padding: '1rem', borderBottom: '1px solid #ddd' }}>
-          <NavLink to="/" end style={({ isActive }) => ({ fontWeight: isActive ? 'bold' : 'normal' })}>
-            Hjem
-          </NavLink>
+    <div className="min-h-screen flex flex-col">
+      {!shouldHideNav && <MainNavigation />}
 
-          {user ? (
-            <>
-              <NavLink to="/profile" style={({ isActive }) => ({ fontWeight: isActive ? 'bold' : 'normal' })}>
-                Profil
-              </NavLink>
-              <button onClick={handleLogout} style={{ marginLeft: 'auto' }}>
-                Logg ut
-              </button>
-            </>
-          ) : (
-            <>
-              <NavLink to="/login" style={({ isActive }) => ({ fontWeight: isActive ? 'bold' : 'normal' })}>
-                Logg inn
-              </NavLink>
-              <NavLink to="/register" style={({ isActive }) => ({ fontWeight: isActive ? 'bold' : 'normal' })}>
-                Registrer
-              </NavLink>
-            </>
-          )}
-
-          <NavLink to="/venues" style={({ isActive }) => ({ fontWeight: isActive ? 'bold' : 'normal' })}>
-            All Venues
-          </NavLink>
-        </nav>
-      </header>
-
-      <main style={{ padding: '1rem' }}>
+      <main className="flex-1 px-4 max-w-screen-lg mx-auto">
         <Outlet />
       </main>
     </div>
