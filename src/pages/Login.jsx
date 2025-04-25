@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router';
 import { UserContext } from '../components/context/UserContext';
+import Logo from '../components/ui/Logo'
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -34,16 +35,14 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-[var(--color-BGcolor)] flex items-start justify-center pt-32 px-4">
-      <div className="w-full max-w-sm">
-        <a href="/">
-          <img
-            src="/images/Logo1.png"
-            alt="Holidaze Logo"
-            className="mx-auto mb-8 h-10"
-          />
-        </a>
+   
+      <div className="w-full max-w-sm space-y-6 text-center ">
+        {/* Logo midt på uten ekstra nedoverflytting */}
+        <Logo className="mx-auto mb-4 h-24 text-5xl" />
 
-        <h2 className="text-xl font-semibold text-center text-black mb-6 tracking-tight">
+   
+
+        <h2 className="text-xl  text-center text-black mb-6 ">
           Log in to your account
         </h2>
 
