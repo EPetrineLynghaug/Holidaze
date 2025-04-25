@@ -1,11 +1,16 @@
 
 import React from 'react';
+import HeroMobile from '../components/hero/HeroMobile';
+
 
 export default function Home() {
   return (
-    <div>
-      <h1 className="font-figtree tracking-10p text-3xl">Velkommen til forsiden!</h1>
-      <p>Dette er Home-siden.</p>
+    <div  className="font-figtree tracking-10p text-3xl">
+         <HeroMobile />
+
+         <p className="font-figtree font-semibold">
+             Explore Experience
+        </p>
     </div>
   );
 }
