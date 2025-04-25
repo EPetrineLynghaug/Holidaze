@@ -7,7 +7,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const { setUser } = useContext(UserContext);
   const [error, setError] = useState('');
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -22,10 +22,11 @@ export default function Login() {
 
       if (!response.ok) throw new Error('Login failed');
       const data = await response.json();
-      setUser(data.data);
+
+      setUser(data.data); 
+      localStorage.setItem('user', JSON.stringify(data.data)); 
 
       navigate('/'); 
-
     } catch (err) {
       setError(err.message);
     }
@@ -78,7 +79,7 @@ export default function Login() {
         </form>
 
         <p className="text-center text-sm text-black mt-8">
-          Don’t have an account?{' '}
+          Don't have an account?{' '}
           <a href="/register" className="text-[var(--color-btn-light)] hover:underline font-medium">
             Sign up
           </a>
