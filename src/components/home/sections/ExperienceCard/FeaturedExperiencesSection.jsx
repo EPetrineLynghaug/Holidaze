@@ -14,7 +14,7 @@ export default function FeaturedExperiencesSection() {
         Explore Experience
       </h2>
 
-      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 justify-items-center">
+      <div className="grid gap-10 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 justify-items-center">
         {experiences.map((exp) => (
           <div key={exp.id} className="w-full max-w-[240px] sm:max-w-none">
             <ExperienceCard {...exp} />
