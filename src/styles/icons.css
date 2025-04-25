@@ -1,18 +1,72 @@
-/* Material Icons font */
-.material-symbols-outlined {
-    font-variation-settings: 
-      'FILL' 0, 
-      'wght' 400, 
-      'GRAD' 0, 
-      'opsz' 40;
-    transition: font-variation-settings 0.3s ease-in-out;
+
+:root {
+    --color-btn-dark: #3E35A2;   /* lilla for logo + fyll */
+    --icon-default-color: #000;  /* svart for “vanlige” ikoner */
+    --form-icon-color: #9CA3AF;  /* text-gray-400 */
   }
   
-  .material-symbols-outlined.filled {
-    font-variation-settings: 
-      'FILL' 1, 
-      'wght' 400, 
-      'GRAD' 0, 
+  /* 1) Base: alle ikoner arver currentColor */
+  .material-symbols-outlined {
+    font-variation-settings:
+      'FILL' 0,
+      'wght' 400,
+      'GRAD' 0,
       'opsz' 40;
+    transition:
+      font-variation-settings 0.6s ease-in-out,
+      transform 0.6s ease-in-out;
+    transform-origin: center bottom;
+    color: currentColor;
+  }
+  
+  /* 2) Vanlige ikoner: gi dem klassen .icon-default */
+  .material-symbols-outlined.icon-default {
+    color: var(--icon-default-color);
+  }
+  
+  /* 3) Skjema-ikoner: gi dem klassen .form-icon */
+  .material-symbols-outlined.form-icon {
+    color: var(--form-icon-color);
+  }
+  
+  /* 4) Logo-wrapper */
+  .holidaze-logo {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    color: var(--color-btn-dark); /* logo-tekst + sol-ikon */
+  }
+  
+  /* 5) Fyll for .filled */
+  .material-symbols-outlined.filled {
+    font-variation-settings:
+      'FILL' 1,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 48;
+    transform: scale(1.1);
+    color: var(--color-btn-dark);
+  }
+  
+  /* 6) Hover fyll på hele logoen */
+  .holidaze-logo:hover .material-symbols-outlined.sun {
+    font-variation-settings:
+      'FILL' 1,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 48;
+    transform: scale(1.1);
+    /* arver lilla fra .holidaze-logo */
+  }
+  
+  /* 7) Evt. andre interaktive ikoner */
+  .material-symbols-outlined.icon-interactive:hover {
+    font-variation-settings:
+      'FILL' 1,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 48;
+    transform: scale(1.1);
+    color: var(--color-btn-dark);
   }
   

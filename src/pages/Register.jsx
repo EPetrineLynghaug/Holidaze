@@ -62,12 +62,12 @@ export default function Register() {
             <div className="relative h-40">
               <img src="/images/traveler.png" alt="Traveler" className="w-full h-full object-cover" />
               <span
-                className={`material-symbols-outlined text-4xl absolute -bottom-5 left-1/2 -translate-x-1/2 shadow-md p-2 rounded-full bg-white transition-colors duration-300 ease-in-out ${
-                  !form.venueManager ? 'filled text-[var(--color-btn-light)]' : 'text-gray-600'
-                }`}
-              >
-                person
-              </span>
+  className={`material-symbols-outlined text-4xl absolute -bottom-5 left-1/2 -translate-x-1/2
+    shadow-md p-2 rounded-full bg-white transition-colors duration-300 ease-in-out
+    ${!form.venueManager ? 'filled' : ''}`}
+>
+  person
+</span>
             </div>
             <div className="text-center pt-6 pb-3 text-sm font-medium text-black">Become a traveler</div>
           </button>
@@ -80,13 +80,14 @@ export default function Register() {
           >
             <div className="relative h-40">
               <img src="/images/hosting-key.png" alt="Host" className="w-full h-full object-cover" />
-              <span
-                className={`material-symbols-outlined text-4xl absolute -bottom-5 left-1/2 -translate-x-1/2 shadow-md p-2 rounded-full bg-white transition-colors duration-300 ease-in-out ${
-                  form.venueManager ? 'filled text-[var(--color-btn-light)]' : 'text-gray-600'
-                }`}
-              >
-                family_home
-              </span>
+             {/* Home-ikon som toggles med filled */}
+            <span
+             className={`material-symbols-outlined text-4xl absolute -bottom-5 left-1/2 -translate-x-1/2
+                shadow-md p-2 rounded-full bg-white transition-colors duration-300 ease-in-out
+             ${form.venueManager ? 'filled' : ''}`}
+>
+  family_home
+</span>
             </div>
             <div className="text-center pt-6 pb-3 text-sm font-medium text-black">Start Hosting</div>
           </button>
@@ -95,7 +96,7 @@ export default function Register() {
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-3">
           <div className="flex items-center border rounded-md px-3 py-2.5 border-[var(--color-border)] focus-within:ring-2 focus-within:ring-[var(--color-btn-light)]">
-            <span className="material-symbols-outlined text-gray-400 text-base mr-2">edit</span>
+            <span className="material-symbols-outlined form-icon  text-base mr-2">edit</span>
             <input
               type="text"
               name="name"
@@ -108,7 +109,7 @@ export default function Register() {
           </div>
 
           <div className="flex items-center border rounded-md px-3 py-2.5 border-[var(--color-border)] focus-within:ring-2 focus-within:ring-[var(--color-btn-light)]">
-            <span className="material-symbols-outlined text-gray-400 text-base mr-2">mail</span>
+            <span className="material-symbols-outlined form-icon text-base mr-2">mail</span>
             <input
               type="email"
               name="email"
@@ -121,7 +122,7 @@ export default function Register() {
           </div>
 
           <div className="flex items-center border rounded-md px-3 py-2.5 border-[var(--color-border)] focus-within:ring-2 focus-within:ring-[var(--color-btn-light)]">
-            <span className="material-symbols-outlined text-gray-400 text-base mr-2">lock</span>
+            <span className="material-symbols-outlined form-icon text-base mr-2">lock</span>
             <input
               type="password"
               name="password"

@@ -9,8 +9,14 @@ export default function MainMobileMenu() {
   return (
     <>
       {/* Topbar */}
-      <header className="sticky top-0 z-50 bg-white shadow-md px-4 py-3 flex items-center justify-between">
-        <img src="/images/Logo1.png" alt="Holidaze logo" className="h-6" />
+      <header className="static bg-white shadow-md px-4 py-3 flex items-center justify-between">
+      <NavLink to="/" className="holidaze-logo flex items-center text-1xl font-bold">
+  <span className="mr-0.5">H</span>
+  <span className="material-symbols-outlined sun icon-interactive mx-0">
+    light_mode
+  </span>
+  <span className="ml-0.5">lidaze</span>
+</NavLink>
 
         <button
           onClick={() => setOpen(true)}
@@ -40,7 +46,6 @@ export default function MainMobileMenu() {
           </button>
         </div>
 
-     
         <nav className="flex flex-col gap-5 text-sm mb-6">
           <MenuItem to="/" label="Home" onClick={() => setOpen(false)} />
           <MenuItem to="/venues" label="All Venues" onClick={() => setOpen(false)} />
@@ -53,7 +58,6 @@ export default function MainMobileMenu() {
           )}
         </nav>
 
-     
         {user && (
           <NavLink
             to="/profile"
@@ -108,7 +112,6 @@ export default function MainMobileMenu() {
     </>
   );
 }
-
 
 function MenuItem({ to, label, onClick }) {
   return (
