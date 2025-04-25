@@ -2,6 +2,7 @@
 import React from 'react';
 import HeroMobile from '../components/home/hero/HeroMobile';
 import FeaturedExperiencesSection from '../components/home/sections/ExperienceCard/FeaturedExperiencesSection';
+import WhyHolidazeSection from '../components/home/sections/WhyHolidaze/WhyHolidazeSection';
 
 
 export default function Home() {
@@ -9,6 +10,7 @@ export default function Home() {
     <div  className="font-figtree tracking-10p text-3xl">
          <HeroMobile />
          <FeaturedExperiencesSection />
+         <WhyHolidazeSection />
          
     </div>
   );
