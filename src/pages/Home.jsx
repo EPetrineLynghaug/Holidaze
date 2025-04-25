@@ -1,11 +1,17 @@
 
 import React from 'react';
+import HeroMobile from '../components/home/hero/HeroMobile';
+import FeaturedExperiencesSection from '../components/home/sections/ExperienceCard/FeaturedExperiencesSection';
+import WhyHolidazeSection from '../components/home/sections/WhyHolidaze/WhyHolidazeSection';
+
 
 export default function Home() {
   return (
-    <div>
-      <h1 className="font-figtree tracking-10p text-3xl">Velkommen til forsiden!</h1>
-      <p>Dette er Home-siden.</p>
+    <div  className="font-figtree tracking-10p text-3xl">
+         <HeroMobile />
+         <FeaturedExperiencesSection />
+         <WhyHolidazeSection />
+         
     </div>
   );
 }
