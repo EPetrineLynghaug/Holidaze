@@ -1,6 +1,6 @@
-
+// src/pages/Login.js
 import React, { useContext, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import useForm from '../hooks/useForm';
 import { useAuthApi } from '../hooks/useApi';
 import { UserContext } from '../components/context/UserContext';
@@ -9,7 +9,7 @@ import Logo from '../components/ui/Logo';
 export default function Login() {
   const { setUser } = useContext(UserContext);
   const navigate = useNavigate();
-  const { login, isLoading: apiLoading, error: apiError } = useAuthApi();
+  const { login, loading: apiLoading, error: apiError } = useAuthApi();
   const [showPassword, setShowPassword] = useState(false);
 
   const {
@@ -31,7 +31,7 @@ export default function Login() {
       navigate('/');
     } catch (err) {
       const field = err.field || 'password';
-      setErrors({ [field]: err.message });
+      setErrors(prev => ({ ...prev, [field]: err.message }));
     }
   }
 
@@ -43,10 +43,12 @@ export default function Login() {
           Log in to your account
         </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           {/* Email Field */}
           <div className="flex items-center border rounded-md px-2 py-2 border-[var(--color-border)] focus-within:ring-1 focus-within:ring-[var(--color-btn-light)]">
-            <span className="material-symbols-outlined icon-gray text-xs mr-2">email</span>
+            <span className="material-symbols-outlined icon-gray text-xs mr-2">
+              email
+            </span>
             <input
               name="email"
               type="email"
@@ -60,7 +62,7 @@ export default function Login() {
               className="w-full text-xs text-gray-800 placeholder-gray-400 outline-none"
             />
           </div>
-          {errors.email && touched.email && (
+          {touched.email && errors.email && (
             <p id="email-error" className="text-red-500 text-xs text-left">
               {errors.email}
             </p>
@@ -92,32 +94,37 @@ export default function Login() {
               </button>
             )}
           </div>
-          {errors.password && touched.password && (
+          {touched.password && errors.password && (
             <p id="password-error" className="text-red-500 text-xs text-left">
               {errors.password}
             </p>
           )}
 
+          {/* General API error */}
+          {apiError && !errors.general && (
+            <p className="text-red-500 text-xs text-center">{apiError}</p>
+          )}
+
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={isSubmitting} // only disabled during actual form submission
+            disabled={isSubmitting || apiLoading}
             className="w-full bg-[var(--color-btn-light)] hover:bg-[var(--color-btn-dark)] text-white font-semibold text-sm py-3 rounded-md transition tracking-wide disabled:opacity-50"
           >
-            {isSubmitting ? 'Logging in...' : 'Log in'}
+            {isSubmitting || apiLoading ? 'Logging in...' : 'Log in'}
           </button>
         </form>
 
         <p className="text-center text-xs text-black mt-6">
           Don't have an account?{' '}
-          <a
-            href="/register"
+          <Link
+            to="/register"
             className="text-[var(--color-btn-light)] hover:underline font-medium"
           >
             Sign up
-          </a>
+          </Link>
         </p>
       </div>
     </div>
-);
+  );
 }

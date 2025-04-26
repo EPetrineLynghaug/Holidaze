@@ -9,15 +9,21 @@ export default function useForm(initialValues, onSubmit) {
 
   const validateField = (name, value) => {
     const trimmed = value.trim();
+
     if (name === "email") {
       if (!trimmed) return "Email is required";
+
       const domain = "@stud.noroff.no";
+
       if (!trimmed.endsWith(domain)) return `Email must end with ${domain}`;
     }
+
     if (name === "password") {
       if (!trimmed) return "Password is required";
+
       if (trimmed.length < 6) return "Password must be at least 6 characters";
     }
+
     return "";
   };
 
@@ -32,29 +38,36 @@ export default function useForm(initialValues, onSubmit) {
     setTouched((prev) => ({ ...prev, [name]: true }));
     setErrors((prev) => ({
       ...prev,
+
       [name]: validateField(name, values[name]),
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const allTouched = Object.keys(values).reduce(
       (acc, key) => ({ ...acc, [key]: true }),
       {}
     );
+
     setTouched(allTouched);
+
     const newErrors = Object.keys(values).reduce(
       (acc, key) => ({ ...acc, [key]: validateField(key, values[key]) }),
+
       {}
     );
+
     setErrors(newErrors);
 
     if (!Object.values(newErrors).some(Boolean)) {
       setIsSubmitting(true);
+
       try {
         await onSubmit(values);
       } catch {
-        // external errors via setErrors
+      
       } finally {
         setIsSubmitting(false);
       }
