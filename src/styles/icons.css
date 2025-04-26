@@ -1,72 +1,103 @@
-
 :root {
-    --color-btn-dark: #3E35A2;   /* lilla for logo + fyll */
-    --icon-default-color: #000;  /* svart for “vanlige” ikoner */
-    --form-icon-color: #9CA3AF;  /* text-gray-400 */
-  }
-  
-  /* 1) Base: alle ikoner arver currentColor */
-  .material-symbols-outlined {
-    font-variation-settings:
-      'FILL' 0,
-      'wght' 400,
-      'GRAD' 0,
-      'opsz' 40;
-    transition:
-      font-variation-settings 0.6s ease-in-out,
-      transform 0.6s ease-in-out;
-    transform-origin: center bottom;
-    color: currentColor;
-  }
-  
-  /* 2) Vanlige ikoner: gi dem klassen .icon-default */
-  .material-symbols-outlined.icon-default {
-    color: var(--icon-default-color);
-  }
-  
-  /* 3) Skjema-ikoner: gi dem klassen .form-icon */
+  --color-btn-dark: #3E35A2;
+  --icon-default-color: #000;
+  --form-icon-color: #9CA3AF;
+  --input-icon-opsz-mobile: 20;
+  --input-icon-opsz-desktop: 24;
+  --input-icon-font-size-mobile: 1rem;
+  --input-icon-font-size-desktop: 1.25rem;
+  --hero-icon-opsz-mobile: 18;
+  --hero-icon-opsz-desktop: 22;
+  --hero-icon-font-size-mobile: 0.875rem;
+  --hero-icon-font-size-desktop: 1rem;
+}
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 40;
+  transition: font-variation-settings 0.3s ease-in-out, transform 0.3s ease-in-out;
+  transform-origin: center bottom;
+  color: currentColor;
+}
+
+/* Gray, black and purple icons */
+.material-symbols-outlined.icon-gray { color: var(--form-icon-color); }
+.material-symbols-outlined.icon-gray.filled {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 48;
+  transform: scale(1.1);
+  color: var(--color-btn-dark);
+}
+.material-symbols-outlined.icon-black { color: var(--icon-default-color); }
+.material-symbols-outlined.icon-purple { color: var(--color-btn-dark); }
+.material-symbols-outlined.icon-purple.filled {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 48;
+  transform: scale(1.1);
+}
+
+/* Logo icon */
+.holidaze-logo { display: inline-flex; align-items: center; cursor: pointer; color: var(--color-btn-dark); }
+.holidaze-logo .material-symbols-outlined.sun {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 36;
+  font-size: 1.5rem;
+  transition: font-variation-settings 0.3s ease-in-out, font-size 0.3s ease-in-out;
+}
+.holidaze-logo:hover .material-symbols-outlined.sun,
+.holidaze-logo .material-symbols-outlined.sun.filled {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 48;
+  transform: scale(1.1);
+}
+
+/* Input icons */
+.material-symbols-outlined.form-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--form-icon-color);
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' var(--input-icon-opsz-mobile);
+  font-size: var(--input-icon-font-size-mobile);
+  transition: font-variation-settings 0.3s ease-in-out, font-size 0.3s ease-in-out;
+}
+@media (min-width: 768px) {
   .material-symbols-outlined.form-icon {
-    color: var(--form-icon-color);
+    left: 1rem;
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' var(--input-icon-opsz-desktop);
+    font-size: var(--input-icon-font-size-desktop);
   }
-  
-  /* 4) Logo-wrapper */
-  .holidaze-logo {
-    display: inline-flex;
-    align-items: center;
-    cursor: pointer;
-    color: var(--color-btn-dark); /* logo-tekst + sol-ikon */
+}
+.field-with-icon { position: relative; }
+.field-with-icon input {
+  padding-left: calc(var(--input-icon-font-size-mobile) + 1.25rem);
+}
+@media (min-width: 768px) {
+  .field-with-icon input {
+    padding-left: calc(var(--input-icon-font-size-desktop) + 1.5rem);
   }
-  
-  /* 5) Fyll for .filled */
-  .material-symbols-outlined.filled {
-    font-variation-settings:
-      'FILL' 1,
-      'wght' 400,
-      'GRAD' 0,
-      'opsz' 48;
-    transform: scale(1.1);
-    color: var(--color-btn-dark);
+}
+
+/* HeroMobile icons */
+.material-symbols-outlined.hero-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--form-icon-color);
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' var(--hero-icon-opsz-mobile);
+  font-size: var(--hero-icon-font-size-mobile);
+  transition: font-variation-settings 0.3s ease-in-out, font-size 0.3s ease-in-out;
+}
+@media (min-width: 768px) {
+  .material-symbols-outlined.hero-icon {
+    left: 1rem;
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' var(--hero-icon-opsz-desktop);
+    font-size: var(--hero-icon-font-size-desktop);
   }
-  
-  /* 6) Hover fyll på hele logoen */
-  .holidaze-logo:hover .material-symbols-outlined.sun {
-    font-variation-settings:
-      'FILL' 1,
-      'wght' 400,
-      'GRAD' 0,
-      'opsz' 48;
-    transform: scale(1.1);
-    /* arver lilla fra .holidaze-logo */
+}
+.field-with-hero-icon { position: relative; }
+.field-with-hero-icon input {
+  padding-left: calc(var(--hero-icon-font-size-mobile) + 1.25rem);
+}
+@media (min-width: 768px) {
+  .field-with-hero-icon input {
+    padding-left: calc(var(--hero-icon-font-size-desktop) + 1.5rem);
   }
-  
-  /* 7) Evt. andre interaktive ikoner */
-  .material-symbols-outlined.icon-interactive:hover {
-    font-variation-settings:
-      'FILL' 1,
-      'wght' 400,
-      'GRAD' 0,
-      'opsz' 48;
-    transform: scale(1.1);
-    color: var(--color-btn-dark);
-  }
-  
+}

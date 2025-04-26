@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 export default function WhyHolidazeSection() {
@@ -40,11 +39,11 @@ export default function WhyHolidazeSection() {
       <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-12">
         {features.map((f) => (
           <div key={f.id} className="flex items-start space-x-4">
-            <span className="material-symbols-outlined w-8 h-8 text-[#5C50FF] flex-shrink-0">
+            <span className="material-symbols-outlined icon-purple w-8 h-8 flex-shrink-0 mt-1">
               {f.iconName}
             </span>
             <div>
-              <h3 className="text-lg sm:text-xl  text-gray-900 mb-0">
+              <h3 className="text-lg sm:text-xl text-gray-900 mb-0">
                 {f.title}
               </h3>
               <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
@@ -66,7 +65,7 @@ export default function WhyHolidazeSection() {
           Hosting through Holidaze gave me more than just bookings — it brought
           people, stories, and purpose into my everyday life.
         </blockquote>
-        <p className="text-sm sm:text-base  text-gray-600">
+        <p className="text-sm sm:text-base text-gray-600">
           Martin, host near Geiranger
         </p>
       </div>
