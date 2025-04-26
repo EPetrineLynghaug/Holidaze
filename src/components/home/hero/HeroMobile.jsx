@@ -45,7 +45,7 @@ export default function HeroMobile() {
 
               {/* Date */}
               <div className="field-with-icon group flex-1 bg-white/75 border border-[#D1D1D1] rounded-[10px] focus-within:border-[#3E35A2]">
-                <span className="material-symbols-outlined form-icon group-focus-within:text-[#3E35A2]">calendar_today</span>
+              
                 <input
                   id="when"
                   name="when"
