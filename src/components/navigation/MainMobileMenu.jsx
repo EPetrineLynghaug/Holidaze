@@ -1,6 +1,8 @@
 import React, { useState, useContext } from 'react';
 import { NavLink } from 'react-router';
 import { UserContext } from '../context/UserContext';
+import Logo from '../ui/Logo';
+
 
 export default function MainMobileMenu() {
   const { user, logout } = useContext(UserContext);
@@ -9,14 +11,9 @@ export default function MainMobileMenu() {
   return (
     <>
       {/* Topbar */}
-      <header className="static bg-white shadow-md px-4 py-3 flex items-center justify-between">
-      <NavLink to="/" className="holidaze-logo flex items-center text-1xl font-bold">
-  <span className="mr-0.5">H</span>
-  <span className="material-symbols-outlined sun icon-interactive mx-0">
-    light_mode
-  </span>
-  <span className="ml-0.5">lidaze</span>
-</NavLink>
+      <header className="static bg-white shadow-md px-4 py-3 flex  justify-between">
+        {/* Replace original <NavLink> block with <Logo /> */}
+        <Logo className=" h-10 mb-1" />
 
         <button
           onClick={() => setOpen(true)}

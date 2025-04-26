@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 export default function WhyHolidazeSection() {
@@ -40,11 +39,11 @@ export default function WhyHolidazeSection() {
       <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-12">
         {features.map((f) => (
           <div key={f.id} className="flex items-start space-x-4">
-            <span className="material-symbols-outlined w-8 h-8 text-[#5C50FF] flex-shrink-0">
+            <span className="material-symbols-outlined icon-purple w-8 h-8 flex-shrink-0 mt-1">
               {f.iconName}
             </span>
             <div>
-              <h3 className="text-lg sm:text-xl  text-gray-900 mb-0">
+              <h3 className="text-lg sm:text-xl text-gray-900 mb-0">
                 {f.title}
               </h3>
               <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
@@ -62,24 +61,39 @@ export default function WhyHolidazeSection() {
           alt="Martin, host near Geiranger"
           className="mx-auto w-56 h-70 sm:w-64 sm:h-64 rounded-lg object-cover"
         />
-        <blockquote className="relative px-4 italic text-gray-800 text-base sm:text-lg leading-relaxed before:content-['“'] before:absolute before:-left-2 before:-top-2 after:content-['”'] after:absolute after:-right-2 after:-bottom-0">
-          Hosting through Holidaze gave me more than just bookings — it brought
-          people, stories, and purpose into my everyday life.
-        </blockquote>
-        <p className="text-sm sm:text-base  text-gray-600">
-          Martin, host near Geiranger
-        </p>
-      </div>
+        <blockquote className="relative mx-auto max-w-[16rem] px-4 py-4 italic text-gray-800 text-base leading-relaxed">
+          {/* Åpnings‐anførselstegn */}
+          <span className="absolute top-1 left-1 text-2xl text-gray-300">
+            ❝
+          </span>
 
-      {/* Call to action */}
-      <div className="text-center mb-16 space-y-3">
-        <button className="px-6 py-2 text-sm sm:text-base bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition">
-          Start sharing your space
-        </button>
-        <p className="text-xs sm:text-sm text-gray-500">
-          Your listing can be up in five minutes.
-        </p>
-      </div>
+          <p className="mx-2 my-0">
+            Hosting through Holidaze gave me more than just bookings—it brought
+            people, stories, and purpose into my everyday life.
+          </p>
+
+          {/* Avslutnings‐anførselstegn */}
+          <span className="absolute bottom-1 right-1 text-2xl text-gray-300">
+            ❞
+          </span>
+        </blockquote>
+
+        <p className="text-sm sm:text-base text-gray-600 mb-4">
+  Martin, host near Geiranger
+</p>
+
+
+{/* Call to action */}
+<div className="text-center mb-8">
+  <button className="px-6 py-2 text-sm sm:text-base bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition mb-4">
+    Start sharing your space
+  </button>
+  <p className="text-xs sm:text-sm text-gray-500">
+    Your listing can be up in five minutes.
+  </p>
+</div>
+</div>
+
     </section>
   );
 }
