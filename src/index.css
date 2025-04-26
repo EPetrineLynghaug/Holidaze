@@ -1,7 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&display=swap');
-
 @import "tailwindcss";
-
 
 :root {
   --color-BGcolor: #fafafa;
@@ -13,13 +11,32 @@
 @layer base {
   *, *::before, *::after {
     box-sizing: border-box;
-    margin: 0px;
-    padding: 0px;
+    margin: 0;
+    padding: 0;
   }
 
   body {
     font-family: 'Figtree', sans-serif;
     background-color: var(--color-BGcolor);
     letter-spacing: 0.1em;
+  }
+
+  /* fjerner den gule utofillfargen, Safari, Edge (Blink/WebKit) */
+  input:-webkit-autofill,
+  textarea:-webkit-autofill,
+  select:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0px 1000px var(--color-BGcolor) inset;
+            box-shadow: 0 0 0px 1000px var(--color-BGcolor) inset;
+    -webkit-text-fill-color: inherit;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  /* fjerner den gule utofillfargen i Firefox */
+  input:-moz-autofill,
+  textarea:-moz-autofill,
+  select:-moz-autofill {
+    box-shadow: 0 0 0px 1000px var(--color-BGcolor) inset;
+    -moz-text-fill-color: inherit;
+    transition: background-color 5000s ease-in-out 0s;
   }
 }
