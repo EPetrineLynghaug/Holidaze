@@ -25,7 +25,7 @@ export default function Login() {
       const data = await login({ email, password });
       setUser(data.user);
       localStorage.setItem('user', JSON.stringify(data));
-      navigate('/');
+      navigate('/profile');
     } catch (err) {
       if (err.code === 'EMAIL_NOT_FOUND') {
         setErrors(prev => ({ ...prev, email: err.message }));
