@@ -20,13 +20,16 @@ export default function Login() {
     return '';
   };
 
-  const loginCallback = async ({ email, password }, setErrors) => {
-    try {
-      const data = await login({ email, password });
-      setUser(data.user);
-      localStorage.setItem('user', JSON.stringify(data));
-      navigate('/');
-    } catch (err) {
+ 
+    
+  async function loginCallback({ email, password }) {
+    
+      try {
+        const data = await login({ email, password });
+        setUser(data);
+        localStorage.setItem('user', JSON.stringify(data));
+        navigate('/');
+      } catch (err) {
       if (err.code === 'EMAIL_NOT_FOUND') {
         setErrors(prev => ({ ...prev, email: err.message }));
       } else if (err.code === 'INVALID_PASSWORD') {
