@@ -1,7 +1,8 @@
+// useForm.js
 import { useState, useRef } from "react";
 
 /**
- * Custom form hook for handling input state, validation, and submission.
+ * Custom form hook for input–/validerings–/submit-logikk.
  */
 export default function useForm({ initialValues, validate, onSubmit }) {
   const [values, setValues] = useState(initialValues);
@@ -22,7 +23,7 @@ export default function useForm({ initialValues, validate, onSubmit }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Fjern eventuelle generelle feilmeldinger
+    // Fjern generelle feilmeldinger
     setErrors((prev) => {
       const { general, ...rest } = prev;
       return rest;
@@ -42,7 +43,7 @@ export default function useForm({ initialValues, validate, onSubmit }) {
       try {
         await onSubmit(values, setErrors);
       } catch {
-        // svelg feilen for å sikre at vi alltid stopper submitting
+        // svelg for å stoppe submitting
       } finally {
         setIsSubmitting(false);
       }
@@ -55,6 +56,17 @@ export default function useForm({ initialValues, validate, onSubmit }) {
     setTouched({});
   };
 
+  // Små tillegg: programmatisk oppdatere felt og touched
+  const setFieldValue = (name, value) => {
+    setValues((v) => ({ ...v, [name]: value }));
+    setErrors((e) => ({ ...e, [name]: validate(name, value) }));
+  };
+
+  const setFieldTouched = (name, isTouched = true) => {
+    setTouched((t) => ({ ...t, [name]: isTouched }));
+    setErrors((e) => ({ ...e, [name]: validate(name, values[name]) }));
+  };
+
   return {
     values,
     errors,
@@ -65,5 +77,7 @@ export default function useForm({ initialValues, validate, onSubmit }) {
     handleSubmit,
     reset,
     setErrors,
+    setFieldValue,
+    setFieldTouched,
   };
 }

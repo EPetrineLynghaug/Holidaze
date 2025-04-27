@@ -3,7 +3,8 @@ import { createRoot } from "react-dom/client";
 import './styles/icons.css';
 import "./index.css";
 import { BrowserRouter as Router } from "react-router"; 
-import { UserProvider } from "./components/context/UserContext"; 
+
+import { UserProvider } from './components/context/UserProvider'; 
 import App from "./App.jsx";
 import './index.css'; 
 

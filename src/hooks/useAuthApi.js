@@ -1,3 +1,4 @@
+// useAuthApi.js
 import { useState, useEffect, useRef } from "react";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
@@ -39,10 +40,33 @@ async function loginApi({ email, password }) {
   return payload.data; // { token, user }
 }
 
+async function registerApi({ name, email, password, venueManager }) {
+  const res = await fetch(`${API_BASE}/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, email, password, venueManager }),
+  });
+  const payload = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    const code = payload.error || "REGISTER_FAILED";
+    const message =
+      payload.message || "Registration failed. Please check your input.";
+    throw { code, message };
+  }
+
+  return payload.data; // det som returneres ved registrering
+}
+
 /**
- * React hook for authentication API calls
+ * Hook for authentication API calls og token-lagring
  */
 export default function useAuthApi() {
+  const [token, setToken] = useState(() => localStorage.getItem("token"));
+  const [user, setUser] = useState(() => {
+    const stored = localStorage.getItem("user");
+    return stored ? JSON.parse(stored) : null;
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState({ code: null, message: "" });
   const mounted = useRef(true);
@@ -54,11 +78,26 @@ export default function useAuthApi() {
     []
   );
 
-  const login = async (credentials) => {
+  // Synkroniser til localStorage
+  useEffect(() => {
+    if (token) localStorage.setItem("token", token);
+    else localStorage.removeItem("token");
+  }, [token]);
+
+  useEffect(() => {
+    if (user) localStorage.setItem("user", JSON.stringify(user));
+    else localStorage.removeItem("user");
+  }, [user]);
+
+  const wrapCall = async (apiFn, args) => {
     setError({ code: null, message: "" });
     setIsLoading(true);
     try {
-      return await loginApi(credentials);
+      const data = await apiFn(args);
+      // Dersom kall returnerer token+user
+      if (data.token) setToken(data.token);
+      if (data.user) setUser(data.user);
+      return data;
     } catch (err) {
       if (mounted.current) setError(err);
       throw err;
@@ -67,5 +106,20 @@ export default function useAuthApi() {
     }
   };
 
-  return { login, isLoading, error };
+  const login = (credentials) => wrapCall(loginApi, credentials);
+  const register = (details) => wrapCall(registerApi, details);
+  const logout = () => {
+    setToken(null);
+    setUser(null);
+  };
+
+  return {
+    login,
+    register,
+    logout,
+    token,
+    user,
+    isLoading,
+    error,
+  };
 }
