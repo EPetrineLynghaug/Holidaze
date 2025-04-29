@@ -1,57 +1,51 @@
 // src/pages/Register.jsx
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router';
 import useForm from '../hooks/useForm';
-import useAuthApi from '../hooks/useAuthApi';
-import { UserContext } from '../components/context/UserContext';
+import { register as registerService } from '../services/authService';
+import { isLoggedIn } from '../services/authService';
 import Logo from '../components/ui/Logo';
 
 export default function Register() {
   const navigate = useNavigate();
-  const { register } = useAuthApi();
-  const { user } = useContext(UserContext);
   const [showPassword, setShowPassword] = useState(false);
 
   // Redirect if already logged in
   useEffect(() => {
-    if (user) navigate('/');
-  }, [user, navigate]);
+    if (isLoggedIn()) navigate('/');
+  }, [navigate]);
 
   // Load saved profile type
   const storedType = localStorage.getItem('venueManager');
-  const initialVenueManager = storedType ? JSON.parse(storedType) : false;
+  const initialVenueManager = storedType === 'true';
 
-  // Validation using regex
+  // Field validation
   const validate = (field, value) => {
     if (field === 'venueManager') return '';
     const v = String(value);
     const emailRegex = /^[^@\s]+@stud\.noroff\.no$/i;
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-
     switch (field) {
       case 'name':
-        if (!v.trim()) return 'Name is required';
-        return '';
+        return v.trim() ? '' : 'Name is required';
       case 'email':
-        if (!emailRegex.test(v)) {
-          return 'Email must be a stud.noroff.no address';
-        }
-        return '';
+        return emailRegex.test(v)
+          ? ''
+          : 'Email must be a stud.noroff.no address';
       case 'password':
-        if (!passwordRegex.test(v)) {
-          return 'Password must be at least 8 characters, include uppercase, lowercase and a number';
-        }
-        return '';
+        return passwordRegex.test(v)
+          ? ''
+          : 'Password must be at least 8 characters, include uppercase, lowercase and a number';
       default:
         return '';
     }
   };
 
+  // Submit handler
   const onSubmit = async (values, setErrors) => {
     try {
-      await register(values);
-      // Save profile and type
-      localStorage.setItem('userProfile', JSON.stringify(values));
+      await registerService(values);
+      localStorage.setItem('venueManager', JSON.stringify(values.venueManager));
       navigate('/');
     } catch (err) {
       setErrors(prev => ({ ...prev, general: err.message }));
@@ -68,12 +62,17 @@ export default function Register() {
     handleSubmit,
     setFieldValue,
   } = useForm({
-    initialValues: { name: '', email: '', password: '', venueManager: initialVenueManager },
+    initialValues: {
+      name: '',
+      email: '',
+      password: '',
+      venueManager: initialVenueManager,
+    },
     validate,
     onSubmit,
   });
 
-  // Handle profile type selection
+  // Profile type selector
   const handleSelectType = isManager => {
     setFieldValue('venueManager', isManager);
     localStorage.setItem('venueManager', JSON.stringify(isManager));
@@ -87,7 +86,7 @@ export default function Register() {
           Create your account
         </h2>
 
-        <div className="text-xs text-center text-gray-700 mb-8 bg-white/75 backdrop-blur-sm px-4 py-2 rounded-2xl border border-[#D1D1D1] shadow-lg">
+        <div className="text-xs text-gray-700 mb-8 bg-white/75 backdrop-blur-sm px-4 py-2 rounded-2xl border border-[#D1D1D1] shadow-lg">
           What type of account would you like to create?
         </div>
 
@@ -98,7 +97,11 @@ export default function Register() {
             className="flex-1 rounded-xl overflow-hidden shadow-lg hover:-translate-y-1 transition"
           >
             <div className="relative h-36">
-              <img src="/images/traveler.png" alt="Traveler" className="w-full h-full object-cover" />
+              <img
+                src="/images/traveler.png"
+                alt="Traveler"
+                className="w-full h-full object-cover"
+              />
               <span
                 className={`material-symbols-outlined icon-gray text-xs absolute -bottom-4 left-1/2 -translate-x-1/2 p-1 rounded-full bg-white transition-colors ${
                   !form.venueManager ? 'filled' : ''
@@ -117,7 +120,11 @@ export default function Register() {
             className="flex-1 rounded-xl overflow-hidden shadow-lg hover:-translate-y-1 transition"
           >
             <div className="relative h-36">
-              <img src="/images/hosting-key.png" alt="Host" className="w-full h-full object-cover" />
+              <img
+                src="/images/hosting-key.png"
+                alt="Host"
+                className="w-full h-full object-cover"
+              />
               <span
                 className={`material-symbols-outlined icon-gray text-xs absolute -bottom-4 left-1/2 -translate-x-1/2 p-1 rounded-full bg-white transition-colors ${
                   form.venueManager ? 'filled' : ''
@@ -222,6 +229,5 @@ export default function Register() {
         </p>
       </div>
     </div>
-
   );
 }

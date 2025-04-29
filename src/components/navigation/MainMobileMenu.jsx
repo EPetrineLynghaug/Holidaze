@@ -1,20 +1,49 @@
-import React, { useState, useContext } from 'react';
+// src/components/MainMobileMenu.jsx
+import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router';
-import { UserContext } from '../context/UserContext';
+import { logout as logoutService } from '../../services/authService';
 import Logo from '../ui/Logo';
 
+function MenuItem({ to, label, onClick }) {
+  return (
+    <NavLink
+      to={to}
+      onClick={onClick}
+      className="flex items-center justify-between group text-gray-700 hover:text-[#3E35A2] transition-colors"
+    >
+      <span>{label}</span>
+      <span className="opacity-0 group-hover:opacity-100 transition-opacity material-symbols-outlined text-sm text-[#3E35A2]">
+        chevron_right
+      </span>
+    </NavLink>
+  );
+}
 
 export default function MainMobileMenu() {
-  const { user, logout } = useContext(UserContext);
+  const [user, setUser] = useState(null);
   const [open, setOpen] = useState(false);
+
+  // Listen for auth changes and load user from localStorage
+  useEffect(() => {
+    function refresh() {
+      const raw = localStorage.getItem('user');
+      setUser(raw ? JSON.parse(raw) : null);
+    }
+    refresh();
+    window.addEventListener('authChange', refresh);
+    return () => window.removeEventListener('authChange', refresh);
+  }, []);
+
+  const handleLogout = () => {
+    logoutService();
+    setOpen(false);
+  };
 
   return (
     <>
       {/* Topbar */}
-      <header className="static bg-white shadow-md px-4 py-3 flex  justify-between">
-        {/* Replace original <NavLink> block with <Logo /> */}
-        <Logo className=" h-10 mb-1" />
-
+      <header className="static bg-white shadow-md px-4 py-3 flex justify-between">
+        <Logo className="h-10 mb-1" />
         <button
           onClick={() => setOpen(true)}
           className="rounded-full p-2 text-black transition-all duration-200 transform hover:scale-110 active:scale-95 hover:rotate-3"
@@ -37,9 +66,7 @@ export default function MainMobileMenu() {
             className="w-10 h-10 flex items-center justify-center bg-white border border-black rounded-full shadow-md transition-transform duration-300 ease-in-out hover:rotate-90 hover:scale-105"
             aria-label="Close menu"
           >
-            <span className="material-symbols-outlined text-lg text-gray-800 leading-none">
-              close
-            </span>
+            <span className="material-symbols-outlined text-lg text-gray-800 leading-none">close</span>
           </button>
         </div>
 
@@ -67,9 +94,7 @@ export default function MainMobileMenu() {
                 alt={user.name || 'User avatar'}
                 className="w-9 h-9 rounded-full object-cover border border-gray-300"
               />
-              <span className="text-sm font-medium capitalize truncate">
-                {user.name}
-              </span>
+              <span className="text-sm font-medium capitalize truncate">{user.name}</span>
             </div>
             <span className="material-symbols-outlined text-sm text-[#3E35A2] opacity-0 group-hover:opacity-100 transition-opacity">
               chevron_right
@@ -84,10 +109,7 @@ export default function MainMobileMenu() {
         {user && (
           <div className="pt-8 border-t border-gray-200">
             <button
-              onClick={() => {
-                logout();
-                setOpen(false);
-              }}
+              onClick={handleLogout}
               className="group w-full flex items-center justify-between text-left text-sm text-gray-700 hover:text-[#3E35A2] transition mt-4"
             >
               <span>Log out</span>
@@ -107,20 +129,5 @@ export default function MainMobileMenu() {
         />
       )}
     </>
-  );
-}
-
-function MenuItem({ to, label, onClick }) {
-  return (
-    <NavLink
-      to={to}
-      onClick={onClick}
-      className="flex items-center justify-between group text-gray-700 hover:text-[#3E35A2] transition-colors"
-    >
-      <span>{label}</span>
-      <span className="opacity-0 group-hover:opacity-100 transition-opacity material-symbols-outlined text-sm text-[#3E35A2]">
-        chevron_right
-      </span>
-    </NavLink>
   );
 }
