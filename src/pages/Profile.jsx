@@ -5,7 +5,9 @@ import { useNavigate, Link } from 'react-router';
 import DeleteVenueButton from '../components/buttons/DeleteVenueButton';
 import { PROFILE_BY_NAME_VENUES_URL, VENUES_URL } from '../components/constans/api';
 import { getAccessToken, isAccessTokenValid } from '../services/tokenService';
-
+import ProfileHeader from '../components/profile/ProfileHeader';
+import DashboardInfoSection from '../components/profile/DashboardInfoSection';
+import ActiveVenuesSection from '../components/profile/ActiveVenueCard';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -142,69 +144,18 @@ export default function Profile() {
   if (!user) return null;
 
   return (
-    <div className="profile-container p-4">
-      <h1>Din profil</h1>
-      <div className="profile-details p-4">
-        {user.avatar && (
-          <img
-            src={user.avatar.url}
-            alt="Avatar"
-            className="w-24 h-24 rounded-full"
-          />
-        )}
-        <h2 className="text-xl font-semibold mt-2">{user.name}</h2>
-        <p>Email: {user.email}</p>
-        {user.bio && <p className="mt-1">{user.bio}</p>}
-      </div>
+  
+    <div className="profile-container font-figtree tracking-10p p-4">
+    <ProfileHeader user={user} />
+    <DashboardInfoSection />
+    <ActiveVenuesSection
+       venues={venues}
+       loading={loading}
+       error={error}
+       onDelete={id => setVenues(prev => prev.filter(v => v.id !== id))}
+   />
+  
+  </div>
+    );
 
-      <label className="flex items-center mb-4">
-        <input
-          type="checkbox"
-          checked={isManager}
-          onChange={handleToggleManager}
-          className="mr-2"
-        />
-        Venue Manager
-      </label>
-
-      {isManager && (
-        <section className="venue-manager mb-6 border-t pt-4">
-          <h3 className="text-lg mb-2">Opprett ny Venue</h3>
-          {errorMsg && <p className="text-red-600 mb-2">{errorMsg}</p>}
-          {successMsg && <p className="text-green-600 mb-2">{successMsg}</p>}
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <input name="name" value={formData.name} onChange={handleChange} placeholder="Navn" required className="p-2 border rounded" />
-            <textarea name="description" value={formData.description} onChange={handleChange} placeholder="Beskrivelse" required className="p-2 border rounded"></textarea>
-            <input name="mediaUrl" type="url" value={formData.mediaUrl} onChange={handleChange} placeholder="Media URL" className="p-2 border rounded" />
-            <input name="price" type="number" value={formData.price} onChange={handleChange} placeholder="Pris (NOK)" required className="p-2 border rounded" />
-            <input name="maxGuests" type="number" value={formData.maxGuests} onChange={handleChange} placeholder="Max Guests" required className="p-2 border rounded" />
-            <input name="city" value={formData.city} onChange={handleChange} placeholder="By" required className="p-2 border rounded" />
-            <input name="address" value={formData.address} onChange={handleChange} placeholder="Adresse" required className="p-2 border rounded" />
-            <button type="submit" className="col-span-full bg-blue-600 text-white py-2 rounded">Send inn Venue</button>
-          </form>
-        </section>
-      )}
-
-<section>
-  <h3 className="text-lg mb-2">Dine venues</h3>
-  {loading && <p>Laster dine venues...</p>}
-  {error && <p className="text-red-600">{error}</p>}
-  {!loading && venues.length === 0 && <p>Ingen venues funnet.</p>}
-  <ul className="space-y-2">
-    {venues.map(v => (
-      <li key={v.id} className="flex justify-between items-center">
-        <Link to={`/venues/${v.id}`} className="text-blue-600 hover:underline">
-          {v.name}
-        </Link>
-        <DeleteVenueButton
-          venueId={v.id}
-          accessToken={getAccessToken()}
-          onDeleted={() => setVenues(prev => prev.filter(x => x.id !== v.id))}
-        />
-      </li>
-    ))}
-  </ul>
-</section>
-    </div>
-  );
 }
