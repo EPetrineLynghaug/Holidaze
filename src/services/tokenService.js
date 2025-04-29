@@ -1,4 +1,3 @@
-
 const ACCESS_KEY = "accessToken";
 const REFRESH_KEY = "refreshToken";
 
@@ -28,15 +27,17 @@ export function clearTokens() {
 export function parseJwt(token) {
   try {
     const base64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
-    return JSON.parse(atob(base64));
+    const json = atob(base64);
+    return JSON.parse(json);
   } catch {
     return null;
   }
 }
 
+
 export function isAccessTokenValid() {
   const token = getAccessToken();
   if (!token) return false;
   const payload = parseJwt(token);
-  return payload && payload.exp * 1000 > Date.now() + 30000;
+  return payload?.exp * 1000 > Date.now() + 30_000;
 }

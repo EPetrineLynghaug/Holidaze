@@ -6,6 +6,7 @@ import DeleteVenueButton from '../components/buttons/DeleteVenueButton';
 import { PROFILE_BY_NAME_VENUES_URL, VENUES_URL } from '../components/constans/api';
 import { getAccessToken, isAccessTokenValid } from '../services/tokenService';
 
+
 export default function Profile() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -184,25 +185,26 @@ export default function Profile() {
         </section>
       )}
 
-      <section>
-        <h3 className="text-lg mb-2">Dine venues</h3>
-        {loading && <p>Laster dine venues...</p>}
-        {error && <p className="text-red-600">{error}</p>}
-        {!loading && venues.length === 0 && <p>Ingen venues funnet.</p>}
-        <ul className="space-y-2">
-          {venues.map(v => (
-            <li key={v.id} className="flex justify-between items-center">
-              <Link to={`/venues/${v.id}`} className="text-blue-600 hover:underline">
-                {v.name}
-              </Link>
-              <DeleteVenueButton
-                venueId={v.id}
-                onDeleted={() => setVenues(prev => prev.filter(x => x.id !== v.id))}
-              />
-            </li>
-          ))}
-        </ul>
-      </section>
+<section>
+  <h3 className="text-lg mb-2">Dine venues</h3>
+  {loading && <p>Laster dine venues...</p>}
+  {error && <p className="text-red-600">{error}</p>}
+  {!loading && venues.length === 0 && <p>Ingen venues funnet.</p>}
+  <ul className="space-y-2">
+    {venues.map(v => (
+      <li key={v.id} className="flex justify-between items-center">
+        <Link to={`/venues/${v.id}`} className="text-blue-600 hover:underline">
+          {v.name}
+        </Link>
+        <DeleteVenueButton
+          venueId={v.id}
+          accessToken={getAccessToken()}
+          onDeleted={() => setVenues(prev => prev.filter(x => x.id !== v.id))}
+        />
+      </li>
+    ))}
+  </ul>
+</section>
     </div>
   );
 }

@@ -1,8 +1,8 @@
-// src/components/buttons/DeleteVenueButton.jsx
 import React, { useState } from 'react';
 import { VENUE_BY_ID_URL } from '../constans/api';
+import { getAccessToken } from '../../services/tokenService';
 
-export default function DeleteVenueButton({ venueId, accessToken, onDeleted }) {
+export default function DeleteVenueButton({ venueId, onDeleted }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -11,10 +11,11 @@ export default function DeleteVenueButton({ venueId, accessToken, onDeleted }) {
     setLoading(true);
     setError('');
     try {
+      const token = getAccessToken();
       const res = await fetch(VENUE_BY_ID_URL(venueId), {
         method: 'DELETE',
         headers: {
-          Authorization: `Bearer ${accessToken}`,
+          Authorization: `Bearer ${token}`,
           'X-Noroff-API-Key': import.meta.env.VITE_NOROFF_API_KEY,
         },
       });
