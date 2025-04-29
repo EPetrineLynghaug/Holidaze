@@ -1,25 +1,23 @@
-// src/pages/Register.jsx
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router';
 import useForm from '../hooks/useForm';
-import { register as registerService } from '../services/authService';
-import { isLoggedIn } from '../services/authService';
+import { register as registerService, login as loginService, isLoggedIn } from '../services/authService';
 import Logo from '../components/ui/Logo';
 
 export default function Register() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
 
-  // Redirect if already logged in
+
   useEffect(() => {
-    if (isLoggedIn()) navigate('/');
+    if (isLoggedIn()) navigate('/', { replace: true });
   }, [navigate]);
 
-  // Load saved profile type
+
   const storedType = localStorage.getItem('venueManager');
   const initialVenueManager = storedType === 'true';
 
-  // Field validation
+
   const validate = (field, value) => {
     if (field === 'venueManager') return '';
     const v = String(value);
@@ -41,14 +39,27 @@ export default function Register() {
     }
   };
 
-  // Submit handler
+  // Submit handler: register then login
   const onSubmit = async (values, setErrors) => {
     try {
-      await registerService(values);
+      // Register new user
+      await registerService({
+        name: values.name,
+        email: values.email,
+        password: values.password
+      });
+    
       localStorage.setItem('venueManager', JSON.stringify(values.venueManager));
-      navigate('/');
+   
+      await loginService({
+        email: values.email,
+        password: values.password,
+        remember: true
+      });
+      navigate('/', { replace: true });
     } catch (err) {
-      setErrors(prev => ({ ...prev, general: err.message }));
+      const message = err.message || 'Registration failed';
+      setErrors(prev => ({ ...prev, general: message }));
     }
   };
 
@@ -200,7 +211,7 @@ export default function Register() {
               aria-label={showPassword ? 'Hide password' : 'Show password'}
               className="material-symbols-outlined text-xs ml-2 focus:outline-none transition-colors"
             >
-              {showPassword ? 'visibility_off' : 'visibility'}
+              {showPassword ? 'visibility' : 'visibility_off'}
             </button>
           </div>
           {touched.password && errors.password && (

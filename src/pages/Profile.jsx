@@ -27,27 +27,24 @@ export default function Profile() {
   const [successMsg, setSuccessMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
-  // Load user from localStorage and redirect if not authenticated
+  // On mount and on auth change, load user or redirect
   useEffect(() => {
-    // Load user and token from localStorage
-    const stored = localStorage.getItem('user');
-    if (!stored) {
-      navigate('/login', { replace: true });
-      return;
-    }
-    const parsedUser = JSON.parse(stored);
-    const token = parsedUser.accessToken || getAccessToken();
-    if (!token) {
-      navigate('/login', { replace: true });
-      return;
-    }
-    // Set user state
-    setUser(parsedUser);
+    const loadUser = () => {
+      const stored = localStorage.getItem('user');
+      if (!stored) {
+        navigate('/', { replace: true });
+      } else {
+        setUser(JSON.parse(stored));
+      }
+    };
+    loadUser();
+    window.addEventListener('authChange', loadUser);
+    return () => window.removeEventListener('authChange', loadUser);
   }, [navigate]);
 
-  // Fetch venues
+  // Fetch venues when user changes
   useEffect(() => {
-    async function fetchVenues() {
+    const fetchVenues = async () => {
       if (!user) return;
       setLoading(true);
       setError('');
@@ -70,7 +67,7 @@ export default function Profile() {
       } finally {
         setLoading(false);
       }
-    }
+    };
     fetchVenues();
   }, [user]);
 
@@ -99,7 +96,15 @@ export default function Profile() {
         maxGuests: Number(formData.maxGuests),
         rating: 0,
         meta: { wifi: false, parking: false, breakfast: false, pets: false },
-        location: { address: formData.address, city: formData.city, zip: '', country: '', continent: '', lat: 0, lng: 0 }
+        location: {
+          address: formData.address,
+          city: formData.city,
+          zip: '',
+          country: '',
+          continent: '',
+          lat: 0,
+          lng: 0
+        }
       };
       const res = await fetch(VENUES_URL, {
         method: 'POST',
@@ -116,7 +121,7 @@ export default function Profile() {
       }
       setSuccessMsg('Venue created!');
       setFormData({ name: '', description: '', mediaUrl: '', price: '', maxGuests: '', city: '', address: '' });
-      // refetch 
+      // refetch
       const refresh = await fetch(
         PROFILE_BY_NAME_VENUES_URL(user.name),
         {
@@ -136,50 +141,60 @@ export default function Profile() {
   if (!user) return null;
 
   return (
-    <div className="profile-container" style={{ padding: '1rem' }}>
+    <div className="profile-container p-4">
       <h1>Din profil</h1>
-      <div className="profile-details" style={{ padding: '1rem' }}>
+      <div className="profile-details p-4">
         {user.avatar && (
-          <img src={user.avatar.url} alt="Avatar" style={{ width: 100, height: 100, borderRadius: '50%' }} />
+          <img
+            src={user.avatar.url}
+            alt="Avatar"
+            className="w-24 h-24 rounded-full"
+          />
         )}
-        <h2>{user.name}</h2>
+        <h2 className="text-xl font-semibold mt-2">{user.name}</h2>
         <p>Email: {user.email}</p>
-        {user.bio && <p>{user.bio}</p>}
+        {user.bio && <p className="mt-1">{user.bio}</p>}
       </div>
 
-      <label style={{ display: 'block', margin: '1rem 0' }}>
-        <input type="checkbox" checked={isManager} onChange={handleToggleManager} /> Venue Manager
+      <label className="flex items-center mb-4">
+        <input
+          type="checkbox"
+          checked={isManager}
+          onChange={handleToggleManager}
+          className="mr-2"
+        />
+        Venue Manager
       </label>
 
       {isManager && (
-        <div className="venue-manager" style={{ borderTop: '1px solid #ccc', marginTop: '2rem', padding: '1rem' }}>
-          <h3>Opprett ny Venue</h3>
-          <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-            <input name="name" placeholder="Navn" value={formData.name} onChange={handleChange} required />
-            <textarea name="description" placeholder="Beskrivelse" value={formData.description} onChange={handleChange} required />
-            <input name="mediaUrl" type="url" placeholder="Media URL" value={formData.mediaUrl} onChange={handleChange} />
-            <input name="price" type="number" placeholder="Pris (NOK)" value={formData.price} onChange={handleChange} required />
-            <input name="maxGuests" type="number" placeholder="Max Guests" value={formData.maxGuests} onChange={handleChange} required />
-            <input name="city" placeholder="By" value={formData.city} onChange={handleChange} required />
-            <input name="address" placeholder="Adresse" value={formData.address} onChange={handleChange} required />
-            <button type="submit" style={{ gridColumn: '1 / -1' }}>Send inn Venue</button>
+        <section className="venue-manager mb-6 border-t pt-4">
+          <h3 className="text-lg mb-2">Opprett ny Venue</h3>
+          {errorMsg && <p className="text-red-600 mb-2">{errorMsg}</p>}
+          {successMsg && <p className="text-green-600 mb-2">{successMsg}</p>}
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <input name="name" value={formData.name} onChange={handleChange} placeholder="Navn" required className="p-2 border rounded" />
+            <textarea name="description" value={formData.description} onChange={handleChange} placeholder="Beskrivelse" required className="p-2 border rounded"></textarea>
+            <input name="mediaUrl" type="url" value={formData.mediaUrl} onChange={handleChange} placeholder="Media URL" className="p-2 border rounded" />
+            <input name="price" type="number" value={formData.price} onChange={handleChange} placeholder="Pris (NOK)" required className="p-2 border rounded" />
+            <input name="maxGuests" type="number" value={formData.maxGuests} onChange={handleChange} placeholder="Max Guests" required className="p-2 border rounded" />
+            <input name="city" value={formData.city} onChange={handleChange} placeholder="By" required className="p-2 border rounded" />
+            <input name="address" value={formData.address} onChange={handleChange} placeholder="Adresse" required className="p-2 border rounded" />
+            <button type="submit" className="col-span-full bg-blue-600 text-white py-2 rounded">Send inn Venue</button>
           </form>
-          {errorMsg && <p style={{ color: 'red' }}>{errorMsg}</p>}
-          {successMsg && <p style={{ color: 'green' }}>{successMsg}</p>}
-        </div>
+        </section>
       )}
 
-      <div style={{ marginTop: '2rem' }}>
-        <h3>Dine venues</h3>
+      <section>
+        <h3 className="text-lg mb-2">Dine venues</h3>
         {loading && <p>Laster dine venues...</p>}
-        {error && <p style={{ color: 'red' }}>{error}</p>}
+        {error && <p className="text-red-600">{error}</p>}
         {!loading && venues.length === 0 && <p>Ingen venues funnet.</p>}
-        <ul>
+        <ul className="space-y-2">
           {venues.map(v => (
-            <li key={v.id} style={{ marginBottom: 8 }}>
-              <Link to={"/venues/" + v.id} className="font-medium text-blue-600 hover:underline">
+            <li key={v.id} className="flex justify-between items-center">
+              <Link to={`/venues/${v.id}`} className="text-blue-600 hover:underline">
                 {v.name}
-              </Link>{' '}(ID: {v.id})
+              </Link>
               <DeleteVenueButton
                 venueId={v.id}
                 onDeleted={() => setVenues(prev => prev.filter(x => x.id !== v.id))}
@@ -187,7 +202,7 @@ export default function Profile() {
             </li>
           ))}
         </ul>
-      </div>
+      </section>
     </div>
   );
 }

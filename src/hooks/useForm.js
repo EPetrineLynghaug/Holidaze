@@ -1,9 +1,6 @@
 // useForm.js
 import { useState, useRef } from "react";
 
-/**
- * Custom form hook for input–/validerings–/submit-logikk.
- */
 export default function useForm({ initialValues, validate, onSubmit }) {
   const [values, setValues] = useState(initialValues);
   const [errors, setErrors] = useState({});
