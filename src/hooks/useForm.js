@@ -1,83 +1,67 @@
+// useForm.js
 import { useState, useRef } from "react";
 
-export default function useForm(initialValues, onSubmit) {
+export default function useForm({ initialValues, validate, onSubmit }) {
   const [values, setValues] = useState(initialValues);
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const initialRef = useRef(initialValues);
 
-  const validateField = (name, value) => {
-    const trimmed = value.trim();
-
-    if (name === "email") {
-      if (!trimmed) return "Email is required";
-
-      const domain = "@stud.noroff.no";
-
-      if (!trimmed.endsWith(domain)) return `Email must end with ${domain}`;
-    }
-
-    if (name === "password") {
-      if (!trimmed) return "Password is required";
-
-      if (trimmed.length < 6) return "Password must be at least 6 characters";
-    }
-
-    return "";
+  const handleChange = ({ target: { name, value } }) => {
+    setValues((v) => ({ ...v, [name]: value }));
+    setErrors((e) => ({ ...e, [name]: validate(name, value) }));
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setValues((prev) => ({ ...prev, [name]: value }));
-    setErrors((prev) => ({ ...prev, [name]: validateField(name, value) }));
-  };
-
-  const handleBlur = (e) => {
-    const { name } = e.target;
-    setTouched((prev) => ({ ...prev, [name]: true }));
-    setErrors((prev) => ({
-      ...prev,
-
-      [name]: validateField(name, values[name]),
-    }));
+  const handleBlur = ({ target: { name } }) => {
+    setTouched((t) => ({ ...t, [name]: true }));
+    setErrors((e) => ({ ...e, [name]: validate(name, values[name]) }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const allTouched = Object.keys(values).reduce(
-      (acc, key) => ({ ...acc, [key]: true }),
+    // Fjern generelle feilmeldinger
+    setErrors((prev) => {
+      const { general, ...rest } = prev;
+      return rest;
+    });
+    // Marker alle felter som touched
+    setTouched(Object.keys(values).reduce((a, k) => ({ ...a, [k]: true }), {}));
+    // Valider alle felter
+    const validationErrors = Object.keys(values).reduce(
+      (a, k) => ({ ...a, [k]: validate(k, values[k]) }),
       {}
     );
+    setErrors(validationErrors);
 
-    setTouched(allTouched);
-
-    const newErrors = Object.keys(values).reduce(
-      (acc, key) => ({ ...acc, [key]: validateField(key, values[key]) }),
-
-      {}
-    );
-
-    setErrors(newErrors);
-
-    if (!Object.values(newErrors).some(Boolean)) {
+    // Hvis ingen feil, kjør onSubmit
+    if (!Object.values(validationErrors).some(Boolean)) {
       setIsSubmitting(true);
-
       try {
-        await onSubmit(values);
+        await onSubmit(values, setErrors);
       } catch {
-      
+        // svelg for å stoppe submitting
       } finally {
         setIsSubmitting(false);
       }
     }
   };
 
-  const resetForm = () => {
+  const reset = () => {
     setValues(initialRef.current);
     setErrors({});
     setTouched({});
+  };
+
+  // Små tillegg: programmatisk oppdatere felt og touched
+  const setFieldValue = (name, value) => {
+    setValues((v) => ({ ...v, [name]: value }));
+    setErrors((e) => ({ ...e, [name]: validate(name, value) }));
+  };
+
+  const setFieldTouched = (name, isTouched = true) => {
+    setTouched((t) => ({ ...t, [name]: isTouched }));
+    setErrors((e) => ({ ...e, [name]: validate(name, values[name]) }));
   };
 
   return {
@@ -88,7 +72,9 @@ export default function useForm(initialValues, onSubmit) {
     handleChange,
     handleBlur,
     handleSubmit,
-    resetForm,
+    reset,
     setErrors,
+    setFieldValue,
+    setFieldTouched,
   };
 }

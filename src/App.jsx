@@ -1,45 +1,31 @@
-import React from "react";
 
-import { BrowserRouter as Router, Routes, Route } from "react-router";
-
-import Layout from './components/constans/layout';
-
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router';
+import Layout from './components/constans/Layout';
 
 import Home from './pages/Home';
-import AllVenues from './pages/AllVenues';
-import Profile from './pages/Profile';
+import Venues from './pages/AllVenues';
 import VenueDetail from './pages/VenueDetail';
-
-
+import Profile from './pages/Profile';
 import Login from './pages/Login';
-import Register from './pages/Register'
+import Register from './pages/Register';
 
-function App() {
+export default function App() {
   return (
-    <Router>
-    
+    <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Layout />}>
-        
+        {/* No navigation on login/register */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+
+        {/* All other routes use Layout with navigation */}
+        <Route path="/" element={<Layout />}>  
           <Route index element={<Home />} />
-
-       
-        {/* Venues-ruter */}
-        <Route path="venues">
-            <Route index element={<AllVenues />} />
-            {/* Dynamisk route for single venue detail */}
-            <Route path=":id" element={<VenueDetail />} />
-          </Route>
-          
+          <Route path="venues" element={<Venues />} />
+          <Route path="venues/:id" element={<VenueDetail />} />
           <Route path="profile" element={<Profile />} />
-
-     
-          <Route path="login" element={<Login />} />
-          <Route path="register" element={<Register />} />
         </Route>
       </Routes>
-    </Router>
+    </BrowserRouter>
   );
 }
-
-export default App;
