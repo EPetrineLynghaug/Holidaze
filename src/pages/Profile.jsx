@@ -8,6 +8,7 @@ import { getAccessToken, isAccessTokenValid } from '../services/tokenService';
 import ProfileHeader from '../components/profile/ProfileHeader';
 import DashboardInfoSection from '../components/profile/DashboardInfoSection';
 import ActiveVenuesSection from '../components/profile/ActiveVenueCard';
+import DashboardMobileMenu from '../components/navigation/DashboardMobileMenu';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -147,6 +148,10 @@ export default function Profile() {
   
     <div className="profile-container font-figtree tracking-10p p-4">
     <ProfileHeader user={user} />
+
+    <div className="mt-4">
+        <DashboardMobileMenu />
+      </div>
     <DashboardInfoSection />
     <ActiveVenuesSection
        venues={venues}

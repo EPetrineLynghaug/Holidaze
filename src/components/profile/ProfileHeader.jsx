@@ -39,19 +39,7 @@ export default function ProfileHeader({ user }) {
  <h1 className="mt-2 text-lg font-semibold text-gray-900 capitalize">{user.name}</h1>
 </div>
 
-<button
-  /* venstre padding (pl-3) gjør at ikonet ikke ligger helt i kanten */
-  className="inline-flex items-center gap-2 pl-3 pr-4 py-1 text-sm font-medium text-gray-700
-             focus-visible:ring-2 focus-visible:ring-blue-500"
->
-  {/* profilikonet – outline lys lilla, fylles mørk lilla på profilsiden */}
-  <span className="material-symbols-outlined profile-icon">
-    dashboard
-  </span>
 
-  {/* teksten */}
-  <span className="whitespace-nowrap">Dashboard&nbsp;Menu</span>
-</button>
 
     </header>
   );
