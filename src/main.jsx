@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import './styles/icons.css';
+import '../src/components/ui/styles/icons.css';
 import "./index.css";
 import { BrowserRouter as Router } from "react-router"; 
 

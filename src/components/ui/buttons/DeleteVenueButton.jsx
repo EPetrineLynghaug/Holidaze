@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { VENUE_BY_ID_URL } from '../constans/api';
-import { getAccessToken } from '../../services/tokenService';
+import { VENUE_BY_ID_URL } from '../../constans/api';
+import { getAccessToken } from '../../../services/tokenService';
 
 export default function DeleteVenueButton({ venueId, onDeleted }) {
   const [loading, setLoading] = useState(false);

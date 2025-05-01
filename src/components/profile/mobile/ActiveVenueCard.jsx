@@ -1,8 +1,8 @@
 
 import React from 'react';
 import { Link } from 'react-router';
-import DeleteVenueButton from '../buttons/DeleteVenueButton';
-import { getAccessToken } from '../../services/tokenService';
+import DeleteVenueButton from '../../ui/buttons/DeleteVenueButton';
+import { getAccessToken } from '../../../services/tokenService';
 
 
 export default function ActiveVenuesSection({ venues, loading, error, onDelete }) {

@@ -1,8 +1,8 @@
 // src/components/MainMobileMenu.jsx
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router';
-import { logout as logoutService } from '../../services/authService';
-import Logo from '../ui/Logo';
+import { logout as logoutService } from '../../../services/authService';
+import Logo from '../../ui/Logo';
 
 function MenuItem({ to, label, onClick }) {
   return (
