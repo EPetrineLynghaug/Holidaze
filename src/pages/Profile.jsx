@@ -132,15 +132,12 @@ export default function Profile() {
       {/* Chart */}
      
         <ProfileChart venues={venues} bookings={bookings} />
-   
-      {/* Active venues */}
-      <div className="mt-6">
-        <h2 className="text-xl font-semibold mb-4">My Venues</h2>
+  
         <ActiveVenuesSection
           venues={venues} loading={loading} error={error}
           onDelete={id => setVenues(vs => vs.filter(v => v.id !== id))}
         />
-      </div>
+     
       {/* Add Venue form */}
       {isManager && (
         <div className="mt-8 bg-white rounded-xl shadow p-4">
