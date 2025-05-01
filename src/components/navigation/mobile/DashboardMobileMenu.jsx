@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-export default function DashboardMobileMenu({ hasBookings = true }) {
+export default function DashboardMobileMenu({ hasBookings = true, onListNew = () => {} }) {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
@@ -19,11 +19,10 @@ export default function DashboardMobileMenu({ hasBookings = true }) {
 
   const menuItems = [
     { icon: 'grid_view', label: 'Dashboard', onClick: () => {}, disabled: false, active: true },
-    { icon: 'add_business', label: 'List New Venue', onClick: () => {}, disabled: false, active: false },
+    { icon: 'add_business', label: 'List New Venue', onClick: onListNew, disabled: false, active: false },
     { icon: 'apartment', label: 'My Venues', onClick: () => {}, disabled: false, active: false },
     { icon: 'calendar_month', label: 'Bookings', onClick: () => {}, disabled: !hasBookings, active: false },
     { icon: 'settings', label: 'Settings', onClick: () => {}, disabled: false, active: false },
-   
   ];
 
   return (
@@ -39,7 +38,7 @@ export default function DashboardMobileMenu({ hasBookings = true }) {
             fontVariationSettings: `'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24`,
           }}
         >
-          grid_view
+          menu
         </span>
         Dashboard
       </button>
@@ -82,10 +81,7 @@ export default function DashboardMobileMenu({ hasBookings = true }) {
           {menuItems.map(({ icon, label, onClick, disabled, active }, idx) => (
             <button
               key={idx}
-              onClick={() => {
-                setIsOpen(false);
-                onClick();
-              }}
+              onClick={() => { setIsOpen(false); onClick(); }}
               disabled={disabled}
               className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl border w-full transition duration-200 overflow-hidden relative group ${
                 disabled
