@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 
@@ -24,15 +25,9 @@ export default function Profile() {
     () => JSON.parse(localStorage.getItem('venueManager')) || false
   );
 
-  // State for new-venue form
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    mediaUrl: '',
-    price: '',
-    maxGuests: '',
-    city: '',
-    address: '',
+    name: '', description: '', mediaUrl: '',
+    price: '', maxGuests: '', city: '', address: '',
   });
   const [successMsg, setSuccessMsg] = useState('');
   const [errorMsg, setErrorMsg]     = useState('');
@@ -44,72 +39,53 @@ export default function Profile() {
     setUser(JSON.parse(stored));
   }, [navigate]);
 
-  // 2) Fetch venues (with embedded bookings if API supports)
+  // 2) Fetch venues with embedded bookings
   useEffect(() => {
     if (!user) return;
     setLoading(true);
     setError('');
     const token = getAccessToken();
-
     fetch(`${PROFILE_BY_NAME_VENUES_URL(user.name)}?_bookings=true`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'X-Noroff-API-Key': import.meta.env.VITE_NOROFF_API_KEY,
-      },
+      headers: { Authorization: `Bearer ${token}`, 'X-Noroff-API-Key': import.meta.env.VITE_NOROFF_API_KEY },
     })
-      .then(r => {
-        if (!r.ok) throw new Error(`Venues fetch failed: ${r.status}`);
-        return r.json();
-      })
+      .then(r => { if (!r.ok) throw new Error(`Fetch failed: ${r.status}`); return r.json() })
       .then(j => setVenues(j.data))
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
   }, [user]);
 
-  // 3) Fetch flat bookings list (ensures chart always has data)
+  // 3) Fetch flat bookings list for filter fallback
   useEffect(() => {
     if (!user) return;
     const token = getAccessToken();
     fetch(`${PROFILE_BY_NAME_BOOKINGS_URL(user.name)}?_venue=true`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'X-Noroff-API-Key': import.meta.env.VITE_NOROFF_API_KEY,
-      },
+      headers: { Authorization: `Bearer ${token}`, 'X-Noroff-API-Key': import.meta.env.VITE_NOROFF_API_KEY },
     })
-      .then(r => {
-        if (!r.ok) throw new Error(`Bookings fetch failed: ${r.status}`);
-        return r.json();
-      })
+      .then(r => r.ok ? r.json() : Promise.reject(`Error ${r.status}`))
       .then(j => setBookings(j.data))
-      .catch(console.error);
+      .catch(() => {/* silent */});
   }, [user]);
 
-  // Toggle manager mode
   const handleToggleManager = e => {
     setIsManager(e.target.checked);
     localStorage.setItem('venueManager', JSON.stringify(e.target.checked));
   };
 
-  // Form field change
   const handleChange = e => {
     const { name, value } = e.target;
     setFormData(f => ({ ...f, [name]: value }));
   };
 
-  // Create new venue
   const handleSubmit = async e => {
     e.preventDefault();
-    setErrorMsg('');
-    setSuccessMsg('');
+    setErrorMsg(''); setSuccessMsg('');
     const token = getAccessToken();
 
     try {
       const payload = {
         name: formData.name,
         description: formData.description,
-        media: formData.mediaUrl
-          ? [{ url: formData.mediaUrl, alt: formData.name }]
-          : [],
+        media: formData.mediaUrl ? [{ url: formData.mediaUrl, alt: formData.name }] : [],
         price: Number(formData.price),
         maxGuests: Number(formData.maxGuests),
         rating: 0,
@@ -117,54 +93,28 @@ export default function Profile() {
         location: {
           address: formData.address,
           city: formData.city,
-          zip: '',
-          country: '',
-          continent: '',
-          lat: 0,
-          lng: 0,
-        },
+          zip: '', country: '', continent: '', lat: 0, lng: 0
+        }
       };
-
       const res = await fetch(VENUES_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
-          'X-Noroff-API-Key': import.meta.env.VITE_NOROFF_API_KEY,
+          'X-Noroff-API-Key': import.meta.env.VITE_NOROFF_API_KEY
         },
         body: JSON.stringify(payload),
       });
-
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(
-          err.errors?.[0]?.message || `Create venue failed: ${res.status}`
-        );
+        throw new Error(err.errors?.[0]?.message || `Error ${res.status}`);
       }
-
       setSuccessMsg('Venue created successfully');
-      setFormData({
-        name: '',
-        description: '',
-        mediaUrl: '',
-        price: '',
-        maxGuests: '',
-        city: '',
-        address: '',
-      });
-
-      // Refresh venues list
-      const token2 = getAccessToken();
-      const refresh = await fetch(
-        `${PROFILE_BY_NAME_VENUES_URL(user.name)}?_bookings=true`,
-        {
-          headers: {
-            Authorization: `Bearer ${token2}`,
-            'X-Noroff-API-Key': import.meta.env.VITE_NOROFF_API_KEY,
-          },
-        }
-      );
-      const j2 = await refresh.json();
+      setFormData({ name: '', description: '', mediaUrl: '', price: '', maxGuests: '', city: '', address: '' });
+      // Refresh venues
+      const j2 = await (await fetch(`${PROFILE_BY_NAME_VENUES_URL(user.name)}?_bookings=true`, {
+        headers: { Authorization: `Bearer ${token}`, 'X-Noroff-API-Key': import.meta.env.VITE_NOROFF_API_KEY },
+      })).json();
       setVenues(j2.data);
     } catch (err) {
       setErrorMsg(err.message);
@@ -176,117 +126,40 @@ export default function Profile() {
   return (
     <div className="profile-container p-4 font-figtree">
       <ProfileHeader user={user} />
-
-      <div className="mt-4">
-        <DashboardMobileMenu />
-      </div>
-
+      <div className="mt-4"><DashboardMobileMenu /></div>
       <DashboardInfoSection />
-
-      <div className="mt-4 flex justify-end">
-        <label className="flex items-center space-x-2 text-sm">
-          <input
-            type="checkbox"
-            checked={isManager}
-            onChange={handleToggleManager}
-            className="h-4 w-4"
-          />
-          <span>Manager mode</span>
-        </label>
-      </div>
-
+ 
       {/* Chart */}
-      <div className="mt-6 bg-white rounded-xl shadow p-4">
+     
         <ProfileChart venues={venues} bookings={bookings} />
-      </div>
-
+   
       {/* Active venues */}
       <div className="mt-6">
         <h2 className="text-xl font-semibold mb-4">My Venues</h2>
         <ActiveVenuesSection
-          venues={venues}
-          loading={loading}
-          error={error}
-          onDelete={id =>
-            setVenues(vs => vs.filter(v => v.id !== id))
-          }
+          venues={venues} loading={loading} error={error}
+          onDelete={id => setVenues(vs => vs.filter(v => v.id !== id))}
         />
       </div>
-
-      {/* Manager: Add New Venue */}
+      {/* Add Venue form */}
       {isManager && (
         <div className="mt-8 bg-white rounded-xl shadow p-4">
-          <h2 className="text-xl font-semibold mb-4">
-            Add New Venue
-          </h2>
+          <h2 className="text-xl font-semibold mb-4">Add New Venue</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <input
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="Name"
-              className="w-full p-2 border rounded"
-            />
-            <input
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              placeholder="Description"
-              className="w-full p-2 border rounded"
-            />
-            <input
-              name="mediaUrl"
-              value={formData.mediaUrl}
-              onChange={handleChange}
-              placeholder="Media URL"
-              className="w-full p-2 border rounded"
-            />
+            <input name="name" value={formData.name} onChange={handleChange} placeholder="Name" className="w-full p-2 border rounded" />
+            <input name="description" value={formData.description} onChange={handleChange} placeholder="Description" className="w-full p-2 border rounded" />
+            <input name="mediaUrl" value={formData.mediaUrl} onChange={handleChange} placeholder="Media URL" className="w-full p-2 border rounded" />
             <div className="grid grid-cols-2 gap-3">
-              <input
-                name="price"
-                type="number"
-                value={formData.price}
-                onChange={handleChange}
-                placeholder="Price / night"
-                className="p-2 border rounded"
-              />
-              <input
-                name="maxGuests"
-                type="number"
-                value={formData.maxGuests}
-                onChange={handleChange}
-                placeholder="Max guests"
-                className="p-2 border rounded"
-              />
+              <input name="price" type="number" value={formData.price} onChange={handleChange} placeholder="Price / night" className="p-2 border rounded" />
+              <input name="maxGuests" type="number" value={formData.maxGuests} onChange={handleChange} placeholder="Max guests" className="p-2 border rounded" />
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <input
-                name="city"
-                value={formData.city}
-                onChange={handleChange}
-                placeholder="City"
-                className="p-2 border rounded"
-              />
-              <input
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-                placeholder="Address"
-                className="p-2 border rounded"
-              />
+              <input name="city" value={formData.city} onChange={handleChange} placeholder="City" className="p-2 border rounded" />
+              <input name="address" value={formData.address} onChange={handleChange} placeholder="Address" className="p-2 border rounded" />
             </div>
-            {errorMsg && (
-              <p className="text-red-500">{errorMsg}</p>
-            )}
-            {successMsg && (
-              <p className="text-green-600">{successMsg}</p>
-            )}
-            <button
-              type="submit"
-              className="mt-2 w-full py-2 bg-purple-600 text-white rounded"
-            >
-              Create Venue
-            </button>
+            {errorMsg && <p className="text-red-500">{errorMsg}</p>}
+            {successMsg && <p className="text-green-600">{successMsg}</p>}
+            <button type="submit" className="mt-2 w-full py-2 bg-purple-600 text-white rounded">Create Venue</button>
           </form>
         </div>
       )}

@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import {
   ResponsiveContainer,
@@ -6,60 +5,54 @@ import {
   Area,
   CartesianGrid,
   XAxis,
+  YAxis,
   Tooltip,
 } from 'recharts';
 
-// Weekday order
 const WEEKDAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
 
 export default function ProfileChart({ venues = [], bookings = [] }) {
-  // Venue filter state
   const [selectedVenue, setSelectedVenue] = useState('all');
 
-  // Determine base bookings list: prefer explicit bookings prop
+  // Samle alle bookings (innebygde + eksterne)
   const allBookings = useMemo(() => {
-    if (Array.isArray(bookings) && bookings.length) {
-      return bookings;
-    }
-    return venues.flatMap(v => v.bookings || []);
+    const embedded = venues.flatMap(v =>
+      (v.bookings || []).map(b => ({ ...b, venueId: v.id }))
+    );
+    return [...embedded, ...bookings];
   }, [venues, bookings]);
 
-  // Filter bookings by selected venue
+  // Filtrer på valgt venue
   const filtered = useMemo(() => {
     if (selectedVenue === 'all') return allBookings;
-    const venue = venues.find(v => String(v.id) === selectedVenue);
-    return venue ? (venue.bookings || []) : [];
-  }, [allBookings, venues, selectedVenue]);
+    return allBookings.filter(b => String(b.venueId) === selectedVenue);
+  }, [allBookings, selectedVenue]);
 
-  // Aggregate counts per weekday
+  // Bygg data for grafen (antall per ukedag)
   const data = useMemo(() => {
-    const counts = WEEKDAYS.reduce((acc, day) => {
-      acc[day] = 0;
-      return acc;
-    }, {});
+    const counts = WEEKDAYS.reduce((acc, d) => ({ ...acc, [d]: 0 }), {});
     filtered.forEach(b => {
-      const date = new Date(b.dateFrom);
-      const key = date.getDay() === 0 ? 'Su' : WEEKDAYS[date.getDay() - 1];
+      const idx = new Date(b.dateFrom).getDay(); // 0 = søndag
+      const key = idx === 0 ? 'Su' : WEEKDAYS[idx - 1];
       counts[key]++;
     });
     return WEEKDAYS.map(day => ({ day, count: counts[day] }));
   }, [filtered]);
 
-  // Compute KPIs
   const total = filtered.length;
-  const avg = total ? (total / 7).toFixed(1) : 0;
-  const busiest = data.reduce((max, d) => (d.count > max.count ? d : max), { day: '', count: -1 });
-
-  // Render no-data state
-  if (!filtered.length) {
-    return <p className="text-gray-500 text-center">No bookings yet.</p>;
-  }
+  const avg = (total / WEEKDAYS.length).toFixed(1);
+  const busiest = data.reduce((m, d) =>
+    d.count > m.count ? d : m,
+    { day: '-', count: 0 }
+  );
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4 max-w-md mx-auto">
-      {/* Venue selector */}
+    <div className=" rounded-xl border p-4 max-w-md mx-auto mt-8">
+      {/* Venue-filter */}
       <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700">Filter by Venue:</label>
+        <label className="block text-sm font-medium text-gray-700">
+          Filter by Venue:
+        </label>
         <select
           className="mt-1 block w-full p-2 border-gray-300 rounded"
           value={selectedVenue}
@@ -67,34 +60,59 @@ export default function ProfileChart({ venues = [], bookings = [] }) {
         >
           <option value="all">All Venues</option>
           {venues.map(v => (
-            <option key={v.id} value={v.id}>{v.name}</option>
+            <option key={v.id} value={String(v.id)}>
+              {v.name}
+            </option>
           ))}
         </select>
       </div>
 
-      {/* Chart title */}
-      <h2 className="text-base font-semibold mb-2 text-center">Weekly Bookings</h2>
+      <h2 className="text-base font-semibold mb-2 text-center">
+        Weekly Bookings
+      </h2>
 
-      {/* Area chart */}
-      <ResponsiveContainer width="100%" height={160}>
-        <AreaChart data={data} margin={{ top: 6, right: 0, left: 0, bottom: 0 }}>
-          <CartesianGrid vertical={false} strokeDasharray="4 4" stroke="#E2E8F0" />
-          <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: '#4A5568', fontSize: 12 }} />
-          <Tooltip cursor={false} formatter={value => [`${value}`, 'Bookings']} />
+      {/* Graf med fyll */}
+      <ResponsiveContainer width="100%" height={180}>
+        <AreaChart data={data} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
+          <defs>
+            <linearGradient id="fillPurple" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#9333EA" stopOpacity={0.25} />
+              <stop offset="100%" stopColor="#9333EA" stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" vertical={false} />
+          <XAxis
+            dataKey="day"
+            axisLine={false}
+            tickLine={false}
+            tick={{ fill: '#4B5563', fontSize: 12 }}
+          />
+          <YAxis
+            domain={[0, 'dataMax + 1']}
+            allowDecimals={false}
+            axisLine={false}
+            tickLine={false}
+            tick={{ fill: '#4B5563', fontSize: 12 }}
+          />
+          <Tooltip formatter={value => [value, 'Bookings']} />
           <Area
             type="monotone"
             dataKey="count"
-            stroke="#6B46C1"
-            strokeWidth={2}
-            fill="#6B46C1"
-            fillOpacity={0.2}
-            dot={{ r: 3, stroke: '#6B46C1', strokeWidth: 2, fill: '#fff' }}
+            stroke="#9333EA"
+            strokeWidth={2.5}
+            fill="url(#fillPurple)"
+            dot={{ r: 3, stroke: '#9333EA', strokeWidth: 2, fill: '#fff' }}
             activeDot={{ r: 5 }}
           />
         </AreaChart>
       </ResponsiveContainer>
 
-      {/* KPI badges */}
+      {/* Ingen data */}
+      {total === 0 && (
+        <p className="text-center text-gray-500 mt-2">No bookings yet.</p>
+      )}
+
+      {/* KPI-er */}
       <div className="mt-4 grid grid-cols-3 gap-2 text-center text-sm">
         <div className="bg-purple-50 p-2 rounded">
           <p className="font-bold text-purple-700">{total}</p>
