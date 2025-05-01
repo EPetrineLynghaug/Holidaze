@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, useLocation } from 'react-router';
-import MainMobileMenu from '../navigation/MainMobileMenu';
+import MainMobileMenu from '../navigation/mobile/MainMobileMenu';
 
 export default function Layout() {
   const { pathname } = useLocation();

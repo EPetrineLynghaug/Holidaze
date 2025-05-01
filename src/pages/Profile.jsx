@@ -8,11 +8,11 @@ import {
   VENUES_URL,
 } from '../components/constans/api';
 import { getAccessToken } from '../services/tokenService';
-import ProfileHeader from '../components/profile/ProfileHeader';
-import DashboardInfoSection from '../components/profile/DashboardInfoSection';
-import ActiveVenuesSection from '../components/profile/ActiveVenueCard';
-import DashboardMobileMenu from '../components/navigation/DashboardMobileMenu';
-import ProfileChart from '../components/profile/ProfileChart';
+import ProfileHeader from '../components/profile/mobile/ProfileHeader';
+import DashboardInfoSection from '../components/profile/mobile/DashboardInfoSection';
+import ActiveVenuesSection from '../components/profile/mobile/ActiveVenueCard';
+import DashboardMobileMenu from '../components/navigation/mobile/DashboardMobileMenu';
+import ProfileChart from '../components/profile/mobile/ProfileChart';
 
 export default function Profile() {
   const navigate = useNavigate();
