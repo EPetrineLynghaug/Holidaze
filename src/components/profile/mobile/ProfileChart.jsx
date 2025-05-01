@@ -47,7 +47,7 @@ export default function ProfileChart({ venues = [], bookings = [] }) {
   );
 
   return (
-    <div className=" rounded-xl border p-4 max-w-md mx-auto mt-8">
+    <div className=" rounded-xl border border-[var(--color-border-soft)] p-4 max-w-md mx-auto mt-8">
       {/* Venue-filter */}
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700">
