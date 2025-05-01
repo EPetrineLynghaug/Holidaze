@@ -1,114 +1,155 @@
-import React, { useState, useEffect } from "react";
-import { useParams } from "react-router";
-import { VENUES_URL } from "../components/constans/api";
+
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router';
+import { VENUE_BY_ID_URL, BOOKINGS_URL } from '../components/constans/api';
+import { getAccessToken } from '../services/tokenService';
 
 export default function VenueDetail() {
- 
   const { id } = useParams();
+  const navigate = useNavigate();
 
- 
   const [venue, setVenue] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
- 
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+  const [guests, setGuests] = useState(1);
+  const [bookingError, setBookingError] = useState('');
+  const [bookingSuccess, setBookingSuccess] = useState('');
+
+  // Fetch venue details on mount
   useEffect(() => {
-    const fetchVenueDetail = async () => {
-      setLoading(true);
+    const fetchVenue = async () => {
       try {
-        const response = await fetch(`${VENUES_URL}/${id}`);
-        if (!response.ok) {
-          throw new Error("Error fetching venue details");
+        const res = await fetch(VENUE_BY_ID_URL(id));
+        if (!res.ok) {
+          throw new Error(`Failed to fetch venue: ${res.status} ${res.statusText}`);
         }
-        const json = await response.json();
-     
-        setVenue(json.data);
-      } catch (err) {
-        setError(err.message);
+        const json = await res.json();
+        setVenue(json.data || json);
+      } catch (e) {
+        setError(e.message);
       } finally {
         setLoading(false);
       }
     };
-
-    fetchVenueDetail();
+    fetchVenue();
   }, [id]);
 
+  // Handle booking submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setBookingError('');
+    setBookingSuccess('');
 
-  if (loading) {
-    return <p>Loading...</p>;
-  }
+    // Validate inputs
+    if (!dateFrom || !dateTo) {
+      setBookingError('Please select both start and end dates.');
+      return;
+    }
+    if (guests < 1) {
+      setBookingError('Please select at least one guest.');
+      return;
+    }
 
-  if (error) {
-    return <p style={{ color: "red" }}>Error: {error}</p>;
-  }
+    // Ensure user is logged in
+    const stored = localStorage.getItem('user');
+    if (!stored) {
+      setBookingError('You must be logged in to book.');
+      return;
+    }
 
+    try {
+      const token = getAccessToken();
+      const res = await fetch(BOOKINGS_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+          'X-Noroff-API-Key': import.meta.env.VITE_NOROFF_API_KEY,
+        },
+        body: JSON.stringify({ venueId: id, dateFrom, dateTo, guests }),
+      });
+      if (!res.ok) {
+        const errJson = await res.json();
+        const msg = errJson.errors?.[0]?.message || `Booking failed (${res.status})`;
+        throw new Error(msg);
+      }
+      setBookingSuccess('Booking successful! Redirecting to profile...');
+      setTimeout(() => navigate('/profile', { replace: true }), 1000);
+    } catch (e) {
+      setBookingError(e.message);
+    }
+  };
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p style={{ color: 'red' }}>Error: {error}</p>;
 
   return (
-    <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
+    <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
       {venue ? (
         <>
-          <h1 style={{ fontSize: "2rem", marginBottom: "20px" }}>
-            {venue.name}
-          </h1>
+          <h1 style={{ fontSize: '2rem', marginBottom: '20px' }}>{venue.name}</h1>
           <img
-            src={
-              venue.media && venue.media[0] && venue.media[0].url
-                ? venue.media[0].url
-                : "https://via.placeholder.com/800x400?text=No+Image"
-            }
-            alt={
-              venue.media && venue.media[0] && venue.media[0].alt
-                ? venue.media[0].alt
-                : "No image"
-            }
-            style={{
-              width: "100%",
-              maxHeight: "400px",
-              objectFit: "cover",
-              borderRadius: "8px",
-            }}
+            src={venue.media?.[0]?.url || 'https://via.placeholder.com/800x400'}
+            alt={venue.media?.[0]?.alt || 'Venue image'}
+            style={{ width: '100%', height: '400px', objectFit: 'cover', borderRadius: '8px' }}
           />
-          <p style={{ marginTop: "20px", lineHeight: "1.6" }}>
-            {venue.description}
-          </p>
-          <p style={{ color: "#666" }}>
-            <strong>Location:</strong>{" "}
-            {venue.location
-              ? `${venue.location.address ? venue.location.address + ", " : ""}${
-                  venue.location.city ? venue.location.city + ", " : ""
-                }${venue.location.zip ? venue.location.zip + ", " : ""}${
-                  venue.location.country ? venue.location.country + ", " : ""
-                }${venue.location.continent ? venue.location.continent : ""}`
-              : "Ukjent sted"}
-          </p>
-          <p style={{ fontWeight: "bold", marginTop: "10px" }}>
-            Pris per natt: {venue.price} NOK
-          </p>
-          <p>
-            <strong>Max Guests:</strong> {venue.maxGuests}
-          </p>
-          <p>
-            <strong>Rating:</strong> {venue.rating}
-          </p>
-          <p>
-            <strong>Created:</strong> {venue.created}
-          </p>
-          <p>
-            <strong>Updated:</strong> {venue.updated}
-          </p>
-          <div style={{ marginTop: "20px" }}>
-            <h3>Amenities</h3>
-            {venue.meta ? (
-              <ul>
-                <li>WiFi: {venue.meta.wifi ? "Yes" : "No"}</li>
-                <li>Parking: {venue.meta.parking ? "Yes" : "No"}</li>
-                <li>Breakfast: {venue.meta.breakfast ? "Yes" : "No"}</li>
-                <li>Pets Allowed: {venue.meta.pets ? "Yes" : "No"}</li>
-              </ul>
-            ) : (
-              <p>No amenities available.</p>
-            )}
-          </div>
+          <p style={{ margin: '20px 0' }}>{venue.description}</p>
+          <p><strong>Price per night:</strong> {venue.price} NOK</p>
+
+          <form onSubmit={handleSubmit} style={{ marginTop: '40px', padding: '20px', border: '1px solid #eee', borderRadius: '8px' }}>
+            <h2>Book now</h2>
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end' }}>
+              <label>
+                From:
+                <input
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                  required
+                  style={{ marginLeft: '0.5rem' }}
+                />
+              </label>
+              <label>
+                To:
+                <input
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                  required
+                  style={{ marginLeft: '0.5rem' }}
+                />
+              </label>
+              <label>
+                Guests:
+                <input
+                  type="number"
+                  min="1"
+                  value={guests}
+                  onChange={(e) => setGuests(Number(e.target.value))}
+                  required
+                  style={{ width: '4rem', marginLeft: '0.5rem' }}
+                />
+              </label>
+              <button
+                type="submit"
+                style={{
+                  padding: '0.5rem 1rem',
+                  backgroundColor: '#6B46C1',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                }}
+              >
+                Book now
+              </button>
+            </div>
+            {bookingError && <p style={{ color: 'red', marginTop: '1rem' }}>{bookingError}</p>}
+            {bookingSuccess && <p style={{ color: 'green', marginTop: '1rem' }}>{bookingSuccess}</p>}
+          </form>
         </>
       ) : (
         <p>No venue details found.</p>
