@@ -13,6 +13,7 @@
     "framer-motion": "^12.9.2",
     "material-symbols": "^0.31.2",
     "react": "^19.1.0",
+    "react-date-range": "^2.0.1",
     "react-dom": "^19.1.0",
     "recharts": "^2.15.3"
   },
