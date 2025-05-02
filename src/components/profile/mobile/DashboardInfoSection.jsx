@@ -1,4 +1,3 @@
-/* DashboardInfoMobile.jsx */
 export default function DashboardInfoMobile() {
     return (
       <section className="md:hidden max-w-2xl mx-auto px-4  space-y-5">

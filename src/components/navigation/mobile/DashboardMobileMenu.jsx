@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
-export default function DashboardMobileMenu({ hasBookings = true, onListNew = () => {} }) {
+export default function DashboardMobileMenu({ hasBookings = true, onListNew = () => {}, onSettings = () => {} }) {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
@@ -18,41 +18,37 @@ export default function DashboardMobileMenu({ hasBookings = true, onListNew = ()
   }, [isOpen]);
 
   const menuItems = [
-    { icon: 'grid_view', label: 'Dashboard', onClick: () => {}, disabled: false, active: true },
-    { icon: 'add_business', label: 'List New Venue', onClick: onListNew, disabled: false, active: false },
-    { icon: 'apartment', label: 'My Venues', onClick: () => {}, disabled: false, active: false },
-    { icon: 'calendar_month', label: 'Bookings', onClick: () => {}, disabled: !hasBookings, active: false },
-    { icon: 'settings', label: 'Settings', onClick: () => {}, disabled: false, active: false },
+    { icon: 'grid_view', label: 'Dashboard',    onClick: () => {},            disabled: false,        active: true  },
+    { icon: 'add_business', label: 'List New Venue', onClick: onListNew,        disabled: false,        active: false },
+    { icon: 'apartment',    label: 'My Venues',     onClick: () => {},            disabled: false,        active: false },
+    { icon: 'calendar_month', label: 'Bookings',    onClick: () => {},            disabled: !hasBookings, active: false },
+    { icon: 'settings',      label: 'Settings',      onClick: onSettings,         disabled: false,        active: false },
   ];
 
   return (
     <div className="md:hidden relative flex justify-end">
       <button
-        onClick={() => setIsOpen((prev) => !prev)}
+        onClick={() => setIsOpen(prev => !prev)}
         aria-label="Toggle dashboard menu"
         className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-black text-sm font-medium border border-[var(--color-border-soft)] hover:bg-[var(--profile-btn-bg)] hover:text-[var(--profile-btn-text)] transition"
       >
         <span
           className="material-symbols-outlined icon-purple"
-          style={{
-            fontVariationSettings: `'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24`,
-          }}
+          style={{ fontVariationSettings: `'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24` }}
         >
           menu
         </span>
         Dashboard
       </button>
 
-      {isOpen && (
-        <div className="fixed inset-0 bg-black/30 z-40" onClick={() => setIsOpen(false)} />
-      )}
+      {isOpen && <div className="fixed inset-0 bg-black/30 z-40" onClick={() => setIsOpen(false)} />}
 
       <div
         className={`fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-2xl shadow-lg transform transition-transform duration-300 ease-out ${
           isOpen ? 'translate-y-0' : 'translate-y-full'
         }`}
         style={{ maxHeight: '60vh' }}
-        onClick={(e) => e.stopPropagation()}
+        onClick={e => e.stopPropagation()}
       >
         <div className="flex justify-center pt-2">
           <div className="w-16 h-1.5 bg-gray-300 rounded-full" />
@@ -66,9 +62,7 @@ export default function DashboardMobileMenu({ hasBookings = true, onListNew = ()
           >
             <span
               className="material-symbols-outlined icon-purple"
-              style={{
-                fontVariationSettings: `'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24`,
-              }}
+              style={{ fontVariationSettings: `'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24` }}
             >
               arrow_back
             </span>
@@ -95,7 +89,7 @@ export default function DashboardMobileMenu({ hasBookings = true, onListNew = ()
                 className="material-symbols-outlined icon-purple"
                 style={{
                   fontVariationSettings: active
-                    ? `'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24`
+                    ? `'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24` 
                     : `'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24`,
                   transition: 'font-variation-settings 0.3s ease-in-out',
                 }}
