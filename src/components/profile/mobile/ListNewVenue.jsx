@@ -192,7 +192,7 @@ export default function AddVenueFormMobile({ userName, onCreated }) {
               arrow_back
             </button>
           ) : (
-            <button onClick={() => navigate('/profile')} className="material-symbols-outlined text-xl text-purple-700">
+            <button onClick={() => navigate('/')} className="material-symbols-outlined text-xl text-purple-700">
               close
             </button>
           )}
