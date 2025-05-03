@@ -3,27 +3,27 @@ import React from 'react';
 export default function ProfileHeader({ user }) {
   if (!user) return null;
 
-  // Always read from localStorage first for immediate updates
-  const bannerSrc = localStorage.getItem('bannerUrl') || user.banner?.url || '/images/default-banner.jpg';
-  const avatarSrc = localStorage.getItem('profileUrl') || user.avatar?.url || '/images/default-avatar.jpg';
+  // Always use the user prop directly to avoid cross-user storage issues
+  const bannerSrc = user.banner?.url || '/images/default-banner.jpg';
+  const avatarSrc = user.avatar?.url || '/images/default-avatar.jpg';
   const role = user.venueManager ? 'Venue' : 'Guest';
 
   return (
     <header className="mb-8">
-      {/* Banner – fills width, fixed px heights */}
+      {/* Banner – full width, fixed heights */}
       <section className="w-full" aria-labelledby="banner-heading">
         <div className="h-[150px] md:h-[300px] lg:h-[300px] overflow-hidden">
           <img
             id="banner-image"
             src={bannerSrc}
-            alt="Profilbanner"
+            alt="Profile banner"
             className="w-full object-cover"
           />
         </div>
       </section>
 
       <div className="flex flex-col items-center -mt-20 px-4">
-        {/* Wrap avatar so <span> can be anchored */}
+        {/* Avatar with role badge */}
         <div className="relative">
           <img
             src={avatarSrc}

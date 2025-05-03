@@ -1,118 +1,124 @@
-
 import React from 'react';
 import { Link } from 'react-router';
 import DeleteVenueButton from '../../ui/buttons/DeleteVenueButton';
 import { getAccessToken } from '../../../services/tokenService';
 
+import { FAC_OPTIONS } from '../../constans/VenueFormConfig';
 
 export default function ActiveVenuesSection({ venues, loading, error, onDelete }) {
-  const ActiveVenueCard = ({ venue, onDelete }) => {
-    if (!venue) return null;
-
-    const {
-      id,
-      name = 'Untitled venue',
-      maxGuests = 0,
-      media = [],
-      location = {},
-      bookings = [],
-    } = venue;
-    const { city = '', country = '' } = location;
-    const booking = bookings[0];
-
-    // hent ut første bilde eller fallback
-    const imgUrl =
-      media[0]?.url ||
-      'https://via.placeholder.com/400x200?text=No+Image';
-
-    return (
-      <article className="flex flex-col rounded-xl border bg-white shadow-sm overflow-hidden">
-        {/* bilde-banner */}
-        <Link to={`/venues/${id}`}>
-          <img
-            src={imgUrl}
-            alt={media[0]?.alt || name}
-            className="w-full h-40 object-cover"
-          />
-        </Link>
-
-        <div className="p-4 space-y-2">
-          {/* navn + badge */}
-          <div className="flex justify-between items-start">
-            <h4 className="text-base font-medium text-gray-900">{name}</h4>
-            {booking && (
-              <span className="inline-flex items-center gap-1 rounded-md bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-800">
-                ● {booking.from}–{booking.to}
-              </span>
-            )}
-          </div>
-
-          {/* lokasjon */}
-          {(city || country) && (
-            <p className="text-xs text-gray-500">
-              {city}{city && country ? ', ' : ''}{country}
-            </p>
-          )}
-
-          {/* facts-linje */}
-          <div className="flex items-center gap-4 pt-1 text-xs text-gray-500">
-            <span className="flex items-center gap-1">
-              <span className="material-symbols-thin">holiday_village</span>
-              House
-            </span>
-            <span className="flex items-center gap-1">
-              <span className="material-symbols-thin">bed</span>
-              {maxGuests}
-            </span>
-            <span className="flex items-center gap-1">
-              <span className="material-symbols-thin">groups</span>
-              +{maxGuests}
-            </span>
-          </div>
-
-          {/* handlinger */}
-          <nav className="mt-3 border-t border-gray-100 pt-2 flex justify-between text-xs">
-            <Link to={`/venues/${id}`} className="hover:text-violet-600">
-              View
-            </Link>
-            <Link to={`/venues/${id}/edit`} className="hover:text-violet-600">
-              Edit
-            </Link>
-            <DeleteVenueButton
-              venueId={id}
-              accessToken={getAccessToken()}
-              onDeleted={() => onDelete(id)}
-              className="text-red-600 hover:text-red-700"
-            >
-              Delete
-            </DeleteVenueButton>
-          </nav>
-        </div>
-      </article>
-    );
-  };
+  if (loading) return <p className="text-center text-gray-500">Loading venues...</p>;
+  if (error)   return <p className="text-center text-red-600">{error}</p>;
+  if (!venues?.length) return <p className="text-center text-gray-500">No active venues.</p>;
 
   return (
-    <section className="mt-6 md:hidden">
-      <h3 className="text-xl font-semibold mb-3">Active Venues</h3>
+    <section className="mt-6">
+      <h3 className="text-2xl font-semibold mb-4">Active Venues</h3>
+      <div className="grid gap-6">
+        {venues.map((venue) => {
+          const {
+            id,
+            name = 'Untitled Venue',
+            maxGuests = 0,
+            media = [],
+            location = {},
+            bookings = [],
+            type = 'House',
+            facilities = [],
+          } = venue;
 
-      {loading ? (
-        <p className="text-sm">Loading your venues…</p>
-      ) : error ? (
-        <p className="text-sm text-red-600">{error}</p>
-      ) : venues.length === 0 ? (
-        <p className="text-sm">You have no active venues.</p>
-      ) : (
-        <div className="space-y-4">
-          {venues.filter(Boolean).map(v => (
-            <ActiveVenueCard
-              key={v.id}
-              venue={v}
-              onDelete={onDelete}
-            />
-          ))}
-        </div>
-      )}
+          const imgUrl = media[0]?.url || 'https://via.placeholder.com/400x200?text=No+Image';
+          const { city = '', country = '' } = location;
+          const bookingCount = bookings.length;
+          const bookingText  = `${bookingCount} booking${bookingCount !== 1 ? 's' : ''}`;
+          const textColor    = bookingCount > 0 ? '#4B9152' : '#8B1C1C';
+          const bgColor      = bookingCount > 0 ? 'rgba(163,217,165,0.6)' : 'rgba(233,107,107,0.4)';
+
+          // Facilities: show up to 3 icons, then +N
+          const facilityOptions = facilities
+            .map(key => FAC_OPTIONS.find(o => o.key === key))
+            .filter(Boolean);
+          const iconsToShow = facilityOptions.slice(0, 3);
+          const extraCount = facilityOptions.length - iconsToShow.length;
+
+          return (
+            <article
+              key={id}
+              className="bg-white rounded-2xl shadow hover:shadow-lg transition flex flex-col overflow-hidden"
+            >
+              <Link to={`/venues/${id}`} className="block h-48 w-full">
+                <img
+                  src={imgUrl}
+                  alt={media[0]?.alt || name}
+                  className="w-full h-full object-cover"
+                />
+              </Link>
+
+              <div className="p-4 flex flex-col flex-1">
+                <div className="flex justify-between items-center mb-2">
+                  <h4 className="text-xl font-semibold text-gray-900 truncate">{name}</h4>
+                  <span
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.25rem',
+                      padding: '0.25rem 0.5rem',
+                      fontSize: '0.75rem',
+                      backgroundColor: bgColor,
+                      borderRadius: '5px',
+                    }}
+                  >
+                    <span style={{ color: textColor }}>●</span>
+                    <span className="font-semibold" style={{ color: textColor }}>
+                      {bookingText}
+                    </span>
+                    <span style={{ color: textColor }}>●</span>
+                  </span>
+                </div>
+
+                {(city || country) && (
+                  <p className="text-sm text-gray-500 truncate mb-2">
+                    {[city, country].filter(Boolean).join(', ')}
+                  </p>
+                )}
+
+                <div className="flex items-center gap-4 text-gray-600 text-sm mb-4">
+                  {/* Venue type */}
+                  <span className="inline-flex items-center gap-1">
+                    <span className="material-symbols-outlined text-base">home</span>
+                    {type}
+                  </span>
+                  {/* Beds */}
+                  <span className="inline-flex items-center gap-1">
+                    <span className="material-symbols-outlined text-base">king_bed</span>
+                    {maxGuests} Beds
+                  </span>
+                  {/* Facility icons */}
+                  {iconsToShow.map(opt => (
+                    <span key={opt.key} className="material-symbols-outlined text-base" title={opt.label}>
+                      {opt.icon}
+                    </span>
+                  ))}
+                  {/* Extra count */}
+                  {extraCount > 0 && (
+                    <span className="text-xs text-gray-500">+{extraCount}</span>
+                  )}
+                </div>
+
+                <nav className="mt-auto pt-4 border-t border-gray-100 flex justify-between text-sm text-indigo-600">
+                  <Link to={`/venues/${id}`} className="hover:underline">View</Link>
+                  <Link to={`/venues/${id}/edit`} className="hover:underline">Edit</Link>
+                  <DeleteVenueButton
+                    venueId={id}
+                    accessToken={getAccessToken()}
+                    onDeleted={() => onDelete(id)}
+                    className="hover:underline text-red-600"
+                  >Delete</DeleteVenueButton>
+                </nav>
+              </div>
+            </article>
+          );
+        })}
+      </div>
     </section>
   );
 }

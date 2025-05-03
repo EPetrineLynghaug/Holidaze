@@ -1,15 +1,14 @@
-// src/components/profile/mobile/ProfileSettingsMobile.jsx
 import React, { useEffect, useState } from 'react';
-import { Switch }                         from '@headlessui/react';
-import { getAccessToken }                 from '../../../services/tokenService';
-import { PROFILE_BY_NAME_URL }            from '../../constans/api';
+import { Switch } from '@headlessui/react';
+import { getAccessToken } from '../../../services/tokenService';
+import { PROFILE_BY_NAME_URL } from '../../constans/api';
 
-export default function ProfileSettings({ onClose, userName }) {
+export default function ProfileSettingsMobile({ onSave, userName }) {
   const [isVenueManager, setIsVenueManager] = useState(false);
   const [profileUrl, setProfileUrl]         = useState('');
   const [bannerUrl, setBannerUrl]           = useState('');
 
-  // Lås bakgrunnsskroll + init state
+  // Lock background scroll + initialize state
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     setIsVenueManager(JSON.parse(localStorage.getItem('venueManager') || 'false'));
@@ -23,23 +22,23 @@ export default function ProfileSettings({ onClose, userName }) {
     localStorage.setItem('venueManager', JSON.stringify(on));
   };
 
-  // PUT mot API
+  // Send updated profile to API
   const saveToApi = async () => {
     const body = {
       bio: '',
-      avatar:  { url: profileUrl, alt: '' },
-      banner:  { url: bannerUrl,  alt: '' },
-      venueManager: isVenueManager
+      avatar: { url: profileUrl, alt: '' },
+      banner: { url: bannerUrl, alt: '' },
+      venueManager: isVenueManager,
     };
     const token = getAccessToken();
     const res = await fetch(PROFILE_BY_NAME_URL(userName), {
       method: 'PUT',
       headers: {
-        'Content-Type':      'application/json',
-        Authorization:       `Bearer ${token}`,
-        'X-Noroff-API-Key':  import.meta.env.VITE_NOROFF_API_KEY
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+        'X-Noroff-API-Key': import.meta.env.VITE_NOROFF_API_KEY,
       },
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
     });
     if (!res.ok) throw new Error(`Error ${res.status}`);
     return res.json();
@@ -47,13 +46,13 @@ export default function ProfileSettings({ onClose, userName }) {
 
   const handleSave = async () => {
     try {
-      // lokal lagring
+      // localStorage
       localStorage.setItem('profileUrl', profileUrl);
-      localStorage.setItem('bannerUrl',  bannerUrl);
-      // til API
-      await saveToApi();
+      localStorage.setItem('bannerUrl', bannerUrl);
+      // API
+      const json = await saveToApi();
       alert('Settings saved!');
-      onClose();
+      onSave(json.data);
     } catch (e) {
       console.error(e);
       alert(`Could not save: ${e.message}`);
@@ -66,7 +65,7 @@ export default function ProfileSettings({ onClose, userName }) {
 
         {/* Header */}
         <div className="sticky top-0 bg-white z-10 flex items-center justify-between px-4 py-3 border-b border-purple-100">
-          <button onClick={onClose} className="material-symbols-outlined text-xl text-purple-700">
+          <button onClick={handleSave} className="material-symbols-outlined text-xl text-purple-700">
             close
           </button>
           <h2 className="text-lg font-semibold text-purple-900">Settings</h2>
@@ -75,7 +74,7 @@ export default function ProfileSettings({ onClose, userName }) {
 
         {/* Content */}
         <div className="flex-1 overflow-auto p-4 space-y-6">
-          {/* Venue Manager */}
+          {/* Venue Manager Toggle */}
           <div className="flex items-center justify-between">
             <div>
               <label className="block text-base font-medium">Enable Venue Manager</label>
@@ -97,7 +96,7 @@ export default function ProfileSettings({ onClose, userName }) {
             </Switch>
           </div>
 
-          {/* Profile URL */}
+          {/* Profile Picture URL */}
           <div className="space-y-1">
             <label htmlFor="profileUrl" className="block text-base font-medium">Profile Picture URL</label>
             <input
@@ -110,7 +109,7 @@ export default function ProfileSettings({ onClose, userName }) {
             />
           </div>
 
-          {/* Banner URL */}
+          {/* Banner Image URL */}
           <div className="space-y-1">
             <label htmlFor="bannerUrl" className="block text-base font-medium">Banner Image URL</label>
             <input

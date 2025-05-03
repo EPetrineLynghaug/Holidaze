@@ -111,25 +111,32 @@ export default function Profile() {
         />
       )}
 
-      {/* List New Venue modal, only for venue manager users */}
-      {user.venueManager && showForm && (
-        <BottomSheet title="Create Venue" onClose={() => setShowForm(false)}>
-          <AddVenueForm
-            userName={user.name}
-            onCreated={data => { setVenues(data); setShowForm(false); }}
-          />
-        </BottomSheet>
-      )}
+   {/* Create Venue modal (for managers) */}
+{user.venueManager && showForm && (
+  <BottomSheet title="Create Venue" onClose={() => setShowForm(false)}>
+    <AddVenueForm
+      userName={user.name}
+      onCreated={data => {
+        setVenues(data);
+        setShowForm(false);
+      }}
+      onClose={() => setShowForm(false)}
+    />
+  </BottomSheet>
+)}
 
-      {/* Settings modal */}
-      {showSettings && (
-        <BottomSheet title="Settings" onClose={() => setShowSettings(false)}>
-          <ProfileSettings
-            userName={user.name}
-            onClose={() => setShowSettings(false)}
-          />
-        </BottomSheet>
-      )}
+{showSettings && (
+  <BottomSheet title="Settings" onClose={() => setShowSettings(false)}>
+    <ProfileSettings
+      userName={user.name}
+      onSave={(updatedProfile) => {
+        setUser(updatedProfile);
+        localStorage.setItem('user', JSON.stringify(updatedProfile));
+        setShowSettings(false);
+      }}
+    />
+  </BottomSheet>
+)}
     </div>
   );
 }

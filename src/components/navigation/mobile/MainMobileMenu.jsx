@@ -39,9 +39,8 @@ export default function MainMobileMenu() {
     setOpen(false);
   };
 
-  // Determine avatar src: read immediately from localStorage or fallback to user prop
-  const avatarSrc =
-    localStorage.getItem('profileUrl') || user?.avatar?.url || '/images/default-avatar.png';
+  // Always read avatar from user
+  const avatarSrc = user?.avatar?.url || '/images/default-avatar.png';
 
   return (
     <>
