@@ -12,112 +12,124 @@ import ActiveVenuesSection from '../components/profile/mobile/ActiveVenueCard';
 import DashboardMobileMenu from '../components/navigation/mobile/DashboardMobileMenu';
 import ProfileChart from '../components/profile/mobile/ProfileChart';
 import AddVenueForm from '../components/profile/mobile/ListNewVenue';
-import Settings from '../components/profile/mobile/Settings.JSX';
+import ProfileSettings from '../components/profile/mobile/ProfileSettings';
+import BottomSheet from '../components/ui/mobildemodal/BottomSheet';
 
 export default function Profile() {
   const navigate = useNavigate();
-  const [user, setUser]         = useState(null);
-  const [venues, setVenues]     = useState([]);
+
+  const [user, setUser] = useState(null);
+  const [venues, setVenues] = useState([]);
   const [bookings, setBookings] = useState([]);
-  const [loading, setLoading]   = useState(true);
-  const [error, setError]       = useState('');
-  const [isManager, setIsManager] = useState(
-    () => JSON.parse(localStorage.getItem('venueManager')) || false
-  );
+  const [loadingVenues, setLoadingVenues] = useState(false);
+  const [venuesError, setVenuesError] = useState('');
+  const [loadingBookings, setLoadingBookings] = useState(false);
+  const [bookingsError, setBookingsError] = useState('');
+
   const [showForm, setShowForm] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   // Load user or redirect
   useEffect(() => {
     const stored = localStorage.getItem('user');
-    if (!stored) return navigate('/', { replace: true });
+    if (!stored) {
+      navigate('/', { replace: true });
+      return;
+    }
     setUser(JSON.parse(stored));
   }, [navigate]);
 
   // Fetch venues
   useEffect(() => {
     if (!user) return;
-    setLoading(true);
-    setError('');
+    setLoadingVenues(true);
+    setVenuesError('');
     const token = getAccessToken();
+
     fetch(`${PROFILE_BY_NAME_VENUES_URL(user.name)}?_bookings=true`, {
-      headers: { Authorization: `Bearer ${token}`, 'X-Noroff-API-Key': import.meta.env.VITE_NOROFF_API_KEY },
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'X-Noroff-API-Key': import.meta.env.VITE_NOROFF_API_KEY,
+      },
     })
       .then(r => { if (!r.ok) throw new Error(`Fetch failed: ${r.status}`); return r.json(); })
       .then(j => setVenues(j.data))
-      .catch(e => setError(e.message))
-      .finally(() => setLoading(false));
+      .catch(e => setVenuesError(e.message))
+      .finally(() => setLoadingVenues(false));
   }, [user]);
 
   // Fetch bookings
   useEffect(() => {
     if (!user) return;
+    setLoadingBookings(true);
+    setBookingsError('');
     const token = getAccessToken();
+
     fetch(`${PROFILE_BY_NAME_BOOKINGS_URL(user.name)}?_venue=true`, {
-      headers: { Authorization: `Bearer ${token}`, 'X-Noroff-API-Key': import.meta.env.VITE_NOROFF_API_KEY },
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'X-Noroff-API-Key': import.meta.env.VITE_NOROFF_API_KEY,
+      },
     })
       .then(r => r.ok ? r.json() : Promise.reject(`Error ${r.status}`))
       .then(j => setBookings(j.data))
-      .catch(() => {/* silent */});
+      .catch(e => setBookingsError(e.toString()))
+      .finally(() => setLoadingBookings(false));
   }, [user]);
-
-  const handleToggleManager = e => {
-    const checked = e.target.checked;
-    setIsManager(checked);
-    localStorage.setItem('venueManager', JSON.stringify(checked));
-  };
 
   if (!user) return null;
 
   return (
     <div className="profile-container p-4 font-figtree">
+      {/* Header */}
       <ProfileHeader user={user} />
+
+      {/* Mobile Dashboard-meny */}
       <div className="mt-4">
         <DashboardMobileMenu
           hasBookings={bookings.length > 0}
           onListNew={() => setShowForm(true)}
+          onSettings={() => setShowSettings(true)}
         />
       </div>
 
+      {/* Info & chart */}
       <DashboardInfoSection />
       <ProfileChart venues={venues} bookings={bookings} />
-      <ActiveVenuesSection
-        venues={venues}
-        loading={loading}
-        error={error}
-        onDelete={id => setVenues(vs => vs.filter(v => v.id !== id))}
-      />
 
-      {/* Manager toggle */}
-      <div className="mt-6 flex items-center">
-        <label className="inline-flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={isManager}
-            onChange={handleToggleManager}
-            className="h-4 w-4 text-purple-600 border-gray-300 rounded"
+      {/* Venues list with loading/error handling */}
+      {loadingVenues ? (
+        <p className="text-center py-4">Loading venues…</p>
+      ) : venuesError ? (
+        <p className="text-center py-4 text-red-500">{venuesError}</p>
+      ) : (
+        <ActiveVenuesSection
+          venues={venues}
+          loading={loadingVenues}
+          error={venuesError}
+          onDelete={id => setVenues(vs => vs.filter(v => v.id !== id))}
+        />
+      )}
+
+      {/* List New Venue modal, only for venue manager users */}
+      {user.venueManager && showForm && (
+        <BottomSheet title="Create Venue" onClose={() => setShowForm(false)}>
+          <AddVenueForm
+            userName={user.name}
+            onCreated={data => { setVenues(data); setShowForm(false); }}
           />
-          <span className="text-sm">Enable venue manager</span>
-        </label>
-      </div>
+        </BottomSheet>
+      )}
 
-      {/* Popup form modal */}
-      {isManager && showForm && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/30 z-50 p-4">
-          <div className="bg-white rounded-xl shadow-lg w-full max-w-md max-h-[90vh] overflow-auto">
-            <div className="flex justify-end p-2">
-              {/* <button onClick={() => setShowForm(false)} className="text-gray-500 hover:text-gray-700">
-                ✕
-              </button> */}
-            </div>
-            <AddVenueForm
-              userName={user.name}
-              onCreated={data => { setVenues(data); setShowForm(false); }}
-            />
-          
-          </div>
-        </div>
+      {/* Settings modal */}
+      {showSettings && (
+        <BottomSheet title="Settings" onClose={() => setShowSettings(false)}>
+          <ProfileSettings
+            userName={user.name}
+            onClose={() => setShowSettings(false)}
+          />
+        </BottomSheet>
       )}
     </div>
-   
   );
 }

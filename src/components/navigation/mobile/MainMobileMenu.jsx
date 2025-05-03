@@ -1,8 +1,8 @@
-// src/components/MainMobileMenu.jsx
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router';
 import { logout as logoutService } from '../../../services/authService';
 import Logo from '../../ui/Logo';
+import DashboardMobileMenu from './DashboardMobileMenu';
 
 function MenuItem({ to, label, onClick }) {
   return (
@@ -38,6 +38,10 @@ export default function MainMobileMenu() {
     logoutService();
     setOpen(false);
   };
+
+  // Determine avatar src: read immediately from localStorage or fallback to user prop
+  const avatarSrc =
+    localStorage.getItem('profileUrl') || user?.avatar?.url || '/images/default-avatar.png';
 
   return (
     <>
@@ -90,7 +94,7 @@ export default function MainMobileMenu() {
           >
             <div className="flex items-center gap-3 pl-[2px]">
               <img
-                src={user.avatar?.url || '/images/default-avatar.png'}
+                src={avatarSrc}
                 alt={user.name || 'User avatar'}
                 className="w-9 h-9 rounded-full object-cover border border-gray-300"
               />
