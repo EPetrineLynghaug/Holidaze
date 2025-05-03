@@ -14,6 +14,7 @@ import {
 
 export function useVenueForm(userName, onCreated) {
   const [step, setStep] = useState(0);
+  // Include location fields: address, city, country
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -26,6 +27,11 @@ export function useVenueForm(userName, onCreated) {
     dateRange: { startDate: new Date(), endDate: new Date(), key: "selection" },
     price: "",
     guests: 1,
+    location: {
+      address: "",
+      city: "",
+      country: "",
+    },
   });
   const [feedback, setFeedback] = useState({ error: "", success: "" });
 
@@ -68,6 +74,7 @@ export function useVenueForm(userName, onCreated) {
   const submit = async () => {
     setFeedback({ error: "", success: "" });
     try {
+      // build metadata from toggles
       const meta = {
         ...ENV_OPTIONS.reduce(
           (m, o) => ({ ...m, [o.key]: form.environments.includes(o.key) }),
@@ -84,6 +91,7 @@ export function useVenueForm(userName, onCreated) {
         bathrooms: form.bathrooms,
       };
 
+      // assemble payload including location
       const payload = {
         name: form.title,
         description: form.description,
@@ -93,13 +101,9 @@ export function useVenueForm(userName, onCreated) {
         rating: form.rating,
         meta,
         location: {
-          address: "",
-          city: "",
-          zip: "",
-          country: "",
-          continent: "",
-          lat: 0,
-          lng: 0,
+          address: form.location.address,
+          city: form.location.city,
+          country: form.location.country,
         },
         availability: {
           start: form.dateRange.startDate.toISOString().slice(0, 10),
@@ -119,6 +123,7 @@ export function useVenueForm(userName, onCreated) {
       });
       if (!res.ok) throw new Error(`Error ${res.status}`);
 
+      // refresh list after creation
       res = await fetch(
         `${PROFILE_BY_NAME_VENUES_URL(userName)}?_bookings=true`,
         {

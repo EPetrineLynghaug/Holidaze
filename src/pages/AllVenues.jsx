@@ -1,4 +1,3 @@
-// src/pages/AllVenues.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import { VENUES_URL } from "../components/constans/api";
