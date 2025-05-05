@@ -1,10 +1,11 @@
-// src/components/navigation/mobile/DashboardMobileMenu.jsx
-import  { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export default function DashboardMobileMenu({
   hasBookings = true,
   onListNew = () => {},
   onSettings = () => {},
+  onMyVenues = () => {},
+  onMyBookings = () => {},
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -23,21 +24,24 @@ export default function DashboardMobileMenu({
   }, [isOpen]);
 
   const menuItems = [
-    { icon: 'grid_view',       label: 'Dashboard',        onClick: () => {},          disabled: false,          active: true  },
-    { icon: 'add_business',    label: 'List New Venue',   onClick: onListNew,         disabled: false,          active: false },
-    { icon: 'apartment',       label: 'My Venues',        onClick: () => {},          disabled: false,          active: false },
-    { icon: 'calendar_month',  label: 'Bookings',         onClick: () => {},          disabled: !hasBookings,    active: false },
-    { icon: 'settings',        label: 'Settings',         onClick: onSettings,        disabled: false,          active: false },
+    { icon: 'grid_view',       label: 'Dashboard',      onClick: () => {},           disabled: false,         active: true  },
+    { icon: 'add_business',    label: 'List New Venue', onClick: onListNew,         disabled: false,         active: false },
+    { icon: 'apartment',       label: 'My Venues',      onClick: onMyVenues,        disabled: false,         active: false },
+    { icon: 'calendar_month',  label: 'Bookings',       onClick: onMyBookings,      disabled: !hasBookings,   active: false },
+    { icon: 'settings',        label: 'Settings',       onClick: onSettings,        disabled: false,         active: false },
   ];
 
   return (
     <div className="md:hidden relative flex justify-end">
       <button
-        onClick={() => setIsOpen((p) => !p)}
+        onClick={() => setIsOpen(p => !p)}
         aria-label="Toggle dashboard menu"
         className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-black text-sm font-medium border border-[var(--color-border-soft)] hover:bg-[var(--profile-btn-bg)] hover:text-[var(--profile-btn-text)] transition"
       >
-        <span className="material-symbols-outlined icon-purple" style={{ fontVariationSettings: `'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24` }}>
+        <span
+          className="material-symbols-outlined icon-purple"
+          style={{ fontVariationSettings: `'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24` }}
+        >
           menu
         </span>
         Dashboard
@@ -55,7 +59,10 @@ export default function DashboardMobileMenu({
         <div className="flex justify-center pt-2"><div className="w-16 h-1.5 bg-gray-300 rounded-full" /></div>
         <div className="sticky top-0 flex items-center justify-between px-4 py-3 bg-white border-b border-[var(--color-border-soft)] z-10">
           <button onClick={() => setIsOpen(false)} aria-label="Close dashboard menu" className="text-[var(--profile-btn-text)]">
-            <span className="material-symbols-outlined icon-purple" style={{ fontVariationSettings: `'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24` }}>
+            <span
+              className="material-symbols-outlined icon-purple"
+              style={{ fontVariationSettings: `'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24` }}
+            >
               arrow_back
             </span>
           </button>
@@ -77,12 +84,15 @@ export default function DashboardMobileMenu({
                     : 'text-black border-[var(--color-border-soft)] hover:bg-[var(--profile-btn-bg)] hover:text-[var(--profile-btn-text)]'
               }`}
             >
-              <span className="material-symbols-outlined icon-purple" style={{
-                fontVariationSettings: active
-                  ? `'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24`
-                  : `'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24`,
-                transition: 'font-variation-settings 0.3s ease-in-out',
-              }}>
+              <span
+                className="material-symbols-outlined icon-purple"
+                style={{
+                  fontVariationSettings: active
+                    ? `'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24`
+                    : `'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24`,
+                  transition: 'font-variation-settings 0.3s ease-in-out',
+                }}
+              >
                 {icon}
               </span>
               <span>{label}</span>
