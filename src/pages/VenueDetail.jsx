@@ -1,65 +1,50 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { VENUE_BY_ID_URL, BOOKINGS_URL } from '../components/constans/api';
 import { getAccessToken } from '../services/tokenService';
+
+const NOK_TO_USD = 0.10;
+const formatUSD = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
 
 export default function VenueDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
 
   const [venue, setVenue] = useState(null);
+  const [owner, setOwner] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [form, setForm] = useState({ dateFrom: '', dateTo: '', guests: 1 });
+  const [feedback, setFeedback] = useState({ error: '', success: '' });
+  const [slideIndex, setSlideIndex] = useState(0);
 
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
-  const [guests, setGuests] = useState(1);
-  const [bookingError, setBookingError] = useState('');
-  const [bookingSuccess, setBookingSuccess] = useState('');
-
-  // Fetch venue details on mount
   useEffect(() => {
-    const fetchVenue = async () => {
+    async function fetchData() {
       try {
-        const res = await fetch(VENUE_BY_ID_URL(id));
-        if (!res.ok) {
-          throw new Error(`Failed to fetch venue: ${res.status} ${res.statusText}`);
-        }
-        const json = await res.json();
-        setVenue(json.data || json);
+        // Fetch venue with owner and reviews
+        const res = await fetch(`${VENUE_BY_ID_URL(id)}?_owner=true&_reviews=true`);
+        if (!res.ok) throw new Error(res.statusText);
+        const { data } = await res.json();
+        setVenue(data);
+        setOwner(data.owner);
       } catch (e) {
         setError(e.message);
       } finally {
         setLoading(false);
       }
-    };
-    fetchVenue();
+    }
+    fetchData();
   }, [id]);
 
-  // Handle booking submission
+  const onScroll = (e) => setSlideIndex(Math.round(e.target.scrollLeft / e.target.clientWidth));
+  const goBack = () => navigate(-1);
+  const handleChange = (key) => (e) => setForm({ ...form, [key]: e.target.value });
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setBookingError('');
-    setBookingSuccess('');
-
-    // Validate inputs
-    if (!dateFrom || !dateTo) {
-      setBookingError('Please select both start and end dates.');
-      return;
-    }
-    if (guests < 1) {
-      setBookingError('Please select at least one guest.');
-      return;
-    }
-
-    // Ensure user is logged in
-    const stored = localStorage.getItem('user');
-    if (!stored) {
-      setBookingError('You must be logged in to book.');
-      return;
-    }
-
+    const { dateFrom, dateTo, guests } = form;
+    if (!dateFrom || !dateTo || guests < 1) return setFeedback({ error: 'Please fill all fields.', success: '' });
+    if (!localStorage.getItem('user')) return setFeedback({ error: 'Login required.', success: '' });
     try {
       const token = getAccessToken();
       const res = await fetch(BOOKINGS_URL, {
@@ -71,89 +56,143 @@ export default function VenueDetail() {
         },
         body: JSON.stringify({ venueId: id, dateFrom, dateTo, guests }),
       });
-      if (!res.ok) {
-        const errJson = await res.json();
-        const msg = errJson.errors?.[0]?.message || `Booking failed (${res.status})`;
-        throw new Error(msg);
-      }
-      setBookingSuccess('Booking successful! Redirecting to profile...');
-      setTimeout(() => navigate('/profile', { replace: true }), 1000);
+      if (!res.ok) throw new Error(await res.text());
+      setFeedback({ success: 'Booked! Redirecting...', error: '' });
+      setTimeout(() => navigate('/profile'), 1000);
     } catch (e) {
-      setBookingError(e.message);
+      setFeedback({ error: e.message, success: '' });
     }
   };
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p style={{ color: 'red' }}>Error: {error}</p>;
+  if (loading) return <p className="text-center py-10">Loading...</p>;
+  if (error) return <p className="text-center py-10 text-red-500">Error: {error}</p>;
+  if (!venue) return null;
+
+  const { name, description, media = [], price, maxGuests, rating, created, location = {}, meta = {}, reviews = [] } = venue;
 
   return (
-    <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
-      {venue ? (
-        <>
-          <h1 style={{ fontSize: '2rem', marginBottom: '20px' }}>{venue.name}</h1>
-          <img
-            src={venue.media?.[0]?.url || 'https://via.placeholder.com/800x400'}
-            alt={venue.media?.[0]?.alt || 'Venue image'}
-            style={{ width: '100%', height: '400px', objectFit: 'cover', borderRadius: '8px' }}
-          />
-          <p style={{ margin: '20px 0' }}>{venue.description}</p>
-          <p><strong>Price per night:</strong> {venue.price} NOK</p>
+    <div className="flex flex-col space-y-4">
+      {/* Back Button */}
+      <button onClick={goBack} className="ml-4 mt-4 text-indigo-600 hover:underline text-sm">
+        &larr; Back
+      </button>
 
-          <form onSubmit={handleSubmit} style={{ marginTop: '40px', padding: '20px', border: '1px solid #eee', borderRadius: '8px' }}>
-            <h2>Book now</h2>
-            <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end' }}>
-              <label>
-                From:
-                <input
-                  type="date"
-                  value={dateFrom}
-                  onChange={(e) => setDateFrom(e.target.value)}
-                  required
-                  style={{ marginLeft: '0.5rem' }}
-                />
-              </label>
-              <label>
-                To:
-                <input
-                  type="date"
-                  value={dateTo}
-                  onChange={(e) => setDateTo(e.target.value)}
-                  required
-                  style={{ marginLeft: '0.5rem' }}
-                />
-              </label>
-              <label>
-                Guests:
-                <input
-                  type="number"
-                  min="1"
-                  value={guests}
-                  onChange={(e) => setGuests(Number(e.target.value))}
-                  required
-                  style={{ width: '4rem', marginLeft: '0.5rem' }}
-                />
-              </label>
-              <button
-                type="submit"
-                style={{
-                  padding: '0.5rem 1rem',
-                  backgroundColor: '#6B46C1',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                }}
-              >
-                Book now
-              </button>
-            </div>
-            {bookingError && <p style={{ color: 'red', marginTop: '1rem' }}>{bookingError}</p>}
-            {bookingSuccess && <p style={{ color: 'green', marginTop: '1rem' }}>{bookingSuccess}</p>}
-          </form>
-        </>
-      ) : (
-        <p>No venue details found.</p>
+      {/* Image Carousel */}
+      <div onScroll={onScroll} className="flex overflow-x-auto snap-x snap-mandatory h-64">
+        {media.map((img, i) => (
+          <img
+            key={i}
+            src={img.url}
+            alt={img.alt || name}
+            className="snap-center w-full flex-shrink-0 object-cover"
+          />
+        ))}
+      </div>
+      {/* Dots */}
+      <div className="flex justify-center">
+        {media.map((_, i) => (
+          <span
+            key={i}
+            className={`h-2 w-2 mx-1 rounded-full ${i === slideIndex ? 'bg-indigo-600' : 'bg-gray-300'}`}
+          />
+        ))}
+      </div>
+
+      {/* Owner Info */}
+      {owner && (
+        <div className="flex items-center px-4 py-2 space-x-3">
+          <img src={owner.avatar.url} alt={owner.avatar.alt} className="w-10 h-10 rounded-full" />
+          <span className="font-semibold">{owner.name}</span>
+        </div>
       )}
+
+      {/* Venue Info */}
+      <section className="px-4 space-y-3">
+        <h1 className="text-xl font-bold">{name}</h1>
+        <p className="text-gray-700">{description}</p>
+
+        {/* Rating with dropdown */}
+        <details className="border rounded-lg p-3">
+          <summary className="flex items-center cursor-pointer">
+            <span className="mr-2 font-medium">Rating:</span>
+            <div className="flex">
+              {Array.from({ length: 5 }, (_, i) => (
+                <span key={i} className="text-yellow-500">
+                  {i < Math.round(rating) ? '★' : '☆'}
+                </span>
+              ))}
+            </div>
+            <span className="ml-2 text-sm text-gray-600">({rating}/5)</span>
+          </summary>
+          <ul className="mt-2 space-y-2">
+            {reviews.length > 0 ? (
+              reviews.map((rev) => (
+                <li key={rev.id} className="border-b pb-2">
+                  <p className="font-semibold">{rev.user.name}</p>
+                  <p className="text-gray-700">{rev.comment}</p>
+                  <div className="flex mt-1 text-yellow-500">
+                    {Array.from({ length: 5 }, (_, i) => (i < rev.rating ? '★' : '☆'))}
+                  </div>
+                </li>
+              ))
+            ) : (
+              <p className="text-gray-700">No reviews yet.</p>
+            )}
+          </ul>
+        </details>
+
+        {/* Key details */}
+        <div className="grid grid-cols-2 gap-2 text-sm">
+          <div><strong>Price:</strong> {formatUSD(price * NOK_TO_USD)}</div>
+          <div><strong>Guests:</strong> {maxGuests}</div>
+          <div><strong>Added:</strong> {new Date(created).toLocaleDateString()}</div>
+          <div><strong>Location:</strong> {location.city}, {location.country}</div>
+        </div>
+        <div className="flex flex-wrap mt-2 text-xs">
+          {meta.wifi && <span className="mr-2 px-2 py-1 bg-green-100 rounded">WiFi</span>}
+          {meta.parking && <span className="mr-2 px-2 py-1 bg-green-100 rounded">Parking</span>}
+          {meta.breakfast && <span className="mr-2 px-2 py-1 bg-green-100 rounded">Breakfast</span>}
+          {meta.pets && <span className="mr-2 px-2 py-1 bg-green-100 rounded">Pets</span>}
+        </div>
+      </section>
+
+      {/* Booking Form */}
+      <form onSubmit={handleSubmit} className="px-4 py-3 bg-white rounded-lg shadow mx-4 mb-6">
+        <h2 className="text-lg font-medium mb-2">Book Now</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          {['dateFrom', 'dateTo'].map((key, idx) => (
+            <label key={idx} className="flex flex-col text-xs">
+              {key === 'dateFrom' ? 'From' : 'To'}
+              <input
+                type="date"
+                value={form[key]}
+                onChange={handleChange(key)}
+                required
+                className="mt-1 p-2 border rounded"
+              />
+            </label>
+          ))}
+          <label className="flex flex-col text-xs">
+            Guests
+            <input
+              type="number"
+              min="1"
+              value={form.guests}
+              onChange={handleChange('guests')}
+              required
+              className="mt-1 p-2 border rounded"
+            />
+          </label>
+        </div>
+        {feedback.error && <p className="text-red-500 mt-2">{feedback.error}</p>}
+        {feedback.success && <p className="text-green-600 mt-2">{feedback.success}</p>}
+        <button
+          type="submit"
+          className="mt-3 w-full bg-indigo-600 text-white py-2 rounded"
+        >
+          Book now
+        </button>
+      </form>
     </div>
   );
 }
