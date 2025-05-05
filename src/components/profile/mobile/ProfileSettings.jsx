@@ -3,26 +3,65 @@ import { Switch } from '@headlessui/react';
 import { getAccessToken } from '../../../services/tokenService';
 import { PROFILE_BY_NAME_URL } from '../../constans/api';
 
-export default function ProfileSettingsMobile({ onSave, userName }) {
+export default function ProfileSettings({ userName, onSave, onClose }) {
   const [isVenueManager, setIsVenueManager] = useState(false);
   const [profileUrl, setProfileUrl]         = useState('');
   const [bannerUrl, setBannerUrl]           = useState('');
+  const token = getAccessToken();
 
-  // Lock background scroll + initialize state
   useEffect(() => {
     document.body.style.overflow = 'hidden';
-    setIsVenueManager(JSON.parse(localStorage.getItem('venueManager') || 'false'));
-    setProfileUrl(localStorage.getItem('profileUrl') || '');
-    setBannerUrl(localStorage.getItem('bannerUrl') || '');
-    return () => { document.body.style.overflow = ''; };
-  }, []);
+
+   
+    (async () => {
+      try {
+        const res = await fetch(PROFILE_BY_NAME_URL(userName), {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'X-Noroff-API-Key': import.meta.env.VITE_NOROFF_API_KEY,
+          },
+        });
+        if (!res.ok) throw new Error(`Error ${res.status}`);
+        const { data } = await res.json();
+
+        // Use localStorage override if present, otherwise server value
+        const storedVM = localStorage.getItem('venueManager');
+        setIsVenueManager(storedVM != null
+          ? JSON.parse(storedVM)
+          : data.venueManager);
+
+        const storedProfile = localStorage.getItem('profileUrl');
+        setProfileUrl(storedProfile || data.avatar.url);
+
+        const storedBanner = localStorage.getItem('bannerUrl');
+        setBannerUrl(storedBanner || data.banner.url);
+      } catch (e) {
+        console.error('Could not load profile:', e);
+      }
+    })();
+
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [userName, token]);
 
   const toggleVenueManager = (on) => {
     setIsVenueManager(on);
     localStorage.setItem('venueManager', JSON.stringify(on));
   };
 
-  // Send updated profile to API
+  const handleProfileUrlChange = (e) => {
+    const url = e.target.value;
+    setProfileUrl(url);
+    localStorage.setItem('profileUrl', url);
+  };
+
+  const handleBannerUrlChange = (e) => {
+    const url = e.target.value;
+    setBannerUrl(url);
+    localStorage.setItem('bannerUrl', url);
+  };
+
   const saveToApi = async () => {
     const body = {
       bio: '',
@@ -30,7 +69,6 @@ export default function ProfileSettingsMobile({ onSave, userName }) {
       banner: { url: bannerUrl, alt: '' },
       venueManager: isVenueManager,
     };
-    const token = getAccessToken();
     const res = await fetch(PROFILE_BY_NAME_URL(userName), {
       method: 'PUT',
       headers: {
@@ -46,13 +84,15 @@ export default function ProfileSettingsMobile({ onSave, userName }) {
 
   const handleSave = async () => {
     try {
-      // localStorage
-      localStorage.setItem('profileUrl', profileUrl);
-      localStorage.setItem('bannerUrl', bannerUrl);
-      // API
-      const json = await saveToApi();
+      const { data } = await saveToApi();
+
+      // Update stored user so other components pick up new URLs
+      localStorage.setItem('user', JSON.stringify(data));
+      window.dispatchEvent(new Event('authChange'));
+
       alert('Settings saved!');
-      onSave(json.data);
+      onSave(data);
+      onClose();
     } catch (e) {
       console.error(e);
       alert(`Could not save: ${e.message}`);
@@ -62,10 +102,12 @@ export default function ProfileSettingsMobile({ onSave, userName }) {
   return (
     <section className="fixed inset-x-0 bottom-0 h-4/5 z-50">
       <div className="absolute inset-0 bg-white rounded-t-3xl shadow-lg flex flex-col">
-
         {/* Header */}
         <div className="sticky top-0 bg-white z-10 flex items-center justify-between px-4 py-3 border-b border-purple-100">
-          <button onClick={handleSave} className="material-symbols-outlined text-xl text-purple-700">
+          <button
+            onClick={onClose}
+            className="material-symbols-outlined text-xl text-purple-700"
+          >
             close
           </button>
           <h2 className="text-lg font-semibold text-purple-900">Settings</h2>
@@ -74,11 +116,14 @@ export default function ProfileSettingsMobile({ onSave, userName }) {
 
         {/* Content */}
         <div className="flex-1 overflow-auto p-4 space-y-6">
-          {/* Venue Manager Toggle */}
           <div className="flex items-center justify-between">
             <div>
-              <label className="block text-base font-medium">Enable Venue Manager</label>
-              <p className="text-sm text-gray-500">Switch between Guest & Venue modes</p>
+              <label className="block text-base font-medium">
+                Enable Venue Manager
+              </label>
+              <p className="text-sm text-gray-500">
+                Switch between Traveler & Venue modes
+              </p>
             </div>
             <Switch
               checked={isVenueManager}
@@ -96,27 +141,29 @@ export default function ProfileSettingsMobile({ onSave, userName }) {
             </Switch>
           </div>
 
-          {/* Profile Picture URL */}
           <div className="space-y-1">
-            <label htmlFor="profileUrl" className="block text-base font-medium">Profile Picture URL</label>
+            <label htmlFor="profileUrl" className="block text-base font-medium">
+              Profile Picture URL
+            </label>
             <input
               id="profileUrl"
               type="url"
               value={profileUrl}
-              onChange={e => setProfileUrl(e.target.value)}
+              onChange={handleProfileUrlChange}
               placeholder="https://…/profile.jpg"
               className="block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-purple-300 focus:border-purple-300"
             />
           </div>
 
-          {/* Banner Image URL */}
           <div className="space-y-1">
-            <label htmlFor="bannerUrl" className="block text-base font-medium">Banner Image URL</label>
+            <label htmlFor="bannerUrl" className="block text-base font-medium">
+              Banner Image URL
+            </label>
             <input
               id="bannerUrl"
               type="url"
               value={bannerUrl}
-              onChange={e => setBannerUrl(e.target.value)}
+              onChange={handleBannerUrlChange}
               placeholder="https://…/banner.jpg"
               className="block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-purple-300 focus:border-purple-300"
             />
@@ -132,7 +179,6 @@ export default function ProfileSettingsMobile({ onSave, userName }) {
             Save Settings
           </button>
         </div>
-
       </div>
     </section>
   );

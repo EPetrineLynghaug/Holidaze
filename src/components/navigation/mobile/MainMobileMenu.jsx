@@ -1,8 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
-import { NavLink } from 'react-router';
+import { NavLink, useNavigate } from 'react-router';
 import { logout as logoutService } from '../../../services/authService';
 import Logo from '../../ui/Logo';
-import DashboardMobileMenu from './DashboardMobileMenu';
 
 function MenuItem({ to, label, onClick }) {
   return (
@@ -22,6 +22,7 @@ function MenuItem({ to, label, onClick }) {
 export default function MainMobileMenu() {
   const [user, setUser] = useState(null);
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
 
   // Listen for auth changes and load user from localStorage
   useEffect(() => {
@@ -35,11 +36,21 @@ export default function MainMobileMenu() {
   }, []);
 
   const handleLogout = () => {
+    // Clear auth tokens and profile
     logoutService();
+
+    // Clear saved settings
+    localStorage.removeItem('profileUrl');
+    localStorage.removeItem('bannerUrl');
+    localStorage.removeItem('venueManager');
+
+    // Close menu
     setOpen(false);
+
+    // Redirect to home
+    navigate('/');
   };
 
-  // Always read avatar from user
   const avatarSrc = user?.avatar?.url || '/images/default-avatar.png';
 
   return (
