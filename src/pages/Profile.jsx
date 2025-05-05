@@ -124,7 +124,6 @@ export default function Profile() {
     />
   </BottomSheet>
 )}
-
 {showSettings && (
   <BottomSheet title="Settings" onClose={() => setShowSettings(false)}>
     <ProfileSettings
@@ -132,8 +131,8 @@ export default function Profile() {
       onSave={(updatedProfile) => {
         setUser(updatedProfile);
         localStorage.setItem('user', JSON.stringify(updatedProfile));
-        setShowSettings(false);
       }}
+      onClose={() => setShowSettings(false)}
     />
   </BottomSheet>
 )}
