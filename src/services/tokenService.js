@@ -1,43 +1,54 @@
-const ACCESS_KEY = "accessToken";
-const REFRESH_KEY = "refreshToken";
+const KEYS = {
+  ACCESS: "accessToken",
+  REFRESH: "refreshToken",
+};
 
-export function setTokens({ accessToken, refreshToken }, remember = false) {
-  const storage = remember ? localStorage : sessionStorage;
-  storage.setItem(ACCESS_KEY, accessToken);
-  storage.setItem(REFRESH_KEY, refreshToken);
+// Helper to choose storage based on `remember` flag
+const storage = (remember) => (remember ? localStorage : sessionStorage);
+
+// Generic setters and getters
+function setToken(key, value, remember = false) {
+  storage(remember).setItem(key, value);
+}
+
+function getToken(key) {
+  return sessionStorage.getItem(key) || localStorage.getItem(key);
+}
+
+// Public API
+export function setTokens(accessToken, refreshToken, remember = false) {
+  setToken(KEYS.ACCESS, accessToken, remember);
+  setToken(KEYS.REFRESH, refreshToken, remember);
 }
 
 export function getAccessToken() {
-  return sessionStorage.getItem(ACCESS_KEY) || localStorage.getItem(ACCESS_KEY);
+  return getToken(KEYS.ACCESS);
 }
 
 export function getRefreshToken() {
-  return (
-    sessionStorage.getItem(REFRESH_KEY) || localStorage.getItem(REFRESH_KEY)
-  );
+  return getToken(KEYS.REFRESH);
 }
 
 export function clearTokens() {
-  sessionStorage.removeItem(ACCESS_KEY);
-  sessionStorage.removeItem(REFRESH_KEY);
-  localStorage.removeItem(ACCESS_KEY);
-  localStorage.removeItem(REFRESH_KEY);
+  Object.values(KEYS).forEach((key) => {
+    sessionStorage.removeItem(key);
+    localStorage.removeItem(key);
+  });
 }
 
 export function parseJwt(token) {
   try {
-    const base64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
-    const json = atob(base64);
-    return JSON.parse(json);
+    const payload = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    const decoded = atob(payload);
+    return JSON.parse(decoded);
   } catch {
     return null;
   }
 }
 
-
-export function isAccessTokenValid() {
+export function isAccessTokenValid(leewayMs = 30_000) {
   const token = getAccessToken();
   if (!token) return false;
   const payload = parseJwt(token);
-  return payload?.exp * 1000 > Date.now() + 30_000;
+  return payload?.exp * 1000 > Date.now() + leewayMs;
 }

@@ -1,83 +1,124 @@
-
-import { setTokens, clearTokens, isAccessTokenValid } from "./tokenService";
-
+import {
+  setTokens,
+  clearTokens,
+  isAccessTokenValid,
+  getAccessToken,
+} from "./tokenService";
 
 const API = import.meta.env.VITE_API_BASE_URL;
+const PROFILE_STORAGE_KEY = "user";
+const AUTH_CHANGE_EVENT = "authChange";
 
+// API endpoints
+const ENDPOINTS = {
+  login: "/auth/login?_holidaze=true",
+  register: "/auth/register",
+};
 
-export async function login({ email, password, remember = true }) {
-  const res = await fetch(`${API}/auth/login?_holidaze=true`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
-  });
-
-  // Parse JSON response
-  const payload = await res.json().catch(() => ({}));
-
-  if (!res.ok) {
-    // Inactive account
-    if (
-      res.status === 403 ||
-      (payload.error || "").toString().includes("ACCOUNT_INACTIVE")
-    ) {
-      const message =
-        payload.message ||
-        "Your account is inactive. Please verify your email.";
-      throw { code: "ACCOUNT_INACTIVE", message };
-    }
-    // Generic credentials error (covers both wrong email and password)
-    const message = payload.message || "Email or password is incorrect.";
-    throw { code: "INVALID_CREDENTIALS", message };
+/**
+ * Custom error for API failures
+ */
+export class ApiError extends Error {
+  constructor(code, message, status) {
+    super(message);
+    this.code = code;
+    this.status = status;
   }
-
-  // Success: extract tokens and profile
-  const userData = payload.data || {};
-  const { accessToken, refreshToken, ...profile } = userData;
-
-  // Persist tokens & profile
-  setTokens({ accessToken, refreshToken }, remember);
-  localStorage.setItem("user", JSON.stringify(profile));
-
-  // Notify app of auth change
-  window.dispatchEvent(new Event("authChange"));
-
-  return profile;
 }
 
 /**
- * Registers a new user. Throws structured { code, message } on failure.
+ * Notify app of authentication changes
  */
-export async function register({ name, email, password }) {
-  const res = await fetch(`${API}/auth/register`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, email, password }),
-  });
-  const payload = await res.json().catch(() => ({}));
+function notifyAuthChange() {
+  window.dispatchEvent(new Event(AUTH_CHANGE_EVENT));
+}
 
-  if (!res.ok) {
-    const code = (payload.error || "REGISTER_FAILED").toString();
-    const message =
-      payload.message || "Registration failed. Please check your input.";
-    throw { code, message };
+/**
+ * Persist user profile to localStorage
+ */
+function persistProfile(profile) {
+  localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile));
+}
+
+/**
+ * Remove persisted profile
+ */
+function removePersistedProfile() {
+  localStorage.removeItem(PROFILE_STORAGE_KEY);
+}
+
+/**
+ * Helper to build headers, injecting auth if available
+ */
+function buildHeaders(isJson = true) {
+  const headers = {};
+  if (isJson) headers["Content-Type"] = "application/json";
+  const token = getAccessToken();
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  return headers;
+}
+
+/**
+ * Handle fetch response: parse JSON and throw ApiError on failure
+ */
+async function handleResponse(res) {
+  let payload = {};
+  try {
+    payload = await res.json();
+  } catch {
+    // ignore parse errors
   }
-
+  if (!res.ok) {
+    const code = payload.error || res.status;
+    const message = payload.message || res.statusText;
+    throw new ApiError(code, message, res.status);
+  }
   return payload.data;
 }
 
 /**
- * Clears tokens and profile, dispatches authChange.
+ * Generic POST to API
  */
-export function logout() {
-  clearTokens();
-  localStorage.removeItem("user");
-  window.dispatchEvent(new Event("authChange"));
+async function apiPost(path, body) {
+  const res = await fetch(`${API}${path}`, {
+    method: "POST",
+    headers: buildHeaders(true),
+    body: JSON.stringify(body),
+  });
+  return handleResponse(res);
 }
 
 /**
- * Returns true if user is logged in (valid token & profile stored).
+ * Log in a user. Throws ApiError on failure.
+ */
+export async function login({ email, password, remember = true }) {
+  const userData = await apiPost(ENDPOINTS.login, { email, password });
+  const { accessToken, ...profile } = userData;
+  setTokens(accessToken, remember);
+  persistProfile(profile);
+  notifyAuthChange();
+  return profile;
+}
+
+/**
+ * Register a new user. Throws ApiError on failure.
+ */
+export async function register({ name, email, password }) {
+  return apiPost(ENDPOINTS.register, { name, email, password });
+}
+
+/**
+ * Log out current user.
+ */
+export function logout() {
+  clearTokens();
+  removePersistedProfile();
+  notifyAuthChange();
+}
+
+/**
+ * Check if user is logged in.
  */
 export function isLoggedIn() {
-  return isAccessTokenValid() && !!localStorage.getItem("user");
+  return isAccessTokenValid() && !!localStorage.getItem(PROFILE_STORAGE_KEY);
 }
