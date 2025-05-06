@@ -3,7 +3,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router';
 import ProfileDetail   from './pages/ProfileDetail';
 
-import Layout      from './components/constans/layout';
+import Layout      from './components/constans/Layout';
 import Home        from './pages/Home';
 import Venues      from './pages/AllVenues';
 import VenueDetail from './pages/VenueDetail';
