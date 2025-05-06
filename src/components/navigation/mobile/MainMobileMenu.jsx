@@ -1,106 +1,140 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { NavLink, useNavigate } from 'react-router';
+import useAuthUser from '../../../hooks/useAuthUser';
 import { logout as logoutService } from '../../../services/authService';
 import Logo from '../../ui/Logo';
 
-function MenuItem({ to, label, onClick }) {
+// Reusable chevron icon
+function Chevron() {
   return (
-    <NavLink
+    <span className="opacity-0 group-hover:opacity-100 transition-opacity material-symbols-outlined text-sm text-[#3E35A2]">
+      chevron_right
+    </span>
+  );
+}
+
+// Menu item component with optional className override
+function MenuItem({ as: Component = NavLink, to, onClick, className = '', children }) {
+  const baseClasses = "flex items-center justify-between group text-gray-700 hover:text-[#3E35A2] transition-colors";
+  return (
+    <Component
       to={to}
       onClick={onClick}
-      className="flex items-center justify-between group text-gray-700 hover:text-[#3E35A2] transition-colors"
+      className={`${baseClasses} ${className}`.trim()}
     >
-      <span>{label}</span>
-      <span className="opacity-0 group-hover:opacity-100 transition-opacity material-symbols-outlined text-sm text-[#3E35A2]">
-        chevron_right
-      </span>
-    </NavLink>
+      <span>{children}</span>
+      <Chevron />
+    </Component>
   );
 }
 
 export default function MainMobileMenu() {
-  const [user, setUser] = useState(null);
+  const user = useAuthUser();
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const menuRef = useRef(null);
+  const openButtonRef = useRef(null);
 
-  // Listen for auth changes and load user from localStorage
+  // Prevent body scroll when menu is open
   useEffect(() => {
-    function refresh() {
-      const raw = localStorage.getItem('user');
-      setUser(raw ? JSON.parse(raw) : null);
+    document.body.style.overflow = open ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [open]);
+
+  // Close on ESC and trap focus
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if (e.key === 'Escape') {
+        setOpen(false);
+        openButtonRef.current?.focus();
+      }
     }
-    refresh();
-    window.addEventListener('authChange', refresh);
-    return () => window.removeEventListener('authChange', refresh);
-  }, []);
+    if (open) {
+      window.addEventListener('keydown', handleKeyDown);
+      menuRef.current?.querySelector('button, a')?.focus();
+    } else {
+      window.removeEventListener('keydown', handleKeyDown);
+    }
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [open]);
+
+  const closeMenu = useCallback(() => setOpen(false), []);
 
   const handleLogout = () => {
-    // Clear auth tokens and profile
     logoutService();
-
-    // Clear saved settings
-    localStorage.removeItem('profileUrl');
-    localStorage.removeItem('bannerUrl');
-    localStorage.removeItem('venueManager');
-
-    // Close menu
-    setOpen(false);
-
-    // Redirect to home
+    ['profileUrl', 'bannerUrl', 'venueManager'].forEach(key => localStorage.removeItem(key));
+    closeMenu();
     navigate('/');
   };
 
   const avatarSrc = user?.avatar?.url || '/images/default-avatar.png';
 
+  const mainLinks = [
+    { to: '/', label: 'Home' },
+    { to: '/venues', label: 'All Venues' },
+  ];
+  const guestLinks = [
+    { to: '/login', label: 'Log in' },
+    { to: '/register', label: 'Register' },
+  ];
+
   return (
     <>
       {/* Topbar */}
-      <header className="static bg-white shadow-md px-4 py-3 flex justify-between">
+      <header className="static bg-white shadow-md px-4 py-3 flex justify-between" aria-label="Main navigation">
         <Logo className="h-10 mb-1" />
         <button
+          ref={openButtonRef}
           onClick={() => setOpen(true)}
-          className="rounded-full p-2 text-black transition-all duration-200 transform hover:scale-110 active:scale-95 hover:rotate-3"
           aria-label="Open menu"
+          aria-expanded={open}
+          className="rounded-full p-2 text-black transition-all duration-200 transform hover:scale-110 active:scale-95 hover:rotate-3"
         >
-          <span className="material-symbols-outlined text-3xl">arrow_menu_close</span>
+          <span className="material-symbols-outlined text-3xl">menu</span>
         </button>
       </header>
 
-      {/* Slide-in menu */}
-      <div
-        className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg p-6 z-50 transform transition-transform duration-300 ease-in-out ${
+      {/* Slide-in Menu */}
+      <aside
+        ref={menuRef}
+        className={`fixed top-0 right-0 h-full w-full max-w-xs bg-white shadow-lg p-6 z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${
           open ? 'translate-x-0' : 'translate-x-full'
-        } flex flex-col`}
+        }`}
+        role="dialog"
+        aria-modal="true"
       >
         {/* Close button */}
         <div className="flex justify-end mb-6">
           <button
-            onClick={() => setOpen(false)}
-            className="w-10 h-10 flex items-center justify-center bg-white border border-black rounded-full shadow-md transition-transform duration-300 ease-in-out hover:rotate-90 hover:scale-105"
+            onClick={closeMenu}
             aria-label="Close menu"
+            className="w-10 h-10 flex items-center justify-center bg-white border border-black rounded-full shadow-md transition-transform duration-300 ease-in-out hover:rotate-90 hover:scale-105"
           >
             <span className="material-symbols-outlined text-lg text-gray-800 leading-none">close</span>
           </button>
         </div>
 
-        <nav className="flex flex-col gap-5 text-sm mb-6">
-          <MenuItem to="/" label="Home" onClick={() => setOpen(false)} />
-          <MenuItem to="/venues" label="All Venues" onClick={() => setOpen(false)} />
-
-          {!user && (
-            <>
-              <MenuItem to="/login" label="Log in" onClick={() => setOpen(false)} />
-              <MenuItem to="/register" label="Register" onClick={() => setOpen(false)} />
-            </>
-          )}
+        {/* Links */}
+        <nav className="flex flex-col gap-5 text-base mb-6" aria-label="Mobile menu links">
+          {mainLinks.map(link => (
+            <MenuItem key={link.to} to={link.to} onClick={closeMenu}>
+              {link.label}
+            </MenuItem>
+          ))}
+          {!user && guestLinks.map(link => (
+            <MenuItem key={link.to} to={link.to} onClick={closeMenu}>
+              {link.label}
+            </MenuItem>
+          ))}
         </nav>
 
+        {/* Profile */}
         {user && (
-          <NavLink
+          <MenuItem
+            as={NavLink}
             to="/profile"
-            onClick={() => setOpen(false)}
-            className="group flex items-center justify-between py-2 text-gray-700 hover:text-[#3E35A2] transition-colors mb-8"
+            onClick={closeMenu}
+            className="py-2 mb-8"
           >
             <div className="flex items-center gap-3 pl-[2px]">
               <img
@@ -110,13 +144,9 @@ export default function MainMobileMenu() {
               />
               <span className="text-sm font-medium capitalize truncate">{user.name}</span>
             </div>
-            <span className="material-symbols-outlined text-sm text-[#3E35A2] opacity-0 group-hover:opacity-100 transition-opacity">
-              chevron_right
-            </span>
-          </NavLink>
+          </MenuItem>
         )}
 
-        {/* Spacer */}
         <div className="flex-grow" />
 
         {/* Log out */}
@@ -124,22 +154,21 @@ export default function MainMobileMenu() {
           <div className="pt-8 border-t border-gray-200">
             <button
               onClick={handleLogout}
-              className="group w-full flex items-center justify-between text-left text-sm text-gray-700 hover:text-[#3E35A2] transition mt-4"
+              className="w-full flex items-center justify-between group text-left text-base text-gray-700 hover:text-[#3E35A2] transition"
             >
               <span>Log out</span>
-              <span className="material-symbols-outlined text-sm text-[#3E35A2] opacity-0 group-hover:opacity-100 transition-opacity">
-                chevron_right
-              </span>
+              <Chevron />
             </button>
           </div>
         )}
-      </div>
+      </aside>
 
       {/* Backdrop */}
       {open && (
         <div
           className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 transition-opacity duration-300"
-          onClick={() => setOpen(false)}
+          onClick={closeMenu}
+          aria-hidden="true"
         />
       )}
     </>

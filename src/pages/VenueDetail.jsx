@@ -1,271 +1,145 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router';
-import { VENUE_BY_ID_URL, BOOKINGS_URL } from '../components/constans/api';
-import { getAccessToken } from '../services/tokenService';
+import useVenueDetail from '../hooks/useVenueDetail';
 import ProfileUserLink from '../components/profile/mobile/ProfileUserSearch';
+import { BOOKINGS_URL } from '../components/constans/api';
+import { getAccessToken } from '../services/tokenService';
 
-const NOK_TO_USD = 0.10;
-const formatUSD = (n) =>
-  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
+const NOK_TO_USD = 0.1;
+const formatUSD = amount =>
+  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+
+
+
+
+
 
 export default function VenueDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { venue, loading, error } = useVenueDetail(id);
 
-  const [venue, setVenue] = useState(null);
-  const [owner, setOwner] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [slideIndex, setSlideIndex] = useState(0);
   const [form, setForm] = useState({ dateFrom: '', dateTo: '', guests: 1 });
   const [feedback, setFeedback] = useState({ error: '', success: '' });
-  const [slideIndex, setSlideIndex] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const res = await fetch(`${VENUE_BY_ID_URL(id)}?_owner=true&_reviews=true`);
-        if (!res.ok) throw new Error(res.statusText);
-        const { data } = await res.json();
-        setVenue(data);
-        setOwner(data.owner);
-      } catch (e) {
-        setError(e.message);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchData();
-  }, [id]);
+  const goBack = useCallback(() => navigate(-1), [navigate]);
+  const nextImage = useCallback(() => {
+    if (!venue?.media) return;
+    setSlideIndex(i => (i + 1) % venue.media.length);
+  }, [venue]);
 
-  const onScroll = (e) =>
-    setSlideIndex(Math.round(e.target.scrollLeft / e.target.clientWidth));
-  const goBack = () => navigate(-1);
-  const handleChange = (key) => (e) =>
-    setForm((f) => ({ ...f, [key]: e.target.value }));
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = useCallback(async e => {
     e.preventDefault();
     const { dateFrom, dateTo, guests } = form;
     if (!dateFrom || !dateTo || guests < 1) {
-      return setFeedback({ error: 'Please fill all fields.', success: '' });
+      return setFeedback({ error: 'Fill all fields', success: '' });
     }
     if (!localStorage.getItem('user')) {
-      return setFeedback({ error: 'Login required.', success: '' });
+      return setFeedback({ error: 'Login required', success: '' });
     }
-
+    setSubmitting(true);
     try {
       const token = getAccessToken();
       const res = await fetch(BOOKINGS_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
           'X-Noroff-API-Key': import.meta.env.VITE_NOROFF_API_KEY,
+          ...(token && { Authorization: `Bearer ${token}` })
         },
-        body: JSON.stringify({ venueId: id, dateFrom, dateTo, guests }),
+        body: JSON.stringify({ venueId: id, dateFrom, dateTo, guests })
       });
       if (!res.ok) throw new Error(await res.text());
-      setFeedback({ success: 'Booked! Redirecting...', error: '' });
+      setFeedback({ success: 'Booked!', error: '' });
       setTimeout(() => navigate('/profile'), 1000);
-    } catch (e) {
-      setFeedback({ error: e.message, success: '' });
+    } catch (err) {
+      setFeedback({ error: err.message, success: '' });
+    } finally {
+      setSubmitting(false);
     }
-  };
+  }, [form, id, navigate]);
 
-  if (loading)
-    return <p className="text-center py-10">Loading...</p>;
-  if (error)
-    return (
-      <p className="text-center py-10 text-red-500">
-        Error: {error}
-      </p>
-    );
+  if (loading) return <p className="text-center py-10">Loading…</p>;
+  if (error) return <p className="text-center py-10 text-red-500">Error: {error}</p>;
   if (!venue) return null;
 
-  const {
-    name,
-    description,
-    media = [],
-    price,
-    maxGuests,
-    rating,
-    created,
-    location = {},
-    meta = {},
-    reviews = [],
-  } = venue;
+  const { name, media = [], description, price, maxGuests, rating, location = {}, reviews = [], owner } = venue;
 
   return (
-    <div className="flex flex-col space-y-4">
-      {/* Back Button */}
-      <button
-        onClick={goBack}
-        className="ml-4 mt-4 text-indigo-600 hover:underline text-sm"
-      >
-        &larr; Back
-      </button>
-
-      {/* Image Carousel */}
-      <div
-        onScroll={onScroll}
-        className="flex overflow-x-auto snap-x snap-mandatory h-64"
-      >
-        {media.map((img, i) => (
+    <div className="w-full bg-white">
+      {/* Image */}
+      {media.length > 0 && (
+        <div className="relative w-full h-56">
           <img
-            key={i}
-            src={img.url}
-            alt={img.alt || name}
-            className="snap-center w-full flex-shrink-0 object-cover"
+            src={media[slideIndex].url}
+            alt={media[slideIndex].alt || name}
+            className="w-full h-full object-cover"
+            onClick={nextImage}
           />
+          <button
+            onClick={goBack}
+            className="absolute top-3 left-3 p-2 bg-white bg-opacity-80 rounded-full shadow"
+          >←</button>
+          <div
+            className="absolute bottom-3 left-3 text-white text-xs px-3 py-1 rounded-full"
+            style={{ backgroundColor: 'rgba(74,74,74,0.92)' }}
+          >{slideIndex + 1}/{media.length}</div>
+        </div>
+      )}
+
+      {/* Title */}
+      <h2 className="px-4 pt-3 text-base font-medium truncate">{name}</h2>
+
+      {/* Location */}
+      <p className="px-4 mt-1 text-gray-600 text-sm">{location.city}, {location.country}</p>
+
+      {/* Rating */}
+      <div className="px-4 mt-2 flex items-center text-gray-600 text-sm space-x-1">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <span key={i} className="material-symbols-outlined text-sm">
+            {i < Math.round(rating) ? 'star' : 'star_border'}
+          </span>
+        ))}
+        <span className="font-medium text-sm ml-1">{rating.toFixed(1)}</span>
+        <a href="#reviews" className="text-indigo-600 text-sm ml-2">({reviews.length})</a>
+      </div>
+
+      {/* Owner */}
+      <div className="px-4 mt-3">
+        <ProfileUserLink user={owner} size="xs" className="text-sm opacity-80 hover:opacity-100" />
+      </div>
+
+      {/* Features */}
+      <div className="px-4 mt-4 flex justify-between text-gray-600 text-sm">
+        {[
+          ['house','House'],
+          ['bed', `${maxGuests} beds`],
+          ['bathtub','1 bath'],
+          ['garage','1 garage']
+        ].map(([icon,label]) => (
+          <div key={icon} className="flex flex-col items-center">
+            <span className="material-symbols-outlined text-base">{icon}</span>
+            <span className="text-xs">{label}</span>
+          </div>
         ))}
       </div>
 
-      {/* Dots */}
-      <div className="flex justify-center">
-        {media.map((_, i) => (
-          <span
-            key={i}
-            className={`h-2 w-2 mx-1 rounded-full ${
-              i === slideIndex ? 'bg-indigo-600' : 'bg-gray-300'
-            }`}
-          />
-        ))}
-      </div>
+      {/* Description */}
+      <p className="px-4 mt-4 text-gray-700 text-sm leading-relaxed">{description}</p>
 
-      {/* Klikkbar eier-lenke */}
-      {owner && <ProfileUserLink user={owner} />}
-
-      {/* Venue Info */}
-      <section className="px-4 space-y-3">
-        <h1 className="text-xl font-bold">{name}</h1>
-        <p className="text-gray-700">{description}</p>
-
-        {/* Rating with dropdown */}
-        <details className="border rounded-lg p-3">
-          <summary className="flex items-center cursor-pointer">
-            <span className="mr-2 font-medium">Rating:</span>
-            <div className="flex">
-              {Array.from({ length: 5 }, (_, i) => (
-                <span key={i}>
-                  {i < Math.round(rating) ? '★' : '☆'}
-                </span>
-              ))}
-            </div>
-            <span className="ml-2 text-sm text-gray-600">
-              ({rating}/5)
-            </span>
-          </summary>
-          <ul className="mt-2 space-y-2">
-            {reviews.length > 0 ? (
-              reviews.map((rev) => (
-                <li key={rev.id} className="border-b pb-2">
-                  <p className="font-semibold">
-                    {rev.user.name}
-                  </p>
-                  <p className="text-gray-700">
-                    {rev.comment}
-                  </p>
-                  <div className="flex mt-1">
-                    {Array.from({ length: 5 }, (_, i) => (
-                      <span key={i}>
-                        {i < rev.rating ? '★' : '☆'}
-                      </span>
-                    ))}
-                  </div>
-                </li>
-              ))
-            ) : (
-              <p className="text-gray-700">No reviews yet.</p>
-            )}
-          </ul>
-        </details>
-
-        {/* Key details */}
-        <div className="grid grid-cols-2 gap-2 text-sm">
-          <div>
-            <strong>Price:</strong> {formatUSD(price * NOK_TO_USD)}
-          </div>
-          <div>
-            <strong>Guests:</strong> {maxGuests}
-          </div>
-          <div>
-            <strong>Added:</strong>{' '}
-            {new Date(created).toLocaleDateString()}
-          </div>
-          <div>
-            <strong>Location:</strong>{' '}
-            {location.city}, {location.country}
-          </div>
-        </div>
-
-        <div className="flex flex-wrap mt-2 text-xs">
-          {meta.wifi && (
-            <span className="mr-2 px-2 py-1 bg-green-100 rounded">
-              WiFi
-            </span>
-          )}
-          {meta.parking && (
-            <span className="mr-2 px-2 py-1 bg-green-100 rounded">
-              Parking
-            </span>
-          )}
-          {meta.breakfast && (
-            <span className="mr-2 px-2 py-1 bg-green-100 rounded">
-              Breakfast
-            </span>
-          )}
-          {meta.pets && (
-            <span className="mr-2 px-2 py-1 bg-green-100 rounded">
-              Pets
-            </span>
-          )}
-        </div>
-      </section>
-
-      {/* Booking Form */}
+      {/* Booking */}
       <form
         onSubmit={handleSubmit}
-        className="px-4 py-3 bg-white rounded-lg shadow mx-4 mb-6"
+        className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 p-4 flex items-center justify-between"
       >
-        <h2 className="text-lg font-medium mb-2">Book Now</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-          {['dateFrom', 'dateTo'].map((key, idx) => (
-            <label key={idx} className="flex flex-col text-xs">
-              {key === 'dateFrom' ? 'From' : 'To'}
-              <input
-                type="date"
-                value={form[key]}
-                onChange={handleChange(key)}
-                required
-                className="mt-1 p-2 border rounded"
-              />
-            </label>
-          ))}
-          <label className="flex flex-col text-xs">
-            Guests
-            <input
-              type="number"
-              min="1"
-              value={form.guests}
-              onChange={handleChange('guests')}
-              required
-              className="mt-1 p-2 border rounded"
-            />
-          </label>
-        </div>
-        {feedback.error && (
-          <p className="text-red-500 mt-2">{feedback.error}</p>
-        )}
-        {feedback.success && (
-          <p className="text-green-600 mt-2">{feedback.success}</p>
-        )}
         <button
           type="submit"
-          className="mt-3 w-full bg-indigo-600 text-white py-2 rounded"
-        >
-          Book now
-        </button>
+          disabled={submitting}
+          className="bg-indigo-600 text-white py-2 px-6 rounded-lg disabled:opacity-50 text-sm"
+        >{submitting ? 'Booking…' : 'Book now'}</button>
+        <span className="text-lg font-bold">{formatUSD(price * NOK_TO_USD)} <span className="text-sm font-normal">/night</span></span>
       </form>
     </div>
   );

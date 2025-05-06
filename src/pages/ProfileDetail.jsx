@@ -1,14 +1,8 @@
-
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link, useParams } from 'react-router';
-import {
-  PROFILE_BY_NAME_URL,
-  PROFILE_BY_NAME_VENUES_URL,
-} from '../components/constans/api';
-import { getAccessToken } from '../services/tokenService';
+import useProfileDetail from '../hooks/useProfileDetail';
 import ProfileHeader from '../components/profile/mobile/ProfileHeader';
 import { FAC_OPTIONS } from '../components/constans/VenueFormConfig';
-
 
 function Loading() {
   return (
@@ -17,7 +11,6 @@ function Loading() {
     </div>
   );
 }
-
 
 function ErrorFallback({ message, onRetry }) {
   return (
@@ -33,20 +26,15 @@ function ErrorFallback({ message, onRetry }) {
   );
 }
 
-// Renders a facility icon based on FAC_OPTIONS
 function FacilityIcon({ type }) {
   const option = FAC_OPTIONS.find((o) => o.key === type);
   if (!option) return null;
   return (
-    <span
-      className="material-symbols-outlined text-base"
-      title={option.label}
-    >
+    <span className="material-symbols-outlined text-base" title={option.label}>
       {option.icon}
     </span>
   );
 }
-
 
 function VenueMeta({ type, maxGuests }) {
   return (
@@ -75,82 +63,37 @@ function CardActions({ id }) {
 
 export default function ProfileDetail() {
   const { username } = useParams();
-  const [userData, setUserData] = useState(null);
-  const [userVenues, setUserVenues] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [venuesLoading, setVenuesLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [venuesError, setVenuesError] = useState('');
+  const {
+    profile,
+    venues,
+    loadingProfile,
+    loadingVenues,
+    errorProfile,
+    errorVenues,
+  } = useProfileDetail(username);
 
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const token = getAccessToken();
-        const res = await fetch(PROFILE_BY_NAME_URL(username), {
-          headers: {
-            'X-Noroff-API-Key': import.meta.env.VITE_NOROFF_API_KEY,
-            ...(token && { Authorization: `Bearer ${token}` }),
-          },
-        });
-        if (!res.ok) throw new Error('Failed to load profile');
-        const { data } = await res.json();
-        setUserData(data);
-      } catch (e) {
-        setError(e.message);
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [username]);
-
- 
-  useEffect(() => {
-    if (!userData) return;
-    (async () => {
-      setVenuesLoading(true);
-      try {
-        const token = getAccessToken();
-        const res = await fetch(
-          `${PROFILE_BY_NAME_VENUES_URL(username)}?_bookings=true`,
-          {
-            headers: {
-              'X-Noroff-API-Key': import.meta.env.VITE_NOROFF_API_KEY,
-              ...(token && { Authorization: `Bearer ${token}` }),
-            },
-          }
-        );
-        if (!res.ok) throw new Error('Failed to load venues');
-        const { data: venues } = await res.json();
-        setUserVenues(venues);
-      } catch (e) {
-        setVenuesError(e.message);
-      } finally {
-        setVenuesLoading(false);
-      }
-    })();
-  }, [username, userData]);
-
-  if (loading) return <Loading />;
-  if (error) return <ErrorFallback message={error} onRetry={() => window.location.reload()} />;
+  if (loadingProfile) return <Loading />;
+  if (errorProfile)
+    return <ErrorFallback message={errorProfile} onRetry={() => window.location.reload()} />;
 
   const now = Date.now();
 
   return (
     <div className="max-w-5xl mx-auto p-4 space-y-8">
-      <ProfileHeader user={userData} />
+      <ProfileHeader user={profile} />
 
       <section>
-        <h2 className="text-2xl font-semibold mb-6">Venues &amp; Availability</h2>
-
-        {venuesLoading && <Loading />}
-        {venuesError && <ErrorFallback message={venuesError} onRetry={() => window.location.reload()} />}
-        {!venuesLoading && userVenues.length === 0 && (
+        <h2 className="text-2xl font-semibold mb-6">Venues & Availability</h2>
+        {loadingVenues && <Loading />}
+        {errorVenues && (
+          <ErrorFallback message={errorVenues} onRetry={() => window.location.reload()} />
+        )}
+        {!loadingVenues && venues.length === 0 && (
           <p className="text-center text-gray-500">No venues created yet.</p>
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {userVenues.map((v) => {
+          {venues.map((v) => {
             const {
               id,
               name = 'Untitled Venue',
@@ -162,7 +105,8 @@ export default function ProfileDetail() {
               facilities = [],
             } = v;
 
-            const imgUrl = media[0]?.url || 'https://via.placeholder.com/400x200?text=No+Image';
+            const imgUrl = media[0]?.url ||
+              'https://via.placeholder.com/400x200?text=No+Image';
             const { city = '', country = '' } = location;
             const isBookedNow = bookings.some(
               (b) =>
