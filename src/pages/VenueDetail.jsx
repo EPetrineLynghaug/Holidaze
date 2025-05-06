@@ -9,6 +9,11 @@ const NOK_TO_USD = 0.1;
 const formatUSD = amount =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
 
+
+
+
+
+
 export default function VenueDetail() {
   const { id } = useParams();
   const navigate = useNavigate();

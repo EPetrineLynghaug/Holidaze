@@ -1,12 +1,8 @@
-import { useState, useEffect } from "react";
+// src/hooks/useVenueDetail.js
+import React, { useState, useEffect } from "react";
 import { getAccessToken } from "../services/tokenService";
 import { VENUE_BY_ID_URL } from "../components/constans/api";
 
-/**
- * Custom hook to fetch a venue by ID, including owner and reviews.
- * @param {string} id - Venue identifier
- * @returns {{ venue: object|null, loading: boolean, error: string|null }}
- */
 export default function useVenueDetail(id) {
   const [venue, setVenue] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -15,10 +11,10 @@ export default function useVenueDetail(id) {
   useEffect(() => {
     if (!id) return;
     const controller = new AbortController();
+    setLoading(true);
+    setError(null);
 
-    (async () => {
-      setLoading(true);
-      setError(null);
+    const fetchVenue = async () => {
       try {
         const token = getAccessToken();
         const headers = {
@@ -37,8 +33,9 @@ export default function useVenueDetail(id) {
       } finally {
         setLoading(false);
       }
-    })();
+    };
 
+    fetchVenue();
     return () => controller.abort();
   }, [id]);
 
