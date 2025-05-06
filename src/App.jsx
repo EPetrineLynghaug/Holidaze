@@ -2,7 +2,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router';
 
-import Layout from './components/constants/Layout'
+import Layout from './components/Layout'
 import Home        from './pages/Home';
 import Venues      from './pages/AllVenues';
 import VenueDetail from './pages/VenueDetail';
