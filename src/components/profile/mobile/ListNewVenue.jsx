@@ -10,7 +10,7 @@ import {
   ENV_OPTIONS,
   AUD_OPTIONS,
   FAC_OPTIONS,
-} from '../../constans/VenueFormConfig';
+} from '../../constants/VenueFormConfig';
 import BottomSheet from '../../../components/ui/mobildemodal/BottomSheet';
 
 export default function AddVenueForm({ userName, onCreated, onClose }) {

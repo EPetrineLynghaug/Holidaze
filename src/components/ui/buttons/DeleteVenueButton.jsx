@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { VENUE_BY_ID_URL } from '../../constans/api';
+import { VENUE_BY_ID_URL } from '../../constants/api';
 import { getAccessToken } from '../../../services/tokenService';
 
 export default function DeleteVenueButton({ venueId, onDeleted }) {

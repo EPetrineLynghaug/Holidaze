@@ -1,7 +1,7 @@
 // src/hooks/useVenueDetail.js
 import React, { useState, useEffect } from "react";
 import { getAccessToken } from "../services/tokenService";
-import { VENUE_BY_ID_URL } from "../components/constans/api";
+import { VENUE_BY_ID_URL } from "../components/constants/api";
 
 export default function useVenueDetail(id) {
   const [venue, setVenue] = useState(null);

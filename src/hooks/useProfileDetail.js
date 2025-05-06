@@ -4,7 +4,7 @@ import { getAccessToken } from "../services/tokenService";
 import {
   PROFILE_BY_NAME_URL,
   PROFILE_BY_NAME_VENUES_URL,
-} from "../components/constans/api";
+} from "../components/constants/api";
 
 /**
  * Custom hook to fetch user profile and their venues

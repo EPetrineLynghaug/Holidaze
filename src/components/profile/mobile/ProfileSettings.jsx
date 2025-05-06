@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Switch } from '@headlessui/react';
 import { getAccessToken } from '../../../services/tokenService';
-import { PROFILE_BY_NAME_URL } from '../../constans/api';
+import { PROFILE_BY_NAME_URL } from '../../constants/api';
 
 export default function ProfileSettings({ userName, onSave, onClose }) {
   const [isVenueManager, setIsVenueManager] = useState(false);

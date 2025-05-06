@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useParams } from 'react-router';
 import useProfileDetail from '../hooks/useProfileDetail';
 import ProfileHeader from '../components/profile/mobile/ProfileHeader';
-import { FAC_OPTIONS } from '../components/constans/VenueFormConfig';
+import { FAC_OPTIONS } from '../components/constants/VenueFormConfig';
 
 function Loading() {
   return (

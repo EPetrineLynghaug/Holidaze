@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { PROFILE_BY_NAME_VENUES_URL } from '../../constans/api';
+import { PROFILE_BY_NAME_VENUES_URL } from '../../constants/api';
 import { getAccessToken } from '../../../services/tokenService';
 import ActiveVenuesSection from './ActiveVenueCard';
 

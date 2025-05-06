@@ -4,7 +4,7 @@ import { getAccessToken } from "../services/tokenService";
 import {
   PROFILE_BY_NAME_VENUES_URL,
   PROFILE_BY_NAME_BOOKINGS_URL,
-} from "../components/constans/api";
+} from "../components/constants/api";
 
 export default function useProfileData() {
   const user = useAuthUser();
