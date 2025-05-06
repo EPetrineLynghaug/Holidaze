@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { getAccessToken } from '../../../services/tokenService';
-import { PROFILE_BY_NAME_BOOKINGS_URL } from '../../constans/api';
+import { PROFILE_BY_NAME_BOOKINGS_URL } from '../../constants/api';
 
 const aspects = ['Location', 'Price', 'Host', 'Accuracy', 'Cleanliness'];
 

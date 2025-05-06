@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import useVenueDetail from '../hooks/useVenueDetail';
 import ProfileUserLink from '../components/profile/mobile/ProfileUserSearch';
-import { BOOKINGS_URL } from '../components/constans/api';
+import { BOOKINGS_URL } from '../components/constants/api';
 import { getAccessToken } from '../services/tokenService';
 
 const NOK_TO_USD = 0.1;
@@ -68,6 +68,7 @@ export default function VenueDetail() {
   const { name, media = [], description, price, maxGuests, rating, location = {}, reviews = [], owner } = venue;
 
   return (
+    <div  className="font-figtree tracking-10p ">
     <div className="w-full bg-white">
       {/* Image */}
       {media.length > 0 && (
@@ -141,6 +142,7 @@ export default function VenueDetail() {
         >{submitting ? 'Booking…' : 'Book now'}</button>
         <span className="text-lg font-bold">{formatUSD(price * NOK_TO_USD)} <span className="text-sm font-normal">/night</span></span>
       </form>
+    </div>
     </div>
   );
 }

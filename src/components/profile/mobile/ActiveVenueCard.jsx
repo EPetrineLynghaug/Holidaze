@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 import DeleteVenueButton from '../../ui/buttons/DeleteVenueButton';
 import { getAccessToken } from '../../../services/tokenService';
 
-import { FAC_OPTIONS } from '../../constans/VenueFormConfig';
+import { FAC_OPTIONS } from '../../constants/VenueFormConfig';
 
 export default function ActiveVenuesSection({ venues, loading, error, onDelete }) {
   if (loading) return <p className="text-center text-gray-500">Loading venues...</p>;
