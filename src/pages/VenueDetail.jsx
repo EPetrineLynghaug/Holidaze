@@ -1,10 +1,13 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { VENUE_BY_ID_URL, BOOKINGS_URL } from '../components/constans/api';
 import { getAccessToken } from '../services/tokenService';
+import ProfileUserLink from '../components/profile/mobile/ProfileUserSearch';
 
 const NOK_TO_USD = 0.10;
-const formatUSD = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
+const formatUSD = (n) =>
+  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
 
 export default function VenueDetail() {
   const { id } = useParams();
@@ -21,7 +24,6 @@ export default function VenueDetail() {
   useEffect(() => {
     async function fetchData() {
       try {
-        // Fetch venue with owner and reviews
         const res = await fetch(`${VENUE_BY_ID_URL(id)}?_owner=true&_reviews=true`);
         if (!res.ok) throw new Error(res.statusText);
         const { data } = await res.json();
@@ -36,15 +38,22 @@ export default function VenueDetail() {
     fetchData();
   }, [id]);
 
-  const onScroll = (e) => setSlideIndex(Math.round(e.target.scrollLeft / e.target.clientWidth));
+  const onScroll = (e) =>
+    setSlideIndex(Math.round(e.target.scrollLeft / e.target.clientWidth));
   const goBack = () => navigate(-1);
-  const handleChange = (key) => (e) => setForm({ ...form, [key]: e.target.value });
+  const handleChange = (key) => (e) =>
+    setForm((f) => ({ ...f, [key]: e.target.value }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const { dateFrom, dateTo, guests } = form;
-    if (!dateFrom || !dateTo || guests < 1) return setFeedback({ error: 'Please fill all fields.', success: '' });
-    if (!localStorage.getItem('user')) return setFeedback({ error: 'Login required.', success: '' });
+    if (!dateFrom || !dateTo || guests < 1) {
+      return setFeedback({ error: 'Please fill all fields.', success: '' });
+    }
+    if (!localStorage.getItem('user')) {
+      return setFeedback({ error: 'Login required.', success: '' });
+    }
+
     try {
       const token = getAccessToken();
       const res = await fetch(BOOKINGS_URL, {
@@ -64,21 +73,44 @@ export default function VenueDetail() {
     }
   };
 
-  if (loading) return <p className="text-center py-10">Loading...</p>;
-  if (error) return <p className="text-center py-10 text-red-500">Error: {error}</p>;
+  if (loading)
+    return <p className="text-center py-10">Loading...</p>;
+  if (error)
+    return (
+      <p className="text-center py-10 text-red-500">
+        Error: {error}
+      </p>
+    );
   if (!venue) return null;
 
-  const { name, description, media = [], price, maxGuests, rating, created, location = {}, meta = {}, reviews = [] } = venue;
+  const {
+    name,
+    description,
+    media = [],
+    price,
+    maxGuests,
+    rating,
+    created,
+    location = {},
+    meta = {},
+    reviews = [],
+  } = venue;
 
   return (
     <div className="flex flex-col space-y-4">
       {/* Back Button */}
-      <button onClick={goBack} className="ml-4 mt-4 text-indigo-600 hover:underline text-sm">
+      <button
+        onClick={goBack}
+        className="ml-4 mt-4 text-indigo-600 hover:underline text-sm"
+      >
         &larr; Back
       </button>
 
       {/* Image Carousel */}
-      <div onScroll={onScroll} className="flex overflow-x-auto snap-x snap-mandatory h-64">
+      <div
+        onScroll={onScroll}
+        className="flex overflow-x-auto snap-x snap-mandatory h-64"
+      >
         {media.map((img, i) => (
           <img
             key={i}
@@ -88,23 +120,21 @@ export default function VenueDetail() {
           />
         ))}
       </div>
+
       {/* Dots */}
       <div className="flex justify-center">
         {media.map((_, i) => (
           <span
             key={i}
-            className={`h-2 w-2 mx-1 rounded-full ${i === slideIndex ? 'bg-indigo-600' : 'bg-gray-300'}`}
+            className={`h-2 w-2 mx-1 rounded-full ${
+              i === slideIndex ? 'bg-indigo-600' : 'bg-gray-300'
+            }`}
           />
         ))}
       </div>
 
-      {/* Owner Info */}
-      {owner && (
-        <div className="flex items-center px-4 py-2 space-x-3">
-          <img src={owner.avatar.url} alt={owner.avatar.alt} className="w-10 h-10 rounded-full" />
-          <span className="font-semibold">{owner.name}</span>
-        </div>
-      )}
+      {/* Klikkbar eier-lenke */}
+      {owner && <ProfileUserLink user={owner} />}
 
       {/* Venue Info */}
       <section className="px-4 space-y-3">
@@ -117,21 +147,31 @@ export default function VenueDetail() {
             <span className="mr-2 font-medium">Rating:</span>
             <div className="flex">
               {Array.from({ length: 5 }, (_, i) => (
-                <span key={i} className="text-yellow-500">
+                <span key={i}>
                   {i < Math.round(rating) ? '★' : '☆'}
                 </span>
               ))}
             </div>
-            <span className="ml-2 text-sm text-gray-600">({rating}/5)</span>
+            <span className="ml-2 text-sm text-gray-600">
+              ({rating}/5)
+            </span>
           </summary>
           <ul className="mt-2 space-y-2">
             {reviews.length > 0 ? (
               reviews.map((rev) => (
                 <li key={rev.id} className="border-b pb-2">
-                  <p className="font-semibold">{rev.user.name}</p>
-                  <p className="text-gray-700">{rev.comment}</p>
-                  <div className="flex mt-1 text-yellow-500">
-                    {Array.from({ length: 5 }, (_, i) => (i < rev.rating ? '★' : '☆'))}
+                  <p className="font-semibold">
+                    {rev.user.name}
+                  </p>
+                  <p className="text-gray-700">
+                    {rev.comment}
+                  </p>
+                  <div className="flex mt-1">
+                    {Array.from({ length: 5 }, (_, i) => (
+                      <span key={i}>
+                        {i < rev.rating ? '★' : '☆'}
+                      </span>
+                    ))}
                   </div>
                 </li>
               ))
@@ -143,21 +183,51 @@ export default function VenueDetail() {
 
         {/* Key details */}
         <div className="grid grid-cols-2 gap-2 text-sm">
-          <div><strong>Price:</strong> {formatUSD(price * NOK_TO_USD)}</div>
-          <div><strong>Guests:</strong> {maxGuests}</div>
-          <div><strong>Added:</strong> {new Date(created).toLocaleDateString()}</div>
-          <div><strong>Location:</strong> {location.city}, {location.country}</div>
+          <div>
+            <strong>Price:</strong> {formatUSD(price * NOK_TO_USD)}
+          </div>
+          <div>
+            <strong>Guests:</strong> {maxGuests}
+          </div>
+          <div>
+            <strong>Added:</strong>{' '}
+            {new Date(created).toLocaleDateString()}
+          </div>
+          <div>
+            <strong>Location:</strong>{' '}
+            {location.city}, {location.country}
+          </div>
         </div>
+
         <div className="flex flex-wrap mt-2 text-xs">
-          {meta.wifi && <span className="mr-2 px-2 py-1 bg-green-100 rounded">WiFi</span>}
-          {meta.parking && <span className="mr-2 px-2 py-1 bg-green-100 rounded">Parking</span>}
-          {meta.breakfast && <span className="mr-2 px-2 py-1 bg-green-100 rounded">Breakfast</span>}
-          {meta.pets && <span className="mr-2 px-2 py-1 bg-green-100 rounded">Pets</span>}
+          {meta.wifi && (
+            <span className="mr-2 px-2 py-1 bg-green-100 rounded">
+              WiFi
+            </span>
+          )}
+          {meta.parking && (
+            <span className="mr-2 px-2 py-1 bg-green-100 rounded">
+              Parking
+            </span>
+          )}
+          {meta.breakfast && (
+            <span className="mr-2 px-2 py-1 bg-green-100 rounded">
+              Breakfast
+            </span>
+          )}
+          {meta.pets && (
+            <span className="mr-2 px-2 py-1 bg-green-100 rounded">
+              Pets
+            </span>
+          )}
         </div>
       </section>
 
       {/* Booking Form */}
-      <form onSubmit={handleSubmit} className="px-4 py-3 bg-white rounded-lg shadow mx-4 mb-6">
+      <form
+        onSubmit={handleSubmit}
+        className="px-4 py-3 bg-white rounded-lg shadow mx-4 mb-6"
+      >
         <h2 className="text-lg font-medium mb-2">Book Now</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           {['dateFrom', 'dateTo'].map((key, idx) => (
@@ -184,8 +254,12 @@ export default function VenueDetail() {
             />
           </label>
         </div>
-        {feedback.error && <p className="text-red-500 mt-2">{feedback.error}</p>}
-        {feedback.success && <p className="text-green-600 mt-2">{feedback.success}</p>}
+        {feedback.error && (
+          <p className="text-red-500 mt-2">{feedback.error}</p>
+        )}
+        {feedback.success && (
+          <p className="text-green-600 mt-2">{feedback.success}</p>
+        )}
         <button
           type="submit"
           className="mt-3 w-full bg-indigo-600 text-white py-2 rounded"
