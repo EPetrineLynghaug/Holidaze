@@ -1,43 +1,54 @@
-// src/hooks/useVenueDetail.js
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { getAccessToken } from "../services/tokenService";
 import { VENUE_BY_ID_URL } from "../components/constants/api";
 
+
 export default function useVenueDetail(id) {
-  const [venue, setVenue] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [state, setState] = useState({
+    data: null,
+    loading: false,
+    error: "",
+  });
 
-  useEffect(() => {
-    if (!id) return;
-    const controller = new AbortController();
-    setLoading(true);
-    setError(null);
-
-    const fetchVenue = async () => {
+  const fetchVenue = useCallback(
+    async (signal) => {
+      if (!id) return;
+      setState((s) => ({ ...s, loading: true, error: "" }));
       try {
         const token = getAccessToken();
-        const headers = {
-          "X-Noroff-API-Key": import.meta.env.VITE_NOROFF_API_KEY,
-          ...(token && { Authorization: `Bearer ${token}` }),
-        };
         const res = await fetch(
           `${VENUE_BY_ID_URL(id)}?_owner=true&_reviews=true`,
-          { headers, signal: controller.signal }
+          {
+            signal,
+            headers: {
+              "X-Noroff-API-Key": import.meta.env.VITE_NOROFF_API_KEY,
+              ...(token && { Authorization: `Bearer ${token}` }),
+            },
+          }
         );
-        if (!res.ok) throw new Error(res.statusText);
+        if (!res.ok) throw new Error(res.statusText || "Could not load venue");
         const { data } = await res.json();
-        setVenue(data);
-      } catch (err) {
-        if (err.name !== "AbortError") setError(err.message);
-      } finally {
-        setLoading(false);
+       
+        setState({ data: data ?? {}, loading: false, error: "" });
+      } catch (e) {
+        if (e.name !== "AbortError")
+          setState({ data: null, loading: false, error: e.message });
       }
-    };
+    },
+    [id]
+  );
 
-    fetchVenue();
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchVenue(controller.signal);
     return () => controller.abort();
-  }, [id]);
+  }, [fetchVenue]);
 
-  return { venue, loading, error };
+  return {
+    ...state,
+    refetch: () => {
+      const controller = new AbortController();
+      fetchVenue(controller.signal);
+    },
+  };
 }

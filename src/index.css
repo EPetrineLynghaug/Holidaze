@@ -95,4 +95,23 @@
       transform: scale(1.1);
     }
   }
+  .rdrDayInRange {
+    border-radius: 0 !important;
+  }
+  
+  /* Runde ender på første dag */
+  .rdrDayStart .rdrDayNumber span {
+    border-top-left-radius: 0.75rem !important;
+    border-bottom-left-radius: 0.75rem !important;
+  }
+  
+  /* Runde ender på siste dag */
+  .rdrDayEnd .rdrDayNumber span {
+    border-top-right-radius: 0.75rem !important;
+    border-bottom-right-radius: 0.75rem !important;
+  }
+  
+  
+
+
   }

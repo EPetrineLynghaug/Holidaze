@@ -1,148 +1,285 @@
-import React, { useState, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router';
-import useVenueDetail from '../hooks/useVenueDetail';
-import ProfileUserLink from '../components/profile/mobile/ProfileUserSearch';
-import { BOOKINGS_URL } from '../components/constants/api';
-import { getAccessToken } from '../services/tokenService';
+import React, {
+  useState,
+  useCallback,
+  useMemo,
+  useRef,
+  useEffect,
+} from "react";
+import { useParams, useNavigate } from "react-router";
+import useVenueDetail from "../hooks/useVenueDetail";
+import ProfileUserLink from "../components/profile/mobile/ProfileUserSearch";
+import CalendarPicker from "../components/ui/calender/CalendarPicker";
+import { BOOKINGS_URL } from "../components/constants/api";
+import { getAccessToken } from "../services/tokenService";
+import RatingStars from "../components/ui/RatingStars";
 
+
+// NOK → USD uten desimaler
 const NOK_TO_USD = 0.1;
-const formatUSD = amount =>
-  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+const usd = (n) =>
+  new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(n * NOK_TO_USD);
 
-
-
-
-
+const VenueSkeleton = () => (
+  <div className="animate-pulse select-none">
+    <div className="w-full aspect-video bg-gray-200 rounded-lg mb-4" />
+    <div className="px-4 pt-4 space-y-3">
+      <div className="h-4 bg-gray-200 rounded w-3/4" />
+      <div className="h-3 bg-gray-200 rounded w-1/2" />
+      <div className="h-3 bg-gray-200 rounded w-full" />
+      <div className="h-3 bg-gray-200 rounded w-5/6" />
+    </div>
+  </div>
+);
 
 export default function VenueDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { venue, loading, error } = useVenueDetail(id);
+  const { data: venue, loading, error } = useVenueDetail(id);
 
-  const [slideIndex, setSlideIndex] = useState(0);
-  const [form, setForm] = useState({ dateFrom: '', dateTo: '', guests: 1 });
-  const [feedback, setFeedback] = useState({ error: '', success: '' });
+  const [slide, setSlide] = useState(0);
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [selection, setSelection] = useState({
+    startDate: new Date(),
+    endDate: new Date(),
+    key: "selection",
+  });
   const [submitting, setSubmitting] = useState(false);
+  const [msg, setMsg] = useState({ ok: "", err: "" });
+  const ref = useRef(null);
 
-  const goBack = useCallback(() => navigate(-1), [navigate]);
-  const nextImage = useCallback(() => {
-    if (!venue?.media) return;
-    setSlideIndex(i => (i + 1) % venue.media.length);
+  // Parsed numeric rating
+  const ratingNum = useMemo(() => {
+    const r = parseFloat(venue?.rating);
+    return isNaN(r) ? 0 : r;
   }, [venue]);
 
-  const handleSubmit = useCallback(async e => {
-    e.preventDefault();
-    const { dateFrom, dateTo, guests } = form;
-    if (!dateFrom || !dateTo || guests < 1) {
-      return setFeedback({ error: 'Fill all fields', success: '' });
+  // Bildenavigasjon
+  const nextImg = useCallback(() => {
+    if (!venue?.media?.length) return;
+    setSlide((i) => (i + 1) % venue.media.length);
+  }, [venue]);
+  const prevImg = useCallback(() => {
+    if (!venue?.media?.length) return;
+    setSlide((i) => (i - 1 + venue.media.length) % venue.media.length);
+  }, [venue]);
+
+  // Deaktiver bookede datoer
+  const disabledDates = useMemo(() => {
+    if (!venue?.bookings) return [];
+    return venue.bookings.flatMap(({ dateFrom, dateTo }) => {
+      const arr = [];
+      let d = new Date(dateFrom);
+      const end = new Date(dateTo);
+      while (d <= end) {
+        arr.push(new Date(d));
+        d.setDate(d.getDate() + 1);
+      }
+      return arr;
+    });
+  }, [venue]);
+
+  // Snake-range for bookings
+  const mergedBookingRange = useMemo(() => {
+    if (!venue?.bookings?.length) return null;
+    const ranges = venue.bookings.map(({ dateFrom, dateTo }) => ({
+      from: new Date(dateFrom),
+      to: new Date(dateTo),
+    }));
+    const start = ranges.reduce((min, r) => (r.from < min ? r.from : min), ranges[0].from);
+    const end = ranges.reduce((max, r) => (r.to > max ? r.to : max), ranges[0].to);
+    return { startDate: start, endDate: end, key: "booked-snake" };
+  }, [venue]);
+
+  // Antall netter
+  const nights = useMemo(() => {
+    const diffMs = selection.endDate - selection.startDate;
+    const diffDays = diffMs / (1000 * 60 * 60 * 24);
+    return diffDays > 0 ? Math.round(diffDays) : 1;
+  }, [selection]);
+
+  // Totalpris
+  const totalPrice = venue?.price ? venue.price * nights : 0;
+  const priceString = usd(totalPrice);
+
+  // Handle booking
+  const handleBook = async () => {
+    const from = selection.startDate.toISOString().slice(0, 10);
+    const to = selection.endDate.toISOString().slice(0, 10);
+    if (!localStorage.getItem("user")) {
+      setMsg({ err: "Login required", ok: "" });
+      return;
     }
-    if (!localStorage.getItem('user')) {
-      return setFeedback({ error: 'Login required', success: '' });
-    }
-    setSubmitting(true);
     try {
+      setSubmitting(true);
       const token = getAccessToken();
       const res = await fetch(BOOKINGS_URL, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'X-Noroff-API-Key': import.meta.env.VITE_NOROFF_API_KEY,
-          ...(token && { Authorization: `Bearer ${token}` })
+          "Content-Type": "application/json",
+          "X-Noroff-API-Key": import.meta.env.VITE_NOROFF_API_KEY,
+          ...(token && { Authorization: `Bearer ${token}` }),
         },
-        body: JSON.stringify({ venueId: id, dateFrom, dateTo, guests })
+        body: JSON.stringify({
+          venueId: id,
+          dateFrom: from,
+          dateTo: to,
+          guests: 1,
+        }),
       });
       if (!res.ok) throw new Error(await res.text());
-      setFeedback({ success: 'Booked!', error: '' });
-      setTimeout(() => navigate('/profile'), 1000);
-    } catch (err) {
-      setFeedback({ error: err.message, success: '' });
+      setMsg({ ok: "Booked successfully!", err: "" });
+      setTimeout(() => navigate("/profile"), 1200);
+    } catch (e) {
+      setMsg({ err: e.message, ok: "" });
     } finally {
       setSubmitting(false);
     }
-  }, [form, id, navigate]);
+  };
 
-  if (loading) return <p className="text-center py-10">Loading…</p>;
-  if (error) return <p className="text-center py-10 text-red-500">Error: {error}</p>;
+  // Calendar handlers
+  const handleSelectRange = (start, end) =>
+    setSelection({ startDate: start, endDate: end, key: "selection" });
+  const handleCloseCalendar = () => setShowCalendar(false);
+
+  // Close calendar on outside click
+  useEffect(() => {
+    const onClick = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setShowCalendar(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, []);
+
+  if (loading) return <VenueSkeleton />;
+  if (error) return <p className="text-center py-10 text-red-500">{error}</p>;
   if (!venue) return null;
 
-  const { name, media = [], description, price, maxGuests, rating, location = {}, reviews = [], owner } = venue;
+  const {
+    name,
+    media = [],
+    description,
+    maxGuests,
+    location = {},
+    reviews = [],
+    owner,
+  } = venue;
 
   return (
-    <div  className="font-figtree tracking-10p ">
-    <div className="w-full bg-white">
-      {/* Image */}
-      {media.length > 0 && (
-        <div className="relative w-full h-56">
+    <div ref={ref} className="relative w-full min-h-screen bg-white pb-32">
+      {/* Slideshow */}
+      {media.length ? (
+        <div className="relative w-full aspect-video">
           <img
-            src={media[slideIndex].url}
-            alt={media[slideIndex].alt || name}
+            src={media[slide].url}
+            alt={media[slide].alt || name}
             className="w-full h-full object-cover"
-            onClick={nextImage}
           />
           <button
-            onClick={goBack}
-            className="absolute top-3 left-3 p-2 bg-white bg-opacity-80 rounded-full shadow"
-          >←</button>
-          <div
-            className="absolute bottom-3 left-3 text-white text-xs px-3 py-1 rounded-full"
-            style={{ backgroundColor: 'rgba(74,74,74,0.92)' }}
-          >{slideIndex + 1}/{media.length}</div>
+            onClick={() => navigate(-1)}
+            className="absolute top-4 left-4 bg-white/90 rounded-full p-2 shadow"
+          >
+            ←
+          </button>
+        
+          <span className="absolute bottom-4 right-4 text-xs bg-black/70 text-white px-2 py-0.5 rounded-full">
+            {slide + 1}/{media.length}
+          </span>
         </div>
+      ) : (
+        <div className="w-full aspect-video bg-gray-100" />
       )}
 
-      {/* Title */}
-      <h2 className="px-4 pt-3 text-base font-medium truncate">{name}</h2>
-
-      {/* Location */}
-      <p className="px-4 mt-1 text-gray-600 text-sm">{location.city}, {location.country}</p>
-
-      {/* Rating */}
-      <div className="px-4 mt-2 flex items-center text-gray-600 text-sm space-x-1">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <span key={i} className="material-symbols-outlined text-sm">
-            {i < Math.round(rating) ? 'star' : 'star_border'}
-          </span>
-        ))}
-        <span className="font-medium text-sm ml-1">{rating.toFixed(1)}</span>
-        <a href="#reviews" className="text-indigo-600 text-sm ml-2">({reviews.length})</a>
-      </div>
-
-      {/* Owner */}
-      <div className="px-4 mt-3">
-        <ProfileUserLink user={owner} size="xs" className="text-sm opacity-80 hover:opacity-100" />
-      </div>
-
-      {/* Features */}
-      <div className="px-4 mt-4 flex justify-between text-gray-600 text-sm">
-        {[
-          ['house','House'],
-          ['bed', `${maxGuests} beds`],
-          ['bathtub','1 bath'],
-          ['garage','1 garage']
-        ].map(([icon,label]) => (
-          <div key={icon} className="flex flex-col items-center">
-            <span className="material-symbols-outlined text-base">{icon}</span>
-            <span className="text-xs">{label}</span>
+      {/* Venue-detaljer */}
+      <section className="px-4 pt-6 space-y-4">
+        {/* Tittel + kalender-trigger */}
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-semibold truncate">{name}</h1>
+          <div
+            onClick={() => setShowCalendar(true)}
+            className="group flex items-center cursor-pointer select-none"
+          >
+            <span className="material-symbols-outlined text-xl text-gray-800 group-hover:text-[#3E35A2]">
+              calendar_month
+            </span>
+            <span className="opacity-0 group-hover:opacity-100 transition-opacity material-symbols-outlined text-sm text-[#3E35A2]">
+              chevron_right
+            </span>
           </div>
-        ))}
-      </div>
+        </div>
 
-      {/* Description */}
-      <p className="px-4 mt-4 text-gray-700 text-sm leading-relaxed">{description}</p>
+        {/* Lokasjon */}
+        <p className="text-sm text-gray-600">
+          {location.city}, {location.country}
+        </p>
 
-      {/* Booking */}
-      <form
-        onSubmit={handleSubmit}
-        className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 p-4 flex items-center justify-between"
+        {/* Rating + eier */}
+        <div className="flex flex-col items-start space-y-1">
+        <RatingStars
+  rating={ratingNum}
+  reviewCount={reviews.length}
+ 
+/>
+          <ProfileUserLink user={owner} size="xs" className="text-xs" />
+        </div>
+
+        {/* Stat-ikoner */}
+        <ul className="flex justify-between text-gray-600 text-sm px-1 pt-2">
+          {[
+            ["bed", `${maxGuests} guests`],
+            ["bathtub", "1 bath"],
+            ["garage", "Parking"],
+          ].map(([icon, label]) => (
+            <li key={icon} className="flex flex-col items-center gap-1">
+              <span className="material-symbols-outlined text-lg">{icon}</span>
+              <span>{label}</span>
+            </li>
+          ))}
+        </ul>
+
+        {/* Beskrivelse */}
+        <p className="text-base leading-relaxed whitespace-pre-wrap pt-2">
+          {description}
+        </p>
+      </section>
+
+      {/* Hoved-Book-knapp */}
+      <button
+        onClick={handleBook}
+        disabled={submitting}
+        className="fixed bottom-4 inset-x-4 bg-[#3E35A2] text-white py-3 rounded-full text-lg font-bold shadow-lg hover:bg-[#5939aa] transition disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        <button
-          type="submit"
-          disabled={submitting}
-          className="bg-indigo-600 text-white py-2 px-6 rounded-lg disabled:opacity-50 text-sm"
-        >{submitting ? 'Booking…' : 'Book now'}</button>
-        <span className="text-lg font-bold">{formatUSD(price * NOK_TO_USD)} <span className="text-sm font-normal">/night</span></span>
-      </form>
-    </div>
+        {submitting ? "Booking…" : `Book · ${priceString}`}
+      </button>
+
+      {/* Kalender-modal */}
+      {showCalendar && (
+        <CalendarPicker
+          selection={selection}
+          onSelectRange={handleSelectRange}
+          disabledDates={disabledDates}
+          mergedBookingRange={mergedBookingRange}
+          onClose={handleCloseCalendar}
+          onConfirm={handleBook}
+          pricePerNight={price}
+        />
+      )}
+
+      {/* Meldinger */}
+      {msg.err && (
+        <p className="fixed bottom-20 inset-x-0 text-center text-red-500 text-xs">
+          {msg.err}
+        </p>
+      )}
+      {msg.ok && (
+        <p className="fixed bottom-20 inset-x-0 text-center text-green-600 text-xs">
+          {msg.ok}
+        </p>
+      )}
     </div>
   );
 }
+
