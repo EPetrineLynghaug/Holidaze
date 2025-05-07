@@ -22,4 +22,6 @@ export const theme = {
     },
   },
 };
-export const plugins = [require("tailwindcss-filters")];
+export const plugins = [
+  require("tailwindcss-filters, aspectRatio, lineClamp]"),
+];
