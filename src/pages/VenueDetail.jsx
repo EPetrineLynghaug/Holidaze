@@ -16,6 +16,8 @@ import VenueSkeleton from "../components/venue/venuedetail/VenueSkeleton";
 import StatsIcons from "../components/venue/venuedetail/StatsIcons";
 import BookingBar from "../components/venue/venuedetail/BookingBar";
 import useBookingRanges from "../hooks/useBookingRanges";
+import ImageCarousel from "../components/venue/venuedetail/Carousel";
+
 
 
 // NOK → USD uten desimaler
@@ -28,11 +30,13 @@ const usd = (n) =>
   }).format(n * NOK_TO_USD);
 
 export default function VenueDetail() {
+
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: venue, loading, error } = useVenueDetail(id);
 
   const [slide, setSlide] = useState(0);
+ 
   const [showCalendar, setShowCalendar] = useState(false);
   const [selection, setSelection] = useState({
     startDate: new Date(),
@@ -49,16 +53,7 @@ export default function VenueDetail() {
     return isNaN(r) ? 0 : r;
   }, [venue]);
 
-  // Image slider
-  const nextImg = useCallback(() => {
-    if (!venue?.media?.length) return;
-    setSlide((i) => (i + 1) % venue.media.length);
-  }, [venue]);
-  const prevImg = useCallback(() => {
-    if (!venue?.media?.length) return;
-    setSlide((i) => (i - 1 + venue.media.length) % venue.media.length);
-  }, [venue]);
-
+  
   // Hent disabledDates og bookingRanges fra hook
   const { disabledDates, bookingRanges } = useBookingRanges(venue?.bookings || []);
 
@@ -138,37 +133,15 @@ export default function VenueDetail() {
   } = venue;
 
   return (
-    <div ref={ref} className="relative w-full min-h-screen bg-white pb-32">
+    <div className="relative w-full min-h-screen bg-white pb-32">
       {/* Slideshow */}
-      {media.length ? (
-        <div
-          className="relative w-full aspect-video"
-          onClick={(e) => {
-            const { left, width } = e.currentTarget.getBoundingClientRect();
-            const x = e.clientX - left;
-            x < width / 2 ? prevImg() : nextImg();
-          }}
-        >
-          <img
-            src={media[slide].url}
-            alt={media[slide].alt || name}
-            className="w-full h-full object-cover"
-          />
-          <button
-            onClick={() => navigate(-1)}
-            className="absolute top-4 left-4 w-10 h-10 flex items-center justify-center bg-white border border-gray-300 rounded-full shadow-md hover:bg-gray-50 transition"
-          >
-            <span className="material-symbols-outlined text-sm text-gray-800">
-              arrow_back
-            </span>
-          </button>
-          <span className="absolute bottom-4 left-4 text-xs bg-black/70 text-white px-2 py-0.5 rounded-full">
-            {slide + 1}/{media.length}
-          </span>
-        </div>
-      ) : (
-        <div className="w-full aspect-video bg-gray-100" />
-      )}
+      <ImageCarousel
+  media={media}
+  name={name}
+  slide={slide}
+  setSlide={setSlide}
+/>
+
 
       {/* Details Section */}
       <section className="px-4 pt-6 space-y-4">
