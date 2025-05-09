@@ -1,26 +1,20 @@
-import React, {
-  useState,
-  useCallback,
-  useMemo,
-  useRef,
-  useEffect,
-} from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
+
 import useVenueDetail from "../hooks/useVenueDetail";
-import CalendarModal from "../components/venue/venuedetail/CalendarModal";
+import CalendarModal   from "../components/venue/venuedetail/CalendarModal";
 import { BOOKINGS_URL } from "../components/constants/api";
 import { getAccessToken } from "../services/tokenService";
-import VenueSkeleton from "../components/venue/venuedetail/VenueSkeleton";
-import BookingBar from "../components/venue/venuedetail/BookingBar";
+import VenueSkeleton   from "../components/venue/venuedetail/VenueSkeleton";
+import BookingBar      from "../components/venue/venuedetail/BookingBar";
 import useBookingRanges from "../hooks/useBookingRanges";
-import ImageCarousel from "../components/venue/venuedetail/Carousel";
+import ImageCarousel   from "../components/venue/venuedetail/Carousel";
+import VenueInfo       from "../components/venue/venuedetail/VenueInfo";
+import BookingBottomSheet from "../components/venue/venuedetail/Booking";   
 
 
-import VenueInfo from "../components/venue/venuedetail/VenueInfo";
-
-// NOK → USD uten desimaler
 const NOK_TO_USD = 0.1;
-const usd = (n) =>
+const usd = n =>
   new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
@@ -32,17 +26,22 @@ export default function VenueDetail() {
   const navigate = useNavigate();
   const { data: venue, loading, error } = useVenueDetail(id);
 
-  const [slide, setSlide] = useState(0);
+  /* UI-state */
+  const [slide,        setSlide]        = useState(0);      
   const [showCalendar, setShowCalendar] = useState(false);
+  const [showSheet,    setShowSheet]    = useState(false);
+
+  /* Booking-state */
   const [selection, setSelection] = useState({
     startDate: new Date(),
-    endDate: new Date(),
+    endDate:   new Date(),
     key: "selection",
   });
   const [submitting, setSubmitting] = useState(false);
   const [msg, setMsg] = useState({ ok: "", err: "" });
   const ref = useRef(null);
 
+  /* Kalkulasjoner */
   const ratingNum = useMemo(() => {
     const r = parseFloat(venue?.rating);
     return isNaN(r) ? 0 : r;
@@ -52,23 +51,25 @@ export default function VenueDetail() {
     venue?.bookings || []
   );
 
-
   const nights = useMemo(() => {
     const diffMs = selection.endDate - selection.startDate;
     const diffDays = diffMs / (1000 * 60 * 60 * 24);
     return diffDays > 0 ? Math.round(diffDays) : 1;
   }, [selection]);
 
-  const totalPrice = venue?.price ? venue.price * nights : 0;
+  const totalPrice  = venue?.price ? venue.price * nights : 0;
   const priceString = usd(totalPrice);
 
-  const handleBook = async () => {
+  /* -------- send til API -------- */
+  const handleBook = async (formData = {}) => {   
     const from = selection.startDate.toISOString().slice(0, 10);
-    const to = selection.endDate.toISOString().slice(0, 10);
+    const to   = selection.endDate.toISOString().slice(0, 10);
+
     if (!localStorage.getItem("user")) {
       setMsg({ err: "Login required", ok: "" });
       return;
     }
+
     try {
       setSubmitting(true);
       const token = getAccessToken();
@@ -82,8 +83,13 @@ export default function VenueDetail() {
         body: JSON.stringify({
           venueId: id,
           dateFrom: from,
-          dateTo: to,
-          guests: 1,
+          dateTo:   to,
+          guests: formData.guests || 1,
+          firstName: formData.firstName,
+          lastName:  formData.lastName,
+          email:     formData.email,
+          phone:     formData.phone,
+          paymentMethod: formData.paymentMethod,
         }),
       });
       if (!res.ok) throw new Error(await res.text());
@@ -96,14 +102,9 @@ export default function VenueDetail() {
     }
   };
 
-  const handleSelectRange = (start, end) =>
-    setSelection({ startDate: start, endDate: end, key: "selection" });
 
-  const handleCloseCalendar = () => setShowCalendar(false);
-
-  // Lukk kalender hvis klikk utenfor
   useEffect(() => {
-    const onClick = (e) => {
+    const onClick = e => {
       if (ref.current && !ref.current.contains(e.target)) {
         setShowCalendar(false);
       }
@@ -112,8 +113,9 @@ export default function VenueDetail() {
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
 
+  /* ---- rendering ---- */
   if (loading) return <VenueSkeleton />;
-  if (error) return <p className="text-center py-10 text-red-500">{error}</p>;
+  if (error)  return <p className="text-center py-10 text-red-500">{error}</p>;
   if (!venue) return null;
 
   const {
@@ -136,7 +138,7 @@ export default function VenueDetail() {
         setSlide={setSlide}
       />
 
-      {/* Detaljer */}
+      {/* Info */}
       <VenueInfo
         name={name}
         location={location}
@@ -148,24 +150,40 @@ export default function VenueDetail() {
         onOpenCalendar={() => setShowCalendar(true)}
       />
 
-      {/* Booking-bar */}
+      {/* BookingBar åpner wizard */}
       <BookingBar
         priceString={priceString}
         nights={nights}
-        onBook={handleBook}
-        submitting={submitting}
+        onBook={() => setShowSheet(true)}
+        submitting={false}
       />
 
       {/* Kalender */}
       {showCalendar && (
-        <CalendarModal
-          selection={selection}
-          onSelectRange={handleSelectRange}
-          disabledDates={disabledDates}
-          bookingRanges={bookingRanges}
-          onClose={handleCloseCalendar}
-          onConfirm={handleBook}
-          pricePerNight={venue.price}
+        <div ref={ref}>
+          <CalendarModal
+            selection={selection}
+            onSelectRange={(s, e) =>
+              setSelection({ startDate: s, endDate: e, key: "selection" })
+            }
+            disabledDates={disabledDates}
+            bookingRanges={bookingRanges}
+            onClose={() => setShowCalendar(false)}
+            onConfirm={() => setShowCalendar(false)}
+            pricePerNight={venue.price}
+          />
+        </div>
+      )}
+
+      {/* Wizard */}
+      {showSheet && (
+        <BookingBottomSheet
+          startDate={selection.startDate}
+          endDate={selection.endDate}
+          nights={nights}
+          priceString={priceString}
+          onClose={() => setShowSheet(false)}
+          onComplete={handleBook}
         />
       )}
 
