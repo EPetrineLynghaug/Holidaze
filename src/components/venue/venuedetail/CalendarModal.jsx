@@ -1,10 +1,12 @@
+
+
 import React, { useRef, useEffect, useMemo } from "react";
 import BottomSheet from "../../ui/mobildemodal/BottomSheet";
 import { DateRange } from "react-date-range";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 
-// En enkel NOK → USD-konverterer
+
 const NOK_TO_USD = 0.1;
 const usd = (n) =>
   new Intl.NumberFormat("en-US", {
@@ -12,20 +14,10 @@ const usd = (n) =>
     currency: "USD",
   }).format(n * NOK_TO_USD);
 
-/**
- * Props:
- *  - selection: { startDate, endDate, key }
- *  - onSelectRange(start, end)
- *  - disabledDates: Date[]
- *  - bookingRanges: [{ startDate, endDate, key }]
- *  - onClose(), onConfirm()
- *  - pricePerNight: number
- */
 export default function CalendarModal({
   selection,
   onSelectRange,
   disabledDates = [],
-  bookingRanges = [],
   onClose,
   onConfirm,
   pricePerNight,
@@ -64,21 +56,23 @@ export default function CalendarModal({
         "
       >
         <DateRange
-          // Viser både brukerens utvalg og allerede bookede ranges
-          ranges={[selection, ...bookingRanges]}
+          // Kun ditt eget utvalg som markeres
+          ranges={[selection]}
           onChange={(item) =>
             onSelectRange(item.selection.startDate, item.selection.endDate)
           }
+          // Disable alle bookede datoer som grå bokser
           disabledDates={disabledDates}
           months={1}
           direction="horizontal"
           showMonthAndYearPickers={false}
           showPreview={false}
           showDateDisplay={false}
-          rangeColors={["#3E35A2", "#3E35A2"]}
+          rangeColors={["#3E35A2"]}
           minDate={new Date()}
         />
       </div>
+
       <div className="fixed bottom-0 inset-x-0 bg-gradient-to-r from-[#3E35A2] to-[#5939aa] px-6 py-4">
         <button
           onClick={() => {
