@@ -13,13 +13,7 @@ import { BOOKINGS_URL } from "../components/constants/api";
 import { getAccessToken } from "../services/tokenService";
 import RatingStars from "../components/ui/RatingStars";
 import VenueSkeleton from "../components/venue/venuedetail/VenueSkeleton";
-
-// Følgende brukes for mobil-visning av stats
-const STAT_OPTIONS = [
-  { key: 'bed', icon: 'bed', labelKey: 'maxGuests' },
-  { key: 'bathtub', icon: 'bathtub', label: '1 bath' },
-  { key: 'garage', icon: 'garage', label: 'Parking' },
-];
+import StatsIcons from "../components/venue/venuedetail/StatsIcons";
 
 // NOK → USD uten desimaler
 const NOK_TO_USD = 0.1;
@@ -29,20 +23,6 @@ const usd = (n) =>
     currency: "USD",
     maximumFractionDigits: 0,
   }).format(n * NOK_TO_USD);
-
-// Komponent for gjest-/bad-/parkering-statistikk
-function StatsIcons({ maxGuests }) {
-  return (
-    <ul className="flex justify-between text-gray-600 text-sm px-1 pt-2">
-      {STAT_OPTIONS.map(({ key, icon, label, labelKey }) => (
-        <li key={key} className="flex flex-col items-center gap-1">
-          <span className="material-symbols-outlined text-lg">{icon}</span>
-          <span>{labelKey ? `${maxGuests} guests` : label}</span>
-        </li>
-      ))}
-    </ul>
-  );
-}
 
 export default function VenueDetail() {
   const { id } = useParams();
@@ -149,12 +129,10 @@ export default function VenueDetail() {
     }
   };
 
-  // Calendar handlers
   const handleSelectRange = (start, end) =>
     setSelection({ startDate: start, endDate: end, key: "selection" });
   const handleCloseCalendar = () => setShowCalendar(false);
 
-  // Close calendar on outside click
   useEffect(() => {
     const onClick = (e) => {
       if (ref.current && !ref.current.contains(e.target)) setShowCalendar(false);
