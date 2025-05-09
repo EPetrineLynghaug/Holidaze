@@ -13,7 +13,6 @@ import { BOOKINGS_URL } from "../components/constants/api";
 import { getAccessToken } from "../services/tokenService";
 import RatingStars from "../components/ui/RatingStars";
 
-
 // NOK → USD uten desimaler
 const NOK_TO_USD = 0.1;
 const usd = (n) =>
@@ -57,7 +56,7 @@ export default function VenueDetail() {
     return isNaN(r) ? 0 : r;
   }, [venue]);
 
-  // Bildenavigasjon
+  // Bildenavigasjon for mobil: klikk venstre/høyre del av bildet
   const nextImg = useCallback(() => {
     if (!venue?.media?.length) return;
     setSlide((i) => (i + 1) % venue.media.length);
@@ -170,9 +169,16 @@ export default function VenueDetail() {
 
   return (
     <div ref={ref} className="relative w-full min-h-screen bg-white pb-32">
-      {/* Slideshow */}
+      {/* Slideshow: klikk venstre/høyre for å navigere */}
       {media.length ? (
-        <div className="relative w-full aspect-video">
+        <div
+          className="relative w-full aspect-video"
+          onClick={(e) => {
+            const { left, width } = e.currentTarget.getBoundingClientRect();
+            const x = e.clientX - left;
+            if (x < width / 2) prevImg(); else nextImg();
+          }}
+        >
           <img
             src={media[slide].url}
             alt={media[slide].alt || name}
@@ -184,7 +190,6 @@ export default function VenueDetail() {
           >
             ←
           </button>
-        
           <span className="absolute bottom-4 right-4 text-xs bg-black/70 text-white px-2 py-0.5 rounded-full">
             {slide + 1}/{media.length}
           </span>
@@ -195,7 +200,6 @@ export default function VenueDetail() {
 
       {/* Venue-detaljer */}
       <section className="px-4 pt-6 space-y-4">
-        {/* Tittel + kalender-trigger */}
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-semibold truncate">{name}</h1>
           <div
@@ -211,75 +215,78 @@ export default function VenueDetail() {
           </div>
         </div>
 
-        {/* Lokasjon */}
-        <p className="text-sm text-gray-600">
-          {location.city}, {location.country}
-        </p>
+        <p className="text-sm text-gray-600">{location.city}, {location.country}</p>
 
-        {/* Rating + eier */}
         <div className="flex flex-col items-start space-y-1">
-        <RatingStars
-  rating={ratingNum}
-  reviewCount={reviews.length}
- 
-/>
+          <RatingStars rating={ratingNum} reviewCount={reviews.length} />
           <ProfileUserLink user={owner} size="xs" className="text-xs" />
         </div>
 
-        {/* Stat-ikoner */}
         <ul className="flex justify-between text-gray-600 text-sm px-1 pt-2">
           {[
             ["bed", `${maxGuests} guests`],
             ["bathtub", "1 bath"],
             ["garage", "Parking"],
           ].map(([icon, label]) => (
-            <li key={icon} className="flex flex-col items-center gap-1">
+            <li key={icon} className="flex flex-col items-center gap-1"> 
               <span className="material-symbols-outlined text-lg">{icon}</span>
               <span>{label}</span>
             </li>
           ))}
         </ul>
 
-        {/* Beskrivelse */}
-        <p className="text-base leading-relaxed whitespace-pre-wrap pt-2">
-          {description}
-        </p>
+        <p className="text-base leading-relaxed whitespace-pre-wrap pt-2">{description}</p>
       </section>
 
       {/* Hoved-Book-knapp */}
-      <button
-        onClick={handleBook}
-        disabled={submitting}
-        className="fixed bottom-4 inset-x-4 bg-[#3E35A2] text-white py-3 rounded-full text-lg font-bold shadow-lg hover:bg-[#5939aa] transition disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        {submitting ? "Booking…" : `Book · ${priceString}`}
-      </button>
+      <div className="fixed bottom-0 inset-x-0 w-full bg-white p-4 shadow-lg flex items-center border-t border-[var(--color-border-soft)]">
+        <button
+          onClick={handleBook}
+          disabled={submitting}
+          className="
+            bg-[#3E35A2]
+            text-white
+            font-medium
+            text-sm
+            px-4
+            py-2
+            rounded-md
+            hover:bg-[#5939aa]
+            transition
+            disabled:opacity-50
+            disabled:cursor-not-allowed
+          "
+        >
+          {submitting ? "Booking…" : "Book now"}
+        </button>
+        <div className="ml-auto flex items-baseline space-x-1">
+          <span className="text-lg font-bold">{priceString}</span>
+          <span className="text-sm text-gray-500">{nights > 1 ? " total" : " /night"}</span>
+        </div>
+      </div>
 
       {/* Kalender-modal */}
       {showCalendar && (
-        <CalendarPicker
-          selection={selection}
-          onSelectRange={handleSelectRange}
-          disabledDates={disabledDates}
-          mergedBookingRange={mergedBookingRange}
-          onClose={handleCloseCalendar}
-          onConfirm={handleBook}
-          pricePerNight={price}
-        />
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/20"
+          onClick={handleCloseCalendar}
+        >
+          <div onClick={(e) => e.stopPropagation()}>
+            <CalendarPicker
+              selection={selection}
+              onSelectRange={handleSelectRange}
+              disabledDates={disabledDates}
+              mergedBookingRange={mergedBookingRange}
+              onClose={handleCloseCalendar}
+              onConfirm={handleBook}
+              pricePerNight={venue.price}
+            />
+          </div>
+        </div>
       )}
 
-      {/* Meldinger */}
-      {msg.err && (
-        <p className="fixed bottom-20 inset-x-0 text-center text-red-500 text-xs">
-          {msg.err}
-        </p>
-      )}
-      {msg.ok && (
-        <p className="fixed bottom-20 inset-x-0 text-center text-green-600 text-xs">
-          {msg.ok}
-        </p>
-      )}
+      {msg.err && <p className="fixed bottom-20 inset-x-0 text-center text-red-500 text-xs">{msg.err}</p>}
+      {msg.ok && <p className="fixed bottom-20 inset-x-0 text-center text-green-600 text-xs">{msg.ok}</p>}
     </div>
   );
 }
-
