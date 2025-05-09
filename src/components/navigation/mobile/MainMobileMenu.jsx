@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from 'react-router';
 import useAuthUser from '../../../hooks/useAuthUser';
 import { logout as logoutService } from '../../../services/authService';
 import Logo from '../../ui/Logo';
+import VenueSearchSlide from '../../venue/allvenues/VenueSearchSlide';
 
 // Reusable chevron icon
 function Chevron() {
@@ -83,17 +84,20 @@ export default function MainMobileMenu() {
       {/* Topbar */}
       <header className="static bg-white shadow-md px-4 py-3 flex justify-between" aria-label="Main navigation">
         <Logo className="h-10 mb-1" />
-        <button
-          ref={openButtonRef}
-          onClick={() => setOpen(true)}
-          aria-label="Open menu"
-          aria-expanded={open}
-          className="rounded-full p-2 text-black transition-all duration-200 transform hover:scale-110 active:scale-95 hover:rotate-3"
-        >
-          <span className="material-symbols-outlined text-3xl">menu</span>
-        </button>
+        <div className="flex items-center gap-2">
+    <VenueSearchSlide />      {/*  ← søkeikonet  */}
+    <button
+      ref={openButtonRef}
+      onClick={() => setOpen(true)}
+      aria-label="Open menu"
+      aria-expanded={open}
+      className="rounded-full p-2 text-black transition hover:scale-110 active:scale-95 hover:rotate-3"
+    >
+      <span className="material-symbols-outlined text-3xl">menu</span>
+    </button>
+  </div>
       </header>
-
+    
       {/* Slide-in Menu */}
       <aside
         ref={menuRef}
