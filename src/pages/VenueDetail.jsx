@@ -14,6 +14,7 @@ import { getAccessToken } from "../services/tokenService";
 import RatingStars from "../components/ui/RatingStars";
 import VenueSkeleton from "../components/venue/venuedetail/VenueSkeleton";
 import StatsIcons from "../components/venue/venuedetail/StatsIcons";
+import BookingBar from "../components/venue/venuedetail/BookingBar";
 
 // NOK → USD uten desimaler
 const NOK_TO_USD = 0.1;
@@ -46,7 +47,7 @@ export default function VenueDetail() {
     return isNaN(r) ? 0 : r;
   }, [venue]);
 
-  // Bildenavigasjon
+  // Image slider logic
   const nextImg = useCallback(() => {
     if (!venue?.media?.length) return;
     setSlide((i) => (i + 1) % venue.media.length);
@@ -56,7 +57,7 @@ export default function VenueDetail() {
     setSlide((i) => (i - 1 + venue.media.length) % venue.media.length);
   }, [venue]);
 
-  // Deaktiver bookede datoer
+  // Disable booked dates
   const disabledDates = useMemo(() => {
     if (!venue?.bookings) return [];
     return venue.bookings.flatMap(({ dateFrom, dateTo }) => {
@@ -71,30 +72,32 @@ export default function VenueDetail() {
     });
   }, [venue]);
 
-  // Snake-range for bookings
+  // Merged booking range for snake display
   const mergedBookingRange = useMemo(() => {
     if (!venue?.bookings?.length) return null;
     const ranges = venue.bookings.map(({ dateFrom, dateTo }) => ({
-      from: new Date(dateFrom),
-      to: new Date(dateTo),
+      startDate: new Date(dateFrom),
+      endDate: new Date(dateTo),
     }));
-    const start = ranges.reduce((min, r) => (r.from < min ? r.from : min), ranges[0].from);
-    const end = ranges.reduce((max, r) => (r.to > max ? r.to : max), ranges[0].to);
-    return { startDate: start, endDate: end, key: "booked-snake" };
+    return {
+      startDate: ranges[0].startDate,
+      endDate: ranges[ranges.length - 1].endDate,
+      key: "booked-snake",
+    };
   }, [venue]);
 
-  // Antall netter
+  // Calculate nights
   const nights = useMemo(() => {
     const diffMs = selection.endDate - selection.startDate;
     const diffDays = diffMs / (1000 * 60 * 60 * 24);
     return diffDays > 0 ? Math.round(diffDays) : 1;
   }, [selection]);
 
-  // Totalpris
+  // Total price
   const totalPrice = venue?.price ? venue.price * nights : 0;
   const priceString = usd(totalPrice);
 
-  // Handle booking
+  // Booking handler
   const handleBook = async () => {
     const from = selection.startDate.toISOString().slice(0, 10);
     const to = selection.endDate.toISOString().slice(0, 10);
@@ -133,6 +136,7 @@ export default function VenueDetail() {
     setSelection({ startDate: start, endDate: end, key: "selection" });
   const handleCloseCalendar = () => setShowCalendar(false);
 
+  // Close calendar on outside click
   useEffect(() => {
     const onClick = (e) => {
       if (ref.current && !ref.current.contains(e.target)) setShowCalendar(false);
@@ -149,14 +153,14 @@ export default function VenueDetail() {
 
   return (
     <div ref={ref} className="relative w-full min-h-screen bg-white pb-32">
-      {/* Slideshow: klikk venstre/høyre for å navigere */}
+      {/* Slideshow */}
       {media.length ? (
         <div
           className="relative w-full aspect-video"
           onClick={(e) => {
             const { left, width } = e.currentTarget.getBoundingClientRect();
             const x = e.clientX - left;
-            if (x < width / 2) prevImg(); else nextImg();
+            x < width / 2 ? prevImg() : nextImg();
           }}
         >
           <img
@@ -164,14 +168,14 @@ export default function VenueDetail() {
             alt={media[slide].alt || name}
             className="w-full h-full object-cover"
           />
-          {/* Rund tilbake-knapp */}
           <button
             onClick={() => navigate(-1)}
             className="absolute top-4 left-4 w-10 h-10 flex items-center justify-center bg-white border border-gray-300 rounded-full shadow-md hover:bg-gray-50 transition"
           >
-            <span className="material-symbols-outlined text-sm text-gray-800">arrow_back</span>
+            <span className="material-symbols-outlined text-sm text-gray-800">
+              arrow_back
+            </span>
           </button>
-          {/* Bildeteller */}
           <span className="absolute bottom-4 left-4 text-xs bg-black/70 text-white px-2 py-0.5 rounded-full">
             {slide + 1}/{media.length}
           </span>
@@ -180,31 +184,28 @@ export default function VenueDetail() {
         <div className="w-full aspect-video bg-gray-100" />
       )}
 
-      {/* Venue-detaljer */}
+      {/* Details Section */}
       <section className="px-4 pt-6 space-y-4">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-semibold truncate">{name}</h1>
-          <div
+          <button
             onClick={() => setShowCalendar(true)}
-            className="group flex items-center cursor-pointer select-none"
+            className="material-symbols-outlined text-xl text-gray-800 hover:text-[#3E35A2]"
           >
-            <span className="material-symbols-outlined text-xl text-gray-800 group-hover:text-[#3E35A2]">
-              calendar_month
-            </span>
-            <span className="opacity-0 group-hover:opacity-100 transition-opacity material-symbols-outlined text-sm text-[#3E35A2]">
-              chevron_right
-            </span>
-          </div>
+            calendar_month
+          </button>
         </div>
+
         <p className="text-sm text-gray-600">
           {location.city}, {location.country}
         </p>
+
         <div className="flex flex-col items-start space-y-1">
           <RatingStars rating={ratingNum} reviewCount={reviews.length} />
           <ProfileUserLink user={owner} size="xs" className="text-xs" />
         </div>
 
-        {/* Viser kun 3 stats for mobil */}
+        {/* Stats row */}
         <StatsIcons maxGuests={maxGuests} />
 
         <p className="text-base leading-relaxed whitespace-pre-wrap pt-2">
@@ -212,34 +213,15 @@ export default function VenueDetail() {
         </p>
       </section>
 
-      <div className="fixed bottom-0 inset-x-0 w-full bg-white p-4 shadow-lg flex items-center border-t border-[var(--color-border-soft)]">
-        <button
-          onClick={handleBook}
-          disabled={submitting}
-          className="
-            bg-[#3E35A2]
-            text-white
-            font-medium
-            text-sm
-            px-4
-            py-2
-            rounded-md
-            hover:bg-[#5939aa]
-            transition
-            disabled:opacity-50
-            disabled:cursor-not-allowed
-          "
-        >
-          {submitting ? "Booking…" : "Book now"}
-        </button>
-        <div className="ml-auto flex items-baseline space-x-1">
-          <span className="text-lg font-bold">{priceString}</span>
-          <span className="text-sm text-gray-500">
-            {nights > 1 ? " total" : " /night"}
-          </span>
-        </div>
-      </div>
+      {/* Booking bar */}
+      <BookingBar
+        priceString={priceString}
+        nights={nights}
+        onBook={handleBook}
+        submitting={submitting}
+      />
 
+      {/* Calendar modal */}
       {showCalendar && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/20"
@@ -259,8 +241,17 @@ export default function VenueDetail() {
         </div>
       )}
 
-      {msg.err && <p className="fixed bottom-20 inset-x-0 text-center text-red-500 text-xs">{msg.err}</p>}
-      {msg.ok && <p className="fixed bottom-20 inset-x-0 text-center text-green-600 text-xs">{msg.ok}</p>}
+      {/* Messages */}
+      {msg.err && (
+        <p className="fixed bottom-20 inset-x-0 text-center text-red-500 text-xs">
+          {msg.err}
+        </p>
+      )}
+      {msg.ok && (
+        <p className="fixed bottom-20 inset-x-0 text-center text-green-600 text-xs">
+          {msg.ok}
+        </p>
+      )}
     </div>
   );
 }
