@@ -1,20 +1,22 @@
-import React, {
-  useState,
-  useCallback,
-  useMemo,
-  useRef,
-  useEffect,
-} from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
-import useVenueDetail from "../hooks/useVenueDetail";
-import ProfileUserLink from "../components/profile/mobile/ProfileUserSearch";
-import CalendarPicker from "../components/ui/calender/CalendarPicker";
-import { BOOKINGS_URL } from "../components/constants/api";
-import { getAccessToken } from "../services/tokenService";
-import RatingStars from "../components/ui/RatingStars";
 
+import useVenueDetail        from "../hooks/useVenueDetail";
+import CalendarModal         from "../components/venue/venuedetail/CalendarModal";
+import ImageCarousel         from "../components/venue/venuedetail/Carousel";
+import VenueInfo             from "../components/venue/venuedetail/VenueInfo";
+import BookingBar            from "../components/venue/venuedetail/BookingBar";
+import BookingBottomSheet    from "../components/venue/venuedetail/Booking";
+import VenueSkeleton         from "../components/venue/venuedetail/VenueSkeleton";
+import useBookingRanges      from "../hooks/useBookingRanges";
 
-// NOK → USD uten desimaler
+import BookingSuccessPopup   from "../components/ui/mobildemodal/BookingSuccessPopup";
+import LoginPromptPopup      from "../components/ui/mobildemodal/LoginPromptPopup";
+
+import { BOOKINGS_URL }      from "../components/constants/api";
+import { getAccessToken }    from "../services/tokenService";
+
+/* NOK → USD (whole dollars) */
 const NOK_TO_USD = 0.1;
 const usd = (n) =>
   new Intl.NumberFormat("en-US", {
@@ -23,140 +25,102 @@ const usd = (n) =>
     maximumFractionDigits: 0,
   }).format(n * NOK_TO_USD);
 
-const VenueSkeleton = () => (
-  <div className="animate-pulse select-none">
-    <div className="w-full aspect-video bg-gray-200 rounded-lg mb-4" />
-    <div className="px-4 pt-4 space-y-3">
-      <div className="h-4 bg-gray-200 rounded w-3/4" />
-      <div className="h-3 bg-gray-200 rounded w-1/2" />
-      <div className="h-3 bg-gray-200 rounded w-full" />
-      <div className="h-3 bg-gray-200 rounded w-5/6" />
-    </div>
-  </div>
-);
-
 export default function VenueDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: venue, loading, error } = useVenueDetail(id);
 
-  const [slide, setSlide] = useState(0);
-  const [showCalendar, setShowCalendar] = useState(false);
+  /* UI state */
+  const [slide, setSlide]                 = useState(0);
+  const [showCalendar,    setShowCalendar]    = useState(false);
+  const [showSheet,       setShowSheet]       = useState(false);
+  const [showSuccess,     setShowSuccess]     = useState(false);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+
+  /* Booking state */
   const [selection, setSelection] = useState({
     startDate: new Date(),
-    endDate: new Date(),
+    endDate:   new Date(),
     key: "selection",
   });
   const [submitting, setSubmitting] = useState(false);
-  const [msg, setMsg] = useState({ ok: "", err: "" });
+  const [errMsg, setErrMsg]         = useState("");
+
   const ref = useRef(null);
 
-  // Parsed numeric rating
+  /* derived values */
   const ratingNum = useMemo(() => {
     const r = parseFloat(venue?.rating);
     return isNaN(r) ? 0 : r;
   }, [venue]);
 
-  // Bildenavigasjon
-  const nextImg = useCallback(() => {
-    if (!venue?.media?.length) return;
-    setSlide((i) => (i + 1) % venue.media.length);
-  }, [venue]);
-  const prevImg = useCallback(() => {
-    if (!venue?.media?.length) return;
-    setSlide((i) => (i - 1 + venue.media.length) % venue.media.length);
-  }, [venue]);
+  const { disabledDates, bookingRanges } = useBookingRanges(
+    venue?.bookings || []
+  );
 
-  // Deaktiver bookede datoer
-  const disabledDates = useMemo(() => {
-    if (!venue?.bookings) return [];
-    return venue.bookings.flatMap(({ dateFrom, dateTo }) => {
-      const arr = [];
-      let d = new Date(dateFrom);
-      const end = new Date(dateTo);
-      while (d <= end) {
-        arr.push(new Date(d));
-        d.setDate(d.getDate() + 1);
-      }
-      return arr;
-    });
-  }, [venue]);
-
-  // Snake-range for bookings
-  const mergedBookingRange = useMemo(() => {
-    if (!venue?.bookings?.length) return null;
-    const ranges = venue.bookings.map(({ dateFrom, dateTo }) => ({
-      from: new Date(dateFrom),
-      to: new Date(dateTo),
-    }));
-    const start = ranges.reduce((min, r) => (r.from < min ? r.from : min), ranges[0].from);
-    const end = ranges.reduce((max, r) => (r.to > max ? r.to : max), ranges[0].to);
-    return { startDate: start, endDate: end, key: "booked-snake" };
-  }, [venue]);
-
-  // Antall netter
   const nights = useMemo(() => {
-    const diffMs = selection.endDate - selection.startDate;
-    const diffDays = diffMs / (1000 * 60 * 60 * 24);
-    return diffDays > 0 ? Math.round(diffDays) : 1;
+    const diff = selection.endDate - selection.startDate;
+    return diff > 0 ? Math.round(diff / 86_400_000) : 1; // ms per day
   }, [selection]);
 
-  // Totalpris
-  const totalPrice = venue?.price ? venue.price * nights : 0;
-  const priceString = usd(totalPrice);
+  const priceString = usd((venue?.price || 0) * nights);
 
-  // Handle booking
-  const handleBook = async () => {
-    const from = selection.startDate.toISOString().slice(0, 10);
-    const to = selection.endDate.toISOString().slice(0, 10);
-    if (!localStorage.getItem("user")) {
-      setMsg({ err: "Login required", ok: "" });
+  /* --------------- API call ---------------- */
+  const handleBook = async (formData = {}) => {
+    const token = getAccessToken();
+    if (!token) {
+      setShowLoginPrompt(true);
       return;
     }
+
+    const body = {
+      venueId: id,
+      dateFrom: selection.startDate.toISOString().slice(0, 10),
+      dateTo:   selection.endDate  .toISOString().slice(0, 10),
+      guests: formData.guests || 1,
+      firstName: formData.firstName,
+      lastName:  formData.lastName,
+      phone:     formData.phone,
+      paymentMethod: formData.paymentMethod,
+    };
+
     try {
       setSubmitting(true);
-      const token = getAccessToken();
       const res = await fetch(BOOKINGS_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "X-Noroff-API-Key": import.meta.env.VITE_NOROFF_API_KEY,
-          ...(token && { Authorization: `Bearer ${token}` }),
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          venueId: id,
-          dateFrom: from,
-          dateTo: to,
-          guests: 1,
-        }),
+        body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error(await res.text());
-      setMsg({ ok: "Booked successfully!", err: "" });
-      setTimeout(() => navigate("/profile"), 1200);
+
+      setShowSheet(false);
+      setShowSuccess(true);
     } catch (e) {
-      setMsg({ err: e.message, ok: "" });
+      setErrMsg(e.message);
     } finally {
       setSubmitting(false);
     }
   };
 
-  // Calendar handlers
-  const handleSelectRange = (start, end) =>
-    setSelection({ startDate: start, endDate: end, key: "selection" });
-  const handleCloseCalendar = () => setShowCalendar(false);
-
-  // Close calendar on outside click
+  /* close calendar on outside-click */
   useEffect(() => {
     const onClick = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setShowCalendar(false);
+      if (ref.current && !ref.current.contains(e.target)) {
+        setShowCalendar(false);
+      }
     };
     document.addEventListener("mousedown", onClick);
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
 
+  /* loading & error states */
   if (loading) return <VenueSkeleton />;
-  if (error) return <p className="text-center py-10 text-red-500">{error}</p>;
-  if (!venue) return null;
+  if (error)   return <p className="text-center py-10 text-red-500">{error}</p>;
+  if (!venue)  return null;
 
   const {
     name,
@@ -168,118 +132,91 @@ export default function VenueDetail() {
     owner,
   } = venue;
 
+  /* ---------------- JSX ---------------- */
   return (
-    <div ref={ref} className="relative w-full min-h-screen bg-white pb-32">
-      {/* Slideshow */}
-      {media.length ? (
-        <div className="relative w-full aspect-video">
-          <img
-            src={media[slide].url}
-            alt={media[slide].alt || name}
-            className="w-full h-full object-cover"
+    <div className="relative w-full min-h-screen bg-white pb-32">
+      <ImageCarousel
+        media={media}
+        name={name}
+        slide={slide}
+        setSlide={setSlide}
+      />
+
+      <VenueInfo
+        name={name}
+        location={location}
+        rating={ratingNum}
+        reviewCount={reviews.length}
+        owner={owner}
+        maxGuests={maxGuests}
+        description={description}
+        onOpenCalendar={() => setShowCalendar(true)}
+      />
+
+      {/* bottom booking bar */}
+      <BookingBar
+        priceString={priceString}
+        nights={nights}
+        onBook={() => {
+          if (!getAccessToken()) {
+            setShowLoginPrompt(true);
+            return;
+          }
+          setShowSheet(true);
+        }}
+        submitting={false}
+      />
+
+      {/* calendar modal */}
+      {showCalendar && (
+        <div ref={ref}>
+          <CalendarModal
+            selection={selection}
+            onSelectRange={(s, e) =>
+              setSelection({ startDate: s, endDate: e, key: "selection" })
+            }
+            disabledDates={disabledDates}
+            bookingRanges={bookingRanges}
+            onClose={() => setShowCalendar(false)}
+            onConfirm={() => setShowCalendar(false)}
+            pricePerNight={venue.price}
           />
-          <button
-            onClick={() => navigate(-1)}
-            className="absolute top-4 left-4 bg-white/90 rounded-full p-2 shadow"
-          >
-            ←
-          </button>
-        
-          <span className="absolute bottom-4 right-4 text-xs bg-black/70 text-white px-2 py-0.5 rounded-full">
-            {slide + 1}/{media.length}
-          </span>
         </div>
-      ) : (
-        <div className="w-full aspect-video bg-gray-100" />
       )}
 
-      {/* Venue-detaljer */}
-      <section className="px-4 pt-6 space-y-4">
-        {/* Tittel + kalender-trigger */}
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-semibold truncate">{name}</h1>
-          <div
-            onClick={() => setShowCalendar(true)}
-            className="group flex items-center cursor-pointer select-none"
-          >
-            <span className="material-symbols-outlined text-xl text-gray-800 group-hover:text-[#3E35A2]">
-              calendar_month
-            </span>
-            <span className="opacity-0 group-hover:opacity-100 transition-opacity material-symbols-outlined text-sm text-[#3E35A2]">
-              chevron_right
-            </span>
-          </div>
-        </div>
-
-        {/* Lokasjon */}
-        <p className="text-sm text-gray-600">
-          {location.city}, {location.country}
-        </p>
-
-        {/* Rating + eier */}
-        <div className="flex flex-col items-start space-y-1">
-        <RatingStars
-  rating={ratingNum}
-  reviewCount={reviews.length}
- 
-/>
-          <ProfileUserLink user={owner} size="xs" className="text-xs" />
-        </div>
-
-        {/* Stat-ikoner */}
-        <ul className="flex justify-between text-gray-600 text-sm px-1 pt-2">
-          {[
-            ["bed", `${maxGuests} guests`],
-            ["bathtub", "1 bath"],
-            ["garage", "Parking"],
-          ].map(([icon, label]) => (
-            <li key={icon} className="flex flex-col items-center gap-1">
-              <span className="material-symbols-outlined text-lg">{icon}</span>
-              <span>{label}</span>
-            </li>
-          ))}
-        </ul>
-
-        {/* Beskrivelse */}
-        <p className="text-base leading-relaxed whitespace-pre-wrap pt-2">
-          {description}
-        </p>
-      </section>
-
-      {/* Hoved-Book-knapp */}
-      <button
-        onClick={handleBook}
-        disabled={submitting}
-        className="fixed bottom-4 inset-x-4 bg-[#3E35A2] text-white py-3 rounded-full text-lg font-bold shadow-lg hover:bg-[#5939aa] transition disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        {submitting ? "Booking…" : `Book · ${priceString}`}
-      </button>
-
-      {/* Kalender-modal */}
-      {showCalendar && (
-        <CalendarPicker
-          selection={selection}
-          onSelectRange={handleSelectRange}
-          disabledDates={disabledDates}
-          mergedBookingRange={mergedBookingRange}
-          onClose={handleCloseCalendar}
-          onConfirm={handleBook}
-          pricePerNight={price}
+      {/* wizard modal */}
+      {showSheet && (
+        <BookingBottomSheet
+          startDate={selection.startDate}
+          endDate={selection.endDate}
+          nights={nights}
+          priceString={priceString}
+          onClose={() => setShowSheet(false)}
+          onComplete={handleBook}
         />
       )}
 
-      {/* Meldinger */}
-      {msg.err && (
-        <p className="fixed bottom-20 inset-x-0 text-center text-red-500 text-xs">
-          {msg.err}
-        </p>
+      {/* success popup */}
+      {showSuccess && (
+        <BookingSuccessPopup
+          onClose={() => {
+            setShowSuccess(false);
+            navigate("/profile");
+          }}
+        />
       )}
-      {msg.ok && (
-        <p className="fixed bottom-20 inset-x-0 text-center text-green-600 text-xs">
-          {msg.ok}
+
+      {/* login / register popup */}
+      {showLoginPrompt && (
+        <LoginPromptPopup onClose={() => setShowLoginPrompt(false)} />
+      )}
+
+      {/* generic error message */}
+      {errMsg && (
+        <p className="fixed bottom-20 inset-x-0 text-center text-red-500 text-xs">
+          {errMsg}
         </p>
       )}
     </div>
   );
 }
-
