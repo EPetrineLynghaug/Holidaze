@@ -1,4 +1,4 @@
-// src/App.jsx
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router';
 
@@ -27,6 +27,8 @@ export default function App() {
           <Route path="venues/:id"   element={<VenueDetail />} />
           <Route path="profile"      element={<Profile />} />
           <Route path="profile/:username" element={<ProfileDetail />} />
+
+    {/* <Route path="*" element={<NotFound />} /> */}
         </Route>
       </Routes>
     </BrowserRouter>
