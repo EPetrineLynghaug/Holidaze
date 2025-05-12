@@ -12,34 +12,32 @@ import ProfileSettings from '../components/profile/mobile/ProfileSettings';
 import MyVenuesDashboard from '../components/profile/mobile/MyVenuesDashboard';
 import MyBookingsDashboard from '../components/profile/mobile/MyBookingsDashboard';
 import BottomSheet from '../components/ui/mobildemodal/BottomSheet';
+import EditVenueForm from '../components/profile/mobile/EditVenueModal';
 
 export default function Profile() {
   const navigate = useNavigate();
 
-  // Local UI state for modals
   const [showForm, setShowForm] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showMyVenues, setShowMyVenues] = useState(false);
   const [showMyBookings, setShowMyBookings] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [selectedVenue, setSelectedVenue] = useState(null);
 
-  // Fetch user, venues and bookings via custom hook
-  const {
-    user,
-    venues,
-    bookings,
-    loading,
-    error,
-  } = useProfileData();
+  const { user, venues, bookings, loading, error } = useProfileData();
 
-  // Redirect to home if no user in localStorage
   useEffect(() => {
     if (!localStorage.getItem('user')) {
       navigate('/', { replace: true });
     }
   }, [navigate]);
 
-  // Render nothing until user is loaded
   if (!user) return null;
+
+  const handleEditVenue = (venue) => {
+    setSelectedVenue(venue);
+    setShowEditForm(true);
+  };
 
   return (
     <div className="profile-container p-4 font-figtree">
@@ -58,7 +56,6 @@ export default function Profile() {
       <DashboardInfoSection />
       <ProfileChart venues={venues} bookings={bookings} />
 
-      {/* Venues section */}
       {loading.venues ? (
         <p className="text-center py-4">Loading venues…</p>
       ) : error.venues ? (
@@ -66,39 +63,42 @@ export default function Profile() {
       ) : (
         <ActiveVenuesSection
           venues={venues}
-          onDelete={id => {
-            // Local update: remove deleted venue
-            // (Hook does not auto-refetch)
-          }}
+          onEdit={handleEditVenue}
+          onDelete={(id) => {}}
         />
       )}
 
-      {/* Bookings section */}
       {loading.bookings && <p className="text-center py-4">Loading bookings…</p>}
       {error.bookings && (
         <p className="text-center py-4 text-red-500">{error.bookings}</p>
       )}
 
-      {/* Create Venue Modal */}
-      {user.venueManager && showForm && (
+      {showForm && (
         <BottomSheet title="Create Venue" onClose={() => setShowForm(false)}>
           <AddVenueForm
             userName={user.name}
-            onCreated={data => {
-              // Optionally update venues locally
-              setShowForm(false);
-            }}
+            onCreated={() => setShowForm(false)}
             onClose={() => setShowForm(false)}
           />
         </BottomSheet>
       )}
 
-      {/* Settings Modal */}
+      {showEditForm && selectedVenue && (
+        <BottomSheet title="Edit Venue" onClose={() => setShowEditForm(false)}>
+          <EditVenueForm
+            userName={user.name}
+            existingVenue={selectedVenue}
+            onCreated={() => setShowEditForm(false)}
+            onClose={() => setShowEditForm(false)}
+          />
+        </BottomSheet>
+      )}
+
       {showSettings && (
         <BottomSheet title="Settings" onClose={() => setShowSettings(false)}>
           <ProfileSettings
             userName={user.name}
-            onSave={updated => {
+            onSave={(updated) => {
               localStorage.setItem('user', JSON.stringify(updated));
               window.dispatchEvent(new Event('authChange'));
               setShowSettings(false);
@@ -108,14 +108,12 @@ export default function Profile() {
         </BottomSheet>
       )}
 
-      {/* My Venues Modal */}
       {showMyVenues && (
         <BottomSheet title="My Venues" onClose={() => setShowMyVenues(false)}>
           <MyVenuesDashboard onClose={() => setShowMyVenues(false)} />
         </BottomSheet>
       )}
 
-      {/* My Bookings Modal */}
       {showMyBookings && (
         <BottomSheet title="My Bookings" onClose={() => setShowMyBookings(false)}>
           <MyBookingsDashboard onClose={() => setShowMyBookings(false)} />
