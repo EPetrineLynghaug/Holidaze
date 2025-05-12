@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import useProfileData from '../hooks/useProfileData';
@@ -9,6 +10,7 @@ import ActiveVenuesSection from '../components/profile/mobile/ActiveVenueCard';
 import DashboardMobileMenu from '../components/navigation/mobile/DashboardMobileMenu';
 import DashboardDesktopMenu from '../components/navigation/desktop/DashboardDesctopMeny';
 import AddVenueForm from '../components/profile/mobile/ListNewVenue';
+import EditVenueForm from '../components/profile/mobile/EditVenueModal';  
 import ProfileSettings from '../components/profile/mobile/ProfileSettings';
 import MyVenuesDashboard from '../components/profile/mobile/MyVenuesDashboard';
 import MyBookingsDashboard from '../components/profile/mobile/MyBookingsDashboard';
@@ -67,17 +69,12 @@ export default function Profile() {
       </div>
 
       {/* Info + Chart */}
-      {/* Mobile: stacked */}
       <div className="block lg:hidden mt-6">
         <DashboardInfoSection user={user} />
         <ProfileChart venues={venues} bookings={bookings} />
       </div>
-
-      {/* Desktop: 1fr_1fr grid, items-end */}
       <div className="hidden lg:grid lg:ml-64 lg:pl-12 lg:mt-6 lg:grid-cols-[1fr_1fr] lg:gap-6 lg:items-end">
-        {/* Text section */}
         <DashboardInfoSection user={user} />
-        {/* Chart section */}
         <div className="self-end mt-4 lg:mt-0">
           <ProfileChart venues={venues} bookings={bookings} />
         </div>
@@ -118,10 +115,13 @@ export default function Profile() {
       {/* Edit Venue Modal */}
       {showEditForm && selectedVenue && (
         <BottomSheet title="Edit Venue" onClose={() => setShowEditForm(false)}>
-          <AddVenueForm
+          <EditVenueForm
             userName={user.name}
             existingVenue={selectedVenue}
-            onCreated={() => setShowEditForm(false)}
+            onCreated={() => {
+              setShowEditForm(false);
+              // optionally refresh profile data here
+            }}
             onClose={() => setShowEditForm(false)}
           />
         </BottomSheet>
