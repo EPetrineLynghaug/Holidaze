@@ -7,15 +7,16 @@ import DashboardInfoSection from '../components/profile/mobile/DashboardInfoSect
 import ProfileChart from '../components/profile/mobile/ProfileChart';
 import ActiveVenuesSection from '../components/profile/mobile/ActiveVenueCard';
 import DashboardMobileMenu from '../components/navigation/mobile/DashboardMobileMenu';
+import DashboardDesktopMenu from '../components/navigation/desktop/DashboardDesctopMeny';
 import AddVenueForm from '../components/profile/mobile/ListNewVenue';
 import ProfileSettings from '../components/profile/mobile/ProfileSettings';
 import MyVenuesDashboard from '../components/profile/mobile/MyVenuesDashboard';
 import MyBookingsDashboard from '../components/profile/mobile/MyBookingsDashboard';
 import BottomSheet from '../components/ui/mobildemodal/BottomSheet';
-import EditVenueForm from '../components/profile/mobile/EditVenueModal';
 
 export default function Profile() {
   const navigate = useNavigate();
+  const { user, venues, bookings, loading, error } = useProfileData();
 
   const [showForm, setShowForm] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -23,8 +24,6 @@ export default function Profile() {
   const [showMyBookings, setShowMyBookings] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
   const [selectedVenue, setSelectedVenue] = useState(null);
-
-  const { user, venues, bookings, loading, error } = useProfileData();
 
   useEffect(() => {
     if (!localStorage.getItem('user')) {
@@ -40,10 +39,12 @@ export default function Profile() {
   };
 
   return (
-    <div className="profile-container p-4 font-figtree">
+    <div className="profile-container px-4 lg:px-0 font-figtree">
+      {/* Header */}
       <ProfileHeader user={user} />
 
-      <div className="mt-4">
+      {/* Mobile dashboard menu */}
+      <div className="mt-4 lg:hidden">
         <DashboardMobileMenu
           hasBookings={bookings.length > 0}
           onListNew={() => setShowForm(true)}
@@ -53,27 +54,58 @@ export default function Profile() {
         />
       </div>
 
-      <DashboardInfoSection />
-      <ProfileChart venues={venues} bookings={bookings} />
+      {/* Desktop sidebar menu */}
+      <div className="hidden lg:block">
+        <DashboardDesktopMenu
+          user={user}
+          hasBookings={bookings.length > 0}
+          onListNew={() => setShowForm(true)}
+          onSettings={() => setShowSettings(true)}
+          onMyVenues={() => setShowMyVenues(true)}
+          onMyBookings={() => setShowMyBookings(true)}
+        />
+      </div>
 
+      {/* Info + Chart */}
+      {/* Mobile: stacked */}
+      <div className="block lg:hidden mt-6">
+        <DashboardInfoSection user={user} />
+        <ProfileChart venues={venues} bookings={bookings} />
+      </div>
+
+      {/* Desktop: 1fr_1fr grid, items-end */}
+      <div className="hidden lg:grid lg:ml-64 lg:pl-12 lg:mt-6 lg:grid-cols-[1fr_1fr] lg:gap-6 lg:items-end">
+        {/* Text section */}
+        <DashboardInfoSection user={user} />
+        {/* Chart section */}
+        <div className="self-end mt-4 lg:mt-0">
+          <ProfileChart venues={venues} bookings={bookings} />
+        </div>
+      </div>
+
+      {/* Active Venues Section */}
       {loading.venues ? (
         <p className="text-center py-4">Loading venues…</p>
       ) : error.venues ? (
         <p className="text-center py-4 text-red-500">{error.venues}</p>
       ) : (
-        <ActiveVenuesSection
-          venues={venues}
-          onEdit={handleEditVenue}
-          onDelete={(id) => {}}
-        />
+        <div className="mt-8">
+          <ActiveVenuesSection
+            venues={venues}
+            onEdit={handleEditVenue}
+            onDelete={() => {}}
+          />
+        </div>
       )}
 
+      {/* Bookings Section */}
       {loading.bookings && <p className="text-center py-4">Loading bookings…</p>}
       {error.bookings && (
         <p className="text-center py-4 text-red-500">{error.bookings}</p>
       )}
 
-      {showForm && (
+      {/* Create Venue Modal */}
+      {user.venueManager && showForm && (
         <BottomSheet title="Create Venue" onClose={() => setShowForm(false)}>
           <AddVenueForm
             userName={user.name}
@@ -83,9 +115,10 @@ export default function Profile() {
         </BottomSheet>
       )}
 
+      {/* Edit Venue Modal */}
       {showEditForm && selectedVenue && (
         <BottomSheet title="Edit Venue" onClose={() => setShowEditForm(false)}>
-          <EditVenueForm
+          <AddVenueForm
             userName={user.name}
             existingVenue={selectedVenue}
             onCreated={() => setShowEditForm(false)}
@@ -94,6 +127,7 @@ export default function Profile() {
         </BottomSheet>
       )}
 
+      {/* Settings Modal */}
       {showSettings && (
         <BottomSheet title="Settings" onClose={() => setShowSettings(false)}>
           <ProfileSettings
@@ -108,12 +142,14 @@ export default function Profile() {
         </BottomSheet>
       )}
 
+      {/* My Venues Modal */}
       {showMyVenues && (
         <BottomSheet title="My Venues" onClose={() => setShowMyVenues(false)}>
           <MyVenuesDashboard onClose={() => setShowMyVenues(false)} />
         </BottomSheet>
       )}
 
+      {/* My Bookings Modal */}
       {showMyBookings && (
         <BottomSheet title="My Bookings" onClose={() => setShowMyBookings(false)}>
           <MyBookingsDashboard onClose={() => setShowMyBookings(false)} />

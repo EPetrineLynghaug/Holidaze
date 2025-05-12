@@ -11,10 +11,10 @@ import {
 
 const WEEKDAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
 
-export default function ProfileChart({ venues = [], bookings = [] }) {
+export default function ProfileChartSection({ venues = [], bookings = [] }) {
   const [selectedVenue, setSelectedVenue] = useState('all');
 
-  // Samle alle bookings (innebygde + eksterne)
+  // Combine embedded and external bookings
   const allBookings = useMemo(() => {
     const embedded = venues.flatMap(v =>
       (v.bookings || []).map(b => ({ ...b, venueId: v.id }))
@@ -22,17 +22,17 @@ export default function ProfileChart({ venues = [], bookings = [] }) {
     return [...embedded, ...bookings];
   }, [venues, bookings]);
 
-  // Filtrer på valgt venue
+  // Filter bookings
   const filtered = useMemo(() => {
     if (selectedVenue === 'all') return allBookings;
     return allBookings.filter(b => String(b.venueId) === selectedVenue);
   }, [allBookings, selectedVenue]);
 
-  // Bygg data for grafen (antall per ukedag)
+  // Build chart data
   const data = useMemo(() => {
     const counts = WEEKDAYS.reduce((acc, d) => ({ ...acc, [d]: 0 }), {});
     filtered.forEach(b => {
-      const idx = new Date(b.dateFrom).getDay(); // 0 = søndag
+      const idx = new Date(b.dateFrom).getDay();
       const key = idx === 0 ? 'Su' : WEEKDAYS[idx - 1];
       counts[key]++;
     });
@@ -41,14 +41,11 @@ export default function ProfileChart({ venues = [], bookings = [] }) {
 
   const total = filtered.length;
   const avg = (total / WEEKDAYS.length).toFixed(1);
-  const busiest = data.reduce((m, d) =>
-    d.count > m.count ? d : m,
-    { day: '-', count: 0 }
-  );
+  const busiest = data.reduce((m, d) => (d.count > m.count ? d : m), { day: '-', count: 0 });
 
   return (
-    <div className=" rounded-xl border border-[var(--color-border-soft)] p-4 max-w-md mx-auto mt-8">
-      {/* Venue-filter */}
+    <div className="w-full lg:max-w-md rounded-xl border border-[var(--color-border-soft)] p-4 mt-6 lg:mt-0 lg:px-2">
+      {/* Venue filter */}
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700">
           Filter by Venue:
@@ -67,11 +64,8 @@ export default function ProfileChart({ venues = [], bookings = [] }) {
         </select>
       </div>
 
-      <h2 className="text-base font-semibold mb-2 text-center">
-        Weekly Bookings
-      </h2>
+      <h2 className="text-base font-semibold mb-2 text-center">Weekly Bookings</h2>
 
-      {/* Graf med fyll */}
       <ResponsiveContainer width="100%" height={180}>
         <AreaChart data={data} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
           <defs>
@@ -81,19 +75,8 @@ export default function ProfileChart({ venues = [], bookings = [] }) {
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" vertical={false} />
-          <XAxis
-            dataKey="day"
-            axisLine={false}
-            tickLine={false}
-            tick={{ fill: '#4B5563', fontSize: 12 }}
-          />
-          <YAxis
-            domain={[0, 'dataMax + 1']}
-            allowDecimals={false}
-            axisLine={false}
-            tickLine={false}
-            tick={{ fill: '#4B5563', fontSize: 12 }}
-          />
+          <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: '#4B5563', fontSize: 12 }} />
+          <YAxis domain={[0, 'dataMax + 1']} allowDecimals={false} axisLine={false} tickLine={false} tick={{ fill: '#4B5563', fontSize: 12 }} />
           <Tooltip formatter={value => [value, 'Bookings']} />
           <Area
             type="monotone"
@@ -107,12 +90,8 @@ export default function ProfileChart({ venues = [], bookings = [] }) {
         </AreaChart>
       </ResponsiveContainer>
 
-      {/* Ingen data */}
-      {total === 0 && (
-        <p className="text-center text-gray-500 mt-2">No bookings yet.</p>
-      )}
+      {!total && <p className="text-center text-gray-500 mt-2">No bookings yet.</p>}
 
-      {/* KPI-er */}
       <div className="mt-4 grid grid-cols-3 gap-2 text-center text-sm">
         <div className="bg-purple-50 p-2 rounded">
           <p className="font-bold text-purple-700">{total}</p>
