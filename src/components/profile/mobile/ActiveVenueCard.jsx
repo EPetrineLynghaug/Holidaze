@@ -1,8 +1,13 @@
 import React from 'react';
+import { Link } from 'react-router';
+import { useNavigate } from 'react-router';
 import DeleteVenueButton from '../../ui/buttons/DeleteVenueButton';
+import { getAccessToken } from '../../../services/tokenService';
 import { FAC_OPTIONS } from '../../constants/VenueFormConfig';
 
 export default function ActiveVenuesSection({ venues, loading, error, onDelete, onEdit }) {
+  const navigate = useNavigate();
+
   if (loading) return <p className="text-center text-gray-500">Loading venues...</p>;
   if (error) return <p className="text-center text-red-600">{error}</p>;
   if (!venues?.length) return <p className="text-center text-gray-500">No active venues.</p>;
@@ -10,7 +15,7 @@ export default function ActiveVenuesSection({ venues, loading, error, onDelete, 
   return (
     <section className="mt-6">
       <h3 className="text-2xl font-semibold mb-4">Active Venues</h3>
-      <div className="grid gap-6">
+      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {venues.map((venue) => {
           const {
             id,
@@ -26,9 +31,9 @@ export default function ActiveVenuesSection({ venues, loading, error, onDelete, 
           const imgUrl = media[0]?.url || 'https://via.placeholder.com/400x200?text=No+Image';
           const { city = '', country = '' } = location;
           const bookingCount = bookings.length;
-          const bookingText  = `${bookingCount} booking${bookingCount !== 1 ? 's' : ''}`;
-          const textColor    = bookingCount > 0 ? '#4B9152' : '#8B1C1C';
-          const bgColor      = bookingCount > 0 ? 'rgba(163,217,165,0.6)' : 'rgba(233,107,107,0.4)';
+          const bookingText = `${bookingCount} booking${bookingCount !== 1 ? 's' : ''}`;
+          const textColor = bookingCount > 0 ? '#FFFFFF' : '#FFFFFF';
+          const bgColor = bookingCount > 0 ? '#4CAF50' : '#DC3545';
 
           const facilityOptions = facilities
             .map(key => FAC_OPTIONS.find(o => o.key === key))
@@ -37,44 +42,35 @@ export default function ActiveVenuesSection({ venues, loading, error, onDelete, 
           const extraCount = facilityOptions.length - iconsToShow.length;
 
           return (
-            <article
-              key={id}
-              className="bg-white rounded-2xl shadow hover:shadow-lg transition flex flex-col overflow-hidden"
-            >
-              <div className="relative h-48 w-full">
-                <img
-                  src={imgUrl}
-                  alt={name}
-                  className="w-full h-full object-cover rounded-t-2xl"
-                />
-              </div>
-              <div className="p-4 flex flex-col flex-1">
-                <div className="flex justify-between items-center mb-2">
-                  <h4 className="text-xl font-semibold text-gray-900 truncate">{name}</h4>
+            <article key={id} className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden">
+              <div className="relative h-52 w-full">
+                <Link to={`/venues/${id}`} className="block h-full w-full">
+                  <img
+                    src={imgUrl}
+                    alt={media[0]?.alt || name}
+                    className="w-full h-full object-cover rounded-t-xl"
+                  />
                   <span
+                    className="absolute top-2 right-2 text-xs font-semibold px-2 py-1 rounded-md"
                     style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.25rem',
-                      padding: '0.25rem 0.5rem',
-                      fontSize: '0.75rem',
                       backgroundColor: bgColor,
-                      borderRadius: '5px',
+                      color: textColor,
                     }}
                   >
-                    <span style={{ color: textColor }}>●</span>
-                    <span className="font-semibold" style={{ color: textColor }}>
-                      {bookingText}
-                    </span>
-                    <span style={{ color: textColor }}>●</span>
+                    {bookingText}
                   </span>
+                </Link>
+              </div>
+              <div className="p-5 flex flex-col flex-1">
+                <div className="mb-2">
+                  <h4 className="text-xl font-bold text-gray-900 truncate">{name}</h4>
+                  {(city || country) && (
+                    <p className="text-sm text-gray-500 truncate mb-1">
+                      {[city, country].filter(Boolean).join(', ')}
+                    </p>
+                  )}
                 </div>
-                {(city || country) && (
-                  <p className="text-sm text-gray-500 truncate mb-2">
-                    {[city, country].filter(Boolean).join(', ')}
-                  </p>
-                )}
-                <div className="flex items-center gap-4 text-gray-600 text-sm mb-4">
+                <div className="flex items-center gap-3 text-gray-700 text-sm mb-4">
                   <span className="inline-flex items-center gap-1">
                     <span className="material-symbols-outlined text-base">home</span>
                     {type}
@@ -92,10 +88,12 @@ export default function ActiveVenuesSection({ venues, loading, error, onDelete, 
                     <span className="text-xs text-gray-500">+{extraCount}</span>
                   )}
                 </div>
-                <nav className="mt-auto pt-4 border-t border-gray-100 flex justify-between text-sm text-indigo-600">
+                <nav className="mt-auto pt-3 border-t border-gray-200 flex justify-between text-sm text-indigo-600">
+                  <button onClick={() => navigate(`/venues/${id}`)} className="hover:underline">View</button>
                   <button onClick={() => onEdit(venue)} className="hover:underline">Edit</button>
                   <DeleteVenueButton
                     venueId={id}
+                    accessToken={getAccessToken()}
                     onDeleted={() => onDelete(id)}
                     className="hover:underline text-red-600"
                   >Delete</DeleteVenueButton>
