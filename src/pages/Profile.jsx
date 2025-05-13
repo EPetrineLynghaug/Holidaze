@@ -15,6 +15,7 @@ import MyVenuesDashboard from '../components/profile/mobile/MyVenuesDashboard';
 import MyBookingsDashboard from '../components/profile/mobile/MyBookingsDashboard';
 import BottomSheet from '../components/ui/mobildemodal/BottomSheet';
 import ProfileSettingsPage from '../components/profile/desktop/ProfileSettings';
+import AddVenuePage from '../components/profile/desktop/AddVenuePage';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -132,15 +133,27 @@ export default function Profile() {
         </>
       )}
 
-       {/* Create Venue Modal */}
-       {user.venueManager && showForm && (
-        <BottomSheet title="Create Venue" onClose={() => setShowForm(false)}>
-          <AddVenueForm
-            userName={user.name}
-            onCreated={() => setShowForm(false)}
-            onClose={() => setShowForm(false)}
-          />
-        </BottomSheet>
+ {/* Create Venue Section */}
+ {user.venueManager && showForm && (
+        <>
+          {/* Desktop/large screens: render full page */}
+          <div className="hidden lg:block lg:ml-64 lg:pl-2 px-16">
+            <AddVenuePage
+              userName={user.name}
+              onCreated={() => setShowForm(false)}
+            />
+          </div>
+
+          {/* Mobile: wrap in BottomSheet */}
+          <div className="block lg:hidden">
+            <BottomSheet title="Create Venue" onClose={() => setShowForm(false)}>
+              <AddVenueForm
+                userName={user.name}
+                onCreated={() => setShowForm(false)}
+              />
+            </BottomSheet>
+          </div>
+        </>
       )}
 
       {/* Edit Venue Modal */}
