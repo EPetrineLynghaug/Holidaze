@@ -86,32 +86,32 @@ export default function ProfileSettingsPage({ userName, onSave }) {
   };
 
   return (
-    <section className="lg:ml-64 lg:pl-12 mt-8 max-w-4xl px-4">
-      <h2 className="text-2xl font-semibold mb-6">Profile Settings</h2>
-
-      <div className="flex items-center justify-between mb-6">
+    <section className="w-full   lg:w-full">
+      <h2 className="text-xl lg:text-2xl font-semibold text-gray-900 mb-6">Profile Settings</h2>
+  
+      <div className="flex justify-between mb-15">
         <div>
-          <label className="block text-base font-medium">Enable Venue Manager</label>
-          <p className="text-sm text-gray-500">Switch between Traveler & Venue modes</p>
+          <label className="text-base lg:text-lg font-medium text-gray-900">Enable Venue Manager</label>
+          <p className="text-sm lg:text-base font-normal text-gray-700">Switch between Traveler & Venue modes</p>
         </div>
         <Switch
           checked={isVenueManager}
           onChange={toggleVenueManager}
-          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ${
-            isVenueManager ? 'bg-purple-300' : 'bg-purple-100'
+          className={`inline-flex h-8 w-16 items-center rounded-full transition-colors duration-300 ${
+            isVenueManager ? 'bg-purple-500' : 'bg-gray-300'
           }`}
         >
           <span className="sr-only">Toggle venue manager</span>
           <span
-            className={`inline-block h-4 w-4 transform bg-white rounded-full transition-transform duration-200 ${
-              isVenueManager ? 'translate-x-6' : 'translate-x-1'
+            className={`inline-block h-6 w-6 transform bg-white rounded-full transition-transform duration-300 ${
+              isVenueManager ? 'translate-x-8' : 'translate-x-1'
             }`}
           />
         </Switch>
       </div>
-
+  
       <div className="mb-6">
-        <label htmlFor="profileUrl" className="block text-base font-medium mb-1">
+        <label htmlFor="profileUrl" className="block text-base lg:text-lg font-medium text-gray-900 mb-1">
           Profile Picture URL
         </label>
         <input
@@ -120,12 +120,12 @@ export default function ProfileSettingsPage({ userName, onSave }) {
           value={profileUrl}
           onChange={handleProfileUrlChange}
           placeholder="https://…/profile.jpg"
-          className="block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-purple-300 focus:border-purple-300"
+          className="block w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
         />
       </div>
-
+  
       <div className="mb-6">
-        <label htmlFor="bannerUrl" className="block text-base font-medium mb-1">
+        <label htmlFor="bannerUrl" className="block text-base lg:text-lg font-medium text-gray-900 mb-1">
           Banner Image URL
         </label>
         <input
@@ -134,13 +134,13 @@ export default function ProfileSettingsPage({ userName, onSave }) {
           value={bannerUrl}
           onChange={handleBannerUrlChange}
           placeholder="https://…/banner.jpg"
-          className="block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-purple-300 focus:border-purple-300"
+          className="block w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
         />
       </div>
-
+  
       <button
         onClick={handleSave}
-        className="w-full py-3 bg-purple-300 hover:bg-purple-400 text-white rounded-lg font-semibold"
+        className="w-full py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-semibold"
       >
         Save Settings
       </button>

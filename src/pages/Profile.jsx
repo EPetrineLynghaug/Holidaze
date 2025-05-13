@@ -58,8 +58,8 @@ export default function Profile() {
           hasBookings={bookings.length > 0}
           onListNew={() => setShowForm(true)}
           onSettings={() => setActiveSection('settings')}
-          onMyVenues={() => setShowMyVenues(true)} // Trigger modal for My Venues
-          onMyBookings={() => setShowMyBookings(true)} // Trigger modal for My Bookings
+          onMyVenues={() => setShowMyVenues(true)} 
+          onMyBookings={() => setShowMyBookings(true)} 
           onDashboard={() => setActiveSection('dashboard')}
           activeSection={activeSection}
         />
@@ -72,8 +72,8 @@ export default function Profile() {
           hasBookings={bookings.length > 0}
           onListNew={() => { setShowForm(true); setActiveSection('list'); }}
           onSettings={() => setActiveSection('settings')}
-          onMyVenues={() => setShowMyVenues(true)} // Show My Venues modal
-          onMyBookings={() => setShowMyBookings(true)} // Show My Bookings modal
+          onMyVenues={() => setShowMyVenues(true)} 
+          onMyBookings={() => setShowMyBookings(true)} 
           onDashboard={() => setActiveSection('dashboard')}
           activeSection={activeSection}
         />
@@ -117,7 +117,7 @@ export default function Profile() {
       {/* Settings Section */}
       {activeSection === 'settings' && (
         <>
-          <div className="hidden lg:block mt-6 lg:ml-64 lg:pl-12 px-12">
+  <div className="hidden lg:block mt-10  lg:pl-12 lg:px-120 " aria-labelledby="settings-heading">
             <ProfileSettingsPage userName={user.name} onSave={handleSaveSettings} />
           </div>
           <div className="block lg:hidden">
