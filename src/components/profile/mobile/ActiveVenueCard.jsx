@@ -1,22 +1,33 @@
-import React from 'react';
-import { Link } from 'react-router';
-import { useNavigate } from 'react-router';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router';
 import DeleteVenueButton from '../../ui/buttons/DeleteVenueButton';
 import { getAccessToken } from '../../../services/tokenService';
 import { FAC_OPTIONS } from '../../constants/VenueFormConfig';
 
 export default function ActiveVenuesSection({ venues, loading, error, onDelete, onEdit }) {
   const navigate = useNavigate();
+  
+  const [localVenues, setLocalVenues] = useState(venues || []);
+
+ 
+  useEffect(() => {
+    setLocalVenues(venues || []);
+  }, [venues]);
+
+
+  const handleUpdated = updatedVenue => {
+    setLocalVenues(prev => prev.map(v => (v.id === updatedVenue.id ? updatedVenue : v)));
+  };
 
   if (loading) return <p className="text-center text-gray-500">Loading venues...</p>;
   if (error) return <p className="text-center text-red-600">{error}</p>;
-  if (!venues?.length) return <p className="text-center text-gray-500">No active venues.</p>;
+  if (!localVenues.length) return <p className="text-center text-gray-500">No active venues.</p>;
 
   return (
     <section className="mt-6">
       <h3 className="text-2xl font-semibold mb-4">Active Venues</h3>
       <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-        {venues.map((venue) => {
+        {localVenues.map(venue => {
           const {
             id,
             name = 'Untitled Venue',
@@ -25,14 +36,13 @@ export default function ActiveVenuesSection({ venues, loading, error, onDelete, 
             location = {},
             bookings = [],
             type = 'House',
-            facilities = [],
+            facilities = []
           } = venue;
 
           const imgUrl = media[0]?.url || 'https://via.placeholder.com/400x200?text=No+Image';
           const { city = '', country = '' } = location;
           const bookingCount = bookings.length;
           const bookingText = `${bookingCount} booking${bookingCount !== 1 ? 's' : ''}`;
-          const textColor = bookingCount > 0 ? '#FFFFFF' : '#FFFFFF';
           const bgColor = bookingCount > 0 ? '#4CAF50' : '#DC3545';
 
           const facilityOptions = facilities
@@ -47,15 +57,12 @@ export default function ActiveVenuesSection({ venues, loading, error, onDelete, 
                 <Link to={`/venues/${id}`} className="block h-full w-full">
                   <img
                     src={imgUrl}
-                    alt={media[0]?.alt || name}
+                    alt={name}
                     className="w-full h-full object-cover rounded-t-xl"
                   />
                   <span
-                    className="absolute top-2 right-2 text-xs font-semibold px-2 py-1 rounded-md"
-                    style={{
-                      backgroundColor: bgColor,
-                      color: textColor,
-                    }}
+                    className="absolute top-2 right-2 text-xs font-semibold px-2 py-1 rounded-md text-white"
+                    style={{ backgroundColor: bgColor }}
                   >
                     {bookingText}
                   </span>
@@ -89,14 +96,26 @@ export default function ActiveVenuesSection({ venues, loading, error, onDelete, 
                   )}
                 </div>
                 <nav className="mt-auto pt-3 border-t border-gray-200 flex justify-between text-sm text-indigo-600">
-                  <button onClick={() => navigate(`/venues/${id}`)} className="hover:underline">View</button>
-                  <button onClick={() => onEdit(venue)} className="hover:underline">Edit</button>
+                  <button
+                    onClick={() => navigate(`/venues/${id}`)}
+                    className="hover:underline"
+                  >
+                    View
+                  </button>
+                  <button
+                    onClick={() => onEdit(venue, handleUpdated)}
+                    className="hover:underline"
+                  >
+                    Edit
+                  </button>
                   <DeleteVenueButton
                     venueId={id}
                     accessToken={getAccessToken()}
-                    onDeleted={() => onDelete(id)}
+                    onDeleted={() => setLocalVenues(vs => vs.filter(v => v.id !== id))}
                     className="hover:underline text-red-600"
-                  >Delete</DeleteVenueButton>
+                  >
+                    Delete
+                  </DeleteVenueButton>
                 </nav>
               </div>
             </article>
