@@ -8,6 +8,7 @@ export default function DashboardDesktopMenu({
   onSettings = () => {},
   onMyVenues = () => {},
   onMyBookings = () => {},
+  activeSection = 'dashboard',
 }) {
   if (!user) return null;
 
@@ -15,11 +16,11 @@ export default function DashboardDesktopMenu({
   const role = user.venueManager ? 'Venue' : 'Guest';
 
   const menuItems = [
-    { icon: 'grid_view',       label: 'Dashboard',      onClick: () => {},           active: true,  disabled: false },
-    { icon: 'add_business',    label: 'List New Venue', onClick: onListNew,         active: false, disabled: false },
-    { icon: 'apartment',       label: 'My Venues',      onClick: onMyVenues,        active: false, disabled: false },
-    { icon: 'calendar_month',  label: 'Bookings',       onClick: onMyBookings,      active: false, disabled: !hasBookings },
-    { icon: 'settings',        label: 'Settings',       onClick: onSettings,        active: false, disabled: false },
+    { icon: 'grid_view', label: 'Dashboard', key: 'dashboard', onClick: () => {}, disabled: false },
+    { icon: 'add_business', label: 'List New Venue', key: 'list', onClick: onListNew, disabled: false },
+    { icon: 'apartment', label: 'My Venues', key: 'venues', onClick: onMyVenues, disabled: false },
+    { icon: 'calendar_month', label: 'Bookings', key: 'bookings', onClick: onMyBookings, disabled: !hasBookings },
+    { icon: 'settings', label: 'Settings', key: 'settings', onClick: onSettings, disabled: false },
   ];
 
   const firstName = user.name?.split(' ')[0] || user.name;
@@ -43,32 +44,33 @@ export default function DashboardDesktopMenu({
       </div>
 
       <nav className="space-y-1 px-2">
-        {menuItems.map(({ icon, label, onClick, disabled, active }, idx) => (
-          <button
-            key={idx}
-            onClick={onClick}
-            disabled={disabled}
-            className={
-              `group flex items-center gap-3 pl-4 pr-3 py-3 text-base font-medium w-full text-left transition-all duration-200
-              ${active ? 'bg-[var(--profile-btn-bg)] text-[var(--profile-btn-text)] font-semibold rounded-r-2xl' : 'text-gray-700 hover:bg-indigo-50 rounded-lg'}
-              ${disabled ? 'text-gray-400 cursor-not-allowed' : ''}`
-            }
-          >
-            <span
-              className={`material-symbols-outlined text-xl transition-all duration-300 ${
-                active ? 'text-[var(--profile-btn-text)] fill-current' : 'group-hover:text-indigo-600'
-              }`}
-              style={{
-                fontVariationSettings: active
-                  ? `'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24`
-                  : `'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24`,
-              }}
+        {menuItems.map(({ icon, label, key, onClick, disabled }) => {
+          const isActive = activeSection === key;
+          return (
+            <button
+              key={key}
+              onClick={onClick}
+              disabled={disabled}
+              className={`group flex items-center gap-3 pl-4 pr-3 py-3 text-base font-medium w-full text-left transition-all duration-200
+                ${isActive ? 'bg-[var(--profile-btn-bg)] text-[var(--profile-btn-text)] font-semibold rounded-r-2xl' : 'text-gray-700 hover:bg-indigo-50 rounded-lg'}
+                ${disabled ? 'text-gray-400 cursor-not-allowed' : ''}`}
             >
-              {icon}
-            </span>
-            {label}
-          </button>
-        ))}
+              <span
+                className={`material-symbols-outlined text-xl transition-all duration-300 ${
+                  isActive ? 'text-[var(--profile-btn-text)] fill-current' : 'group-hover:text-indigo-600'
+                }`}
+                style={{
+                  fontVariationSettings: isActive
+                    ? `'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24`
+                    : `'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24`,
+                }}
+              >
+                {icon}
+              </span>
+              {label}
+            </button>
+          );
+        })}
       </nav>
     </aside>
   );

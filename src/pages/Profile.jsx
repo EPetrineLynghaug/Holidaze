@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import useProfileData from '../hooks/useProfileData';
@@ -10,23 +9,26 @@ import ActiveVenuesSection from '../components/profile/mobile/ActiveVenueCard';
 import DashboardMobileMenu from '../components/navigation/mobile/DashboardMobileMenu';
 import DashboardDesktopMenu from '../components/navigation/desktop/DashboardDesctopMeny';
 import AddVenueForm from '../components/profile/mobile/ListNewVenue';
-import EditVenueForm from '../components/profile/mobile/EditVenueModal';  
+import EditVenueForm from '../components/profile/mobile/EditVenueModal';
 import ProfileSettings from '../components/profile/mobile/ProfileSettings';
 import MyVenuesDashboard from '../components/profile/mobile/MyVenuesDashboard';
 import MyBookingsDashboard from '../components/profile/mobile/MyBookingsDashboard';
 import BottomSheet from '../components/ui/mobildemodal/BottomSheet';
+import ProfileSettingsPage from '../components/profile/desktop/ProfileSettings';
 
 export default function Profile() {
   const navigate = useNavigate();
   const { user, venues, bookings, loading, error } = useProfileData();
 
+  // Local UI state for modals
   const [showForm, setShowForm] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
   const [showMyVenues, setShowMyVenues] = useState(false);
   const [showMyBookings, setShowMyBookings] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
   const [selectedVenue, setSelectedVenue] = useState(null);
+  const [activeSection, setActiveSection] = useState('dashboard');
 
+  // Redirect to home if no user in localStorage
   useEffect(() => {
     if (!localStorage.getItem('user')) {
       navigate('/', { replace: true });
@@ -40,9 +42,14 @@ export default function Profile() {
     setShowEditForm(true);
   };
 
+  const handleSaveSettings = (updated) => {
+    localStorage.setItem('user', JSON.stringify(updated));
+    window.dispatchEvent(new Event('authChange'));
+    setActiveSection('dashboard');
+  };
+
   return (
     <div className="profile-container px-4 lg:px-0 font-figtree">
-      {/* Header */}
       <ProfileHeader user={user} />
 
       {/* Mobile dashboard menu */}
@@ -50,9 +57,11 @@ export default function Profile() {
         <DashboardMobileMenu
           hasBookings={bookings.length > 0}
           onListNew={() => setShowForm(true)}
-          onSettings={() => setShowSettings(true)}
-          onMyVenues={() => setShowMyVenues(true)}
-          onMyBookings={() => setShowMyBookings(true)}
+          onSettings={() => setActiveSection('settings')}
+          onMyVenues={() => setShowMyVenues(true)} // Trigger modal for My Venues
+          onMyBookings={() => setShowMyBookings(true)} // Trigger modal for My Bookings
+          onDashboard={() => setActiveSection('dashboard')}
+          activeSection={activeSection}
         />
       </div>
 
@@ -61,63 +70,66 @@ export default function Profile() {
         <DashboardDesktopMenu
           user={user}
           hasBookings={bookings.length > 0}
-          onListNew={() => setShowForm(true)}
-          onSettings={() => setShowSettings(true)}
-          onMyVenues={() => setShowMyVenues(true)}
-          onMyBookings={() => setShowMyBookings(true)}
+          onListNew={() => { setShowForm(true); setActiveSection('list'); }}
+          onSettings={() => setActiveSection('settings')}
+          onMyVenues={() => setShowMyVenues(true)} // Show My Venues modal
+          onMyBookings={() => setShowMyBookings(true)} // Show My Bookings modal
+          onDashboard={() => setActiveSection('dashboard')}
+          activeSection={activeSection}
         />
       </div>
 
-      {/* Info + Chart */}
-      <div className="block lg:hidden mt-6">
-        <DashboardInfoSection user={user} />
-        <ProfileChart venues={venues} bookings={bookings} />
-      </div>
-      <div className="hidden lg:grid lg:ml-64 lg:pl-12 lg:mt-6 lg:grid-cols-[1fr_1fr] lg:gap-6 lg:items-end">
-        <DashboardInfoSection user={user} />
-        <div className="self-end mt-4 lg:mt-0">
-          <ProfileChart venues={venues} bookings={bookings} />
-        </div>
-      </div>
+      {/* Dashboard Content */}
+      {activeSection === 'dashboard' && (
+        <>
+          <div className="block lg:hidden mt-6">
+            <DashboardInfoSection user={user} />
+            <ProfileChart venues={venues} bookings={bookings} />
+          </div>
+          <div className="hidden lg:grid lg:ml-64 lg:pl-12 lg:mt-6 lg:grid-cols-[1fr_1fr] lg:gap-6 lg:items-end">
+            <DashboardInfoSection user={user} />
+            <div className="self-end mt-4 lg:mt-0">
+              <ProfileChart venues={venues} bookings={bookings} />
+            </div>
+          </div>
 
-{/* Active Venues Section */}
-{/* Mobil */}
-<div className="block lg:hidden mt-6 px-2">
-  <ActiveVenuesSection
-    venues={venues}
-    loading={loading.venues}
-    error={error.venues}
-    onEdit={handleEditVenue}
-    onDelete={() => {}}
-  />
-</div>
-
-{/* Desktop: legger på mer horisontal padding */}
-<div className="hidden lg:block mt-6 lg:ml-64 lg:pl-12 px-12">
-  <ActiveVenuesSection
-    venues={venues}
-    loading={loading.venues}
-    error={error.venues}
-    onEdit={handleEditVenue}
-    onDelete={() => {}}
-  />
-</div>
-
-      {/* Bookings Section */}
-      {loading.bookings && <p className="text-center py-4">Loading bookings…</p>}
-      {error.bookings && (
-        <p className="text-center py-4 text-red-500">{error.bookings}</p>
+          <div className="block lg:hidden mt-6 px-2">
+            <ActiveVenuesSection
+              venues={venues}
+              loading={loading.venues}
+              error={error.venues}
+              onEdit={handleEditVenue}
+              onDelete={() => {}}
+            />
+          </div>
+          <div className="hidden lg:block mt-6 lg:ml-64 lg:pl-12 px-12">
+            <ActiveVenuesSection
+              venues={venues}
+              loading={loading.venues}
+              error={error.venues}
+              onEdit={handleEditVenue}
+              onDelete={() => {}}
+            />
+          </div>
+        </>
       )}
 
-      {/* Create Venue Modal */}
-      {user.venueManager && showForm && (
-        <BottomSheet title="Create Venue" onClose={() => setShowForm(false)}>
-          <AddVenueForm
-            userName={user.name}
-            onCreated={() => setShowForm(false)}
-            onClose={() => setShowForm(false)}
-          />
-        </BottomSheet>
+      {/* Settings Section */}
+      {activeSection === 'settings' && (
+        <>
+          <div className="hidden lg:block mt-6 lg:ml-64 lg:pl-12 px-12">
+            <ProfileSettingsPage userName={user.name} onSave={handleSaveSettings} />
+          </div>
+          <div className="block lg:hidden">
+            <BottomSheet title="Settings" onClose={() => setActiveSection('dashboard')}>
+              <ProfileSettings
+                userName={user.name}
+                onSave={handleSaveSettings}
+                onClose={() => setActiveSection('dashboard')}
+              />
+            </BottomSheet>
+          </div>
+        </>
       )}
 
       {/* Edit Venue Modal */}
@@ -131,21 +143,6 @@ export default function Profile() {
               // optionally refresh profile data here
             }}
             onClose={() => setShowEditForm(false)}
-          />
-        </BottomSheet>
-      )}
-
-      {/* Settings Modal */}
-      {showSettings && (
-        <BottomSheet title="Settings" onClose={() => setShowSettings(false)}>
-          <ProfileSettings
-            userName={user.name}
-            onSave={(updated) => {
-              localStorage.setItem('user', JSON.stringify(updated));
-              window.dispatchEvent(new Event('authChange'));
-              setShowSettings(false);
-            }}
-            onClose={() => setShowSettings(false)}
           />
         </BottomSheet>
       )}
