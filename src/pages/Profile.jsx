@@ -80,20 +80,28 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Active Venues Section */}
-      {loading.venues ? (
-        <p className="text-center py-4">Loading venues…</p>
-      ) : error.venues ? (
-        <p className="text-center py-4 text-red-500">{error.venues}</p>
-      ) : (
-        <div className="mt-8">
-          <ActiveVenuesSection
-            venues={venues}
-            onEdit={handleEditVenue}
-            onDelete={() => {}}
-          />
-        </div>
-      )}
+{/* Active Venues Section */}
+{/* Mobil */}
+<div className="block lg:hidden mt-6 px-2">
+  <ActiveVenuesSection
+    venues={venues}
+    loading={loading.venues}
+    error={error.venues}
+    onEdit={handleEditVenue}
+    onDelete={() => {}}
+  />
+</div>
+
+{/* Desktop: legger på mer horisontal padding */}
+<div className="hidden lg:block mt-6 lg:ml-64 lg:pl-12 px-12">
+  <ActiveVenuesSection
+    venues={venues}
+    loading={loading.venues}
+    error={error.venues}
+    onEdit={handleEditVenue}
+    onDelete={() => {}}
+  />
+</div>
 
       {/* Bookings Section */}
       {loading.bookings && <p className="text-center py-4">Loading bookings…</p>}
