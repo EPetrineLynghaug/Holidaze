@@ -132,6 +132,17 @@ export default function Profile() {
         </>
       )}
 
+       {/* Create Venue Modal */}
+       {user.venueManager && showForm && (
+        <BottomSheet title="Create Venue" onClose={() => setShowForm(false)}>
+          <AddVenueForm
+            userName={user.name}
+            onCreated={() => setShowForm(false)}
+            onClose={() => setShowForm(false)}
+          />
+        </BottomSheet>
+      )}
+
       {/* Edit Venue Modal */}
       {showEditForm && selectedVenue && (
         <BottomSheet title="Edit Venue" onClose={() => setShowEditForm(false)}>

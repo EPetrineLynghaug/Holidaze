@@ -8,6 +8,7 @@ export default function DashboardDesktopMenu({
   onSettings = () => {},
   onMyVenues = () => {},
   onMyBookings = () => {},
+  onDashboard = () => {}, // Add onDashboard function here
   activeSection = 'dashboard',
 }) {
   if (!user) return null;
@@ -16,7 +17,7 @@ export default function DashboardDesktopMenu({
   const role = user.venueManager ? 'Venue' : 'Guest';
 
   const menuItems = [
-    { icon: 'grid_view', label: 'Dashboard', key: 'dashboard', onClick: () => {}, disabled: false },
+    { icon: 'grid_view', label: 'Dashboard', key: 'dashboard', onClick: onDashboard, disabled: false },
     { icon: 'add_business', label: 'List New Venue', key: 'list', onClick: onListNew, disabled: false },
     { icon: 'apartment', label: 'My Venues', key: 'venues', onClick: onMyVenues, disabled: false },
     { icon: 'calendar_month', label: 'Bookings', key: 'bookings', onClick: onMyBookings, disabled: !hasBookings },
