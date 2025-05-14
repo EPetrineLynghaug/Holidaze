@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { VENUE_BY_ID_URL } from '../../constants/api';
 import { getAccessToken } from '../../../services/tokenService';
+import DeleteConfirmPopup from '../mobildemodal/DeleteConfirmPopup';
 
-export default function DeleteVenueButton({ venueId, onDeleted }) {
+export default function DeleteVenueButton({ venueId, onDeleted, className = '' }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const handleDelete = async () => {
-    if (!window.confirm('Er du sikker på at du vil slette denne venueen?')) return;
     setLoading(true);
     setError('');
     try {
@@ -19,37 +20,39 @@ export default function DeleteVenueButton({ venueId, onDeleted }) {
           'X-Noroff-API-Key': import.meta.env.VITE_NOROFF_API_KEY,
         },
       });
+
       if (!res.ok) {
         const errJson = await res.json();
         throw new Error(errJson.errors?.[0]?.message || `Error ${res.status}`);
       }
+
       onDeleted(venueId);
+      window.location.reload();
     } catch (err) {
       console.error('Delete error:', err);
       setError(err.message);
     } finally {
       setLoading(false);
+      setShowConfirm(false);
     }
   };
 
   return (
     <div>
       <button
-        onClick={handleDelete}
+        onClick={() => setShowConfirm(true)}
         disabled={loading}
-        style={{
-          marginLeft: 8,
-          padding: '6px 10px',
-          backgroundColor: '#dc3545',
-          color: '#fff',
-          border: 'none',
-          borderRadius: 4,
-          cursor: loading ? 'not-allowed' : 'pointer',
-        }}
+        className={`inline-flex items-center px-2 py-1 text-sm font-medium text-red-600 hover:underline transition disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
       >
-        {loading ? 'Sletter...' : 'Slett venue'}
+        {loading ? 'Deleting…' : 'Delete'}
       </button>
-      {error && <p style={{ color: 'red', marginTop: 4 }}>{error}</p>}
+      {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
+      {showConfirm && (
+        <DeleteConfirmPopup
+          onCancel={() => setShowConfirm(false)}
+          onConfirm={handleDelete}
+        />
+      )}
     </div>
   );
 }

@@ -9,7 +9,7 @@ export default function ProfileHeader({ user }) {
   const role = user.venueManager ? 'Venue' : 'Guest';
 
   return (
-    <header className="mb-8">
+    <header className="mb-8 lg:hidden">
       {/* Banner – full width, fixed heights */}
       <section className="w-full" aria-labelledby="banner-heading">
         <div className="h-[150px] md:h-[300px] lg:h-[300px] overflow-hidden">

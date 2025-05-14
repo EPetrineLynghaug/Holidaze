@@ -1,54 +1,62 @@
-export default function DashboardInfoMobile() {
-    return (
-      <section className="md:hidden max-w-2xl mx-auto px-4  space-y-5">
-        {/* Seksjonstittel */}
-        <h2 className="text-lg font-normal text-gray-900">Dashboard</h2>
-  
-        {/* 1 – Velkomst */}
-        <div>
-          <p className="text-base font-normal text-gray-900">
-            Welcome to your Venue Control Center!
+import React from 'react';
+
+export default function DashboardInfoSection({ user }) {
+  const isVenue = user?.venueManager;
+
+  return (
+    <section className="w-full px-2 space-y-5 mt-6 lg:px-0 lg:w-full">
+      {/* Seksjonstittel */}
+      <h2 className="text-xl lg:text-2xl font-semibold text-gray-900">
+        Dashboard
+      </h2>
+
+      {/* 1 – Velkomst */}
+      <div className="space-y-2">
+        <p className="text-base lg:text-lg font-medium text-gray-900">
+          {isVenue
+            ? "Welcome to your Venue Control Center!"
+            : "Welcome to your Dashboard!"}
+        </p>
+        <p className="text-sm lg:text-base font-normal text-gray-700">
+          {isVenue
+            ? "Get an instant visual overview of your venue's booking activity. Easily monitor booking trends, occupancy rates, and manage your active venues efficiently."
+            : "Here you can manage your profile and access other important features."}
+        </p>
+      </div>
+
+      {/* 2 – Rask redigering */}
+      {isVenue && (
+        <div className="space-y-2">
+          <p className="text-base lg:text-lg font-medium text-gray-900">
+            Quickly edit venue:
           </p>
-          <p className="mt-1 text-sm font-normal text-gray-600">
-            Get an instant visual overview of your venue&apos;s booking activity.
-            Easily monitor booking trends, occupancy rates, and manage your active
-            venues efficiently:
-          </p>
-        </div>
-  
-        {/* 2 – Rask redigering */}
-        <div>
-          <p className="text-base font-normal text-gray-900">
-            Quickly edit venue&nbsp;:
-          </p>
-          <p className="mt-1 text-sm font-normal text-gray-600">
-            Details, remove venues, or temporarily disable listings directly from
-            your active venue list.
-          </p>
-        </div>
-  
-        {/* 3 – Tilbakemelding */}
-        <div>
-          <p className="text-base font-normal text-gray-900">
-            Feedback Matters&nbsp;:
-          </p>
-          <p className="mt-1 text-sm font-normal text-gray-600">
-            Use the sidebar to rate and share feedback from your latest rental
-            experience, helping you enhance the quality of future stays.
+          <p className="text-sm lg:text-base font-normal text-gray-700">
+            Details, remove venues, or temporarily disable listings directly from your active venue list.
           </p>
         </div>
-  
-        {/* 4 – Profiladministrasjon */}
-        <div>
-          <p className="text-base font-normal text-gray-900">
-            Manage Your Venue Profile&nbsp;:
-          </p>
-          <p className="mt-1 text-sm font-normal text-gray-600">
-            Visit Settings to change your venue status, update your profile image,
-            and modify other important information about your venue.
-          </p>
-        </div>
-      </section>
-    );
-  }
-  
+      )}
+
+      {/* 3 – Tilbakemelding */}
+      <div className="space-y-2">
+        <p className="text-base lg:text-lg font-medium text-gray-900">
+          Feedback Matters:
+        </p>
+        <p className="text-sm lg:text-base font-normal text-gray-700">
+          Use the sidebar to rate and share feedback from your latest rental experience, helping you enhance the quality of future stays.
+        </p>
+      </div>
+
+      {/* 4 – Profiladministrasjon */}
+      <div className="space-y-2">
+        <p className="text-base lg:text-lg font-medium text-gray-900">
+          Manage Your Profile:
+        </p>
+        <p className="text-sm lg:text-base font-normal text-gray-700">
+          {isVenue
+            ? "Visit Settings to change your venue status, update your profile image, and modify other important information about your venue."
+            : "Visit Settings to update your profile information and manage your account."}
+        </p>
+      </div>
+    </section>
+  );
+}
