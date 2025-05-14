@@ -16,6 +16,7 @@ import MyBookingsDashboard from '../components/profile/mobile/MyBookingsDashboar
 import BottomSheet from '../components/ui/mobildemodal/BottomSheet';
 import ProfileSettingsPage from '../components/profile/desktop/ProfileSettings';
 import AddVenuePage from '../components/profile/desktop/AddVenuePage';
+import MyVenuesDashboardDesktop from '../components/profile/desktop/MyVenuesDashboardDesktop';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -57,12 +58,9 @@ export default function Profile() {
       <div className="mt-4 lg:hidden">
       <DashboardMobileMenu
         hasBookings={bookings.length > 0}
-        onListNew={() => {
-        setShowForm(true);
-        setActiveSection('list');
-       }}
+        onListNew={() => {setShowForm(true);setActiveSection('list');}}
         onSettings={() => setActiveSection('settings')}
-       onMyVenues={() => setShowMyVenues(true)}
+        onMyVenues={() => { setShowMyVenues(true); setActiveSection('venues'); }}
        onMyBookings={() => setShowMyBookings(true)}
         onDashboard={() => setActiveSection('dashboard')}
        activeSection={activeSection}
@@ -76,7 +74,7 @@ export default function Profile() {
           hasBookings={bookings.length > 0}
           onListNew={() => { setShowForm(true); setActiveSection('list'); }}
           onSettings={() => setActiveSection('settings')}
-          onMyVenues={() => setShowMyVenues(true)} 
+          onMyVenues={() => { setShowMyVenues(true); setActiveSection('venues'); }}
           onMyBookings={() => setShowMyBookings(true)} 
           onDashboard={() => setActiveSection('dashboard')}
           activeSection={activeSection}
@@ -183,13 +181,34 @@ export default function Profile() {
           />
         </BottomSheet>
       )}
+{/* My Venues Section */}
+{showMyVenues && activeSection === 'venues' && (
+  <>
+    {/* Desktop */}
+    <div className="hidden lg:block lg:ml-64 lg:pl-2 px-16">
+      <MyVenuesDashboardDesktop onClose={() => setShowMyVenues(false)} />
+    </div>
 
-      {/* My Venues Modal */}
-      {showMyVenues && (
-        <BottomSheet title="My Venues" onClose={() => setShowMyVenues(false)}>
-          <MyVenuesDashboard onClose={() => setShowMyVenues(false)} />
-        </BottomSheet>
-      )}
+    {/* Mobile */}
+    <div className="block lg:hidden">
+      <BottomSheet
+        title="My Venues"
+        onClose={() => {
+          setShowMyVenues(false);
+          setActiveSection('dashboard');
+        }}
+      >
+        <MyVenuesDashboard
+          onClose={() => {
+            setShowMyVenues(false);
+            setActiveSection('dashboard');
+          }}
+        />
+      </BottomSheet>
+    </div>
+  </>
+)}
+
 
       {/* My Bookings Modal */}
       {showMyBookings && (
