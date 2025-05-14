@@ -133,28 +133,38 @@ export default function Profile() {
         </>
       )}
 
- {/* Create Venue Section */}
- {user.venueManager && showForm && (
-        <>
-          {/* Desktop/large screens: render full page */}
-          <div className="hidden lg:block lg:ml-64 lg:pl-2 px-16">
-            <AddVenuePage
-              userName={user.name}
-              onCreated={() => setShowForm(false)}
-            />
-          </div>
+{user.venueManager && showForm && activeSection === 'list' && (
+  <>
+    {/* Desktop */}
+    <div className="hidden lg:block lg:ml-64 lg:pl-2 px-16">
+      <AddVenuePage
+        userName={user.name}
+        onCreated={() => {
+          setShowForm(false);
+          setActiveSection('dashboard');
+        }}
+        hideHeader={true}
+      />
+    </div>
 
-          {/* Mobile: wrap in BottomSheet */}
-          <div className="block lg:hidden">
-            <BottomSheet title="Create Venue" onClose={() => setShowForm(false)}>
-              <AddVenueForm
-                userName={user.name}
-                onCreated={() => setShowForm(false)}
-              />
-            </BottomSheet>
-          </div>
-        </>
-      )}
+    {/* Mobile */}
+    <div className="block lg:hidden">
+      <BottomSheet title="Create Venue" onClose={() => {
+        setShowForm(false);
+        setActiveSection('dashboard');
+      }}>
+        <AddVenueForm
+          userName={user.name}
+          onCreated={() => {
+            setShowForm(false);
+            setActiveSection('dashboard');
+          }}
+        />
+      </BottomSheet>
+    </div>
+  </>
+)}
+
 
       {/* Edit Venue Modal */}
       {showEditForm && selectedVenue && (
