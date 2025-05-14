@@ -55,15 +55,18 @@ export default function Profile() {
 
       {/* Mobile dashboard menu */}
       <div className="mt-4 lg:hidden">
-        <DashboardMobileMenu
-          hasBookings={bookings.length > 0}
-          onListNew={() => setShowForm(true)}
-          onSettings={() => setActiveSection('settings')}
-          onMyVenues={() => setShowMyVenues(true)} 
-          onMyBookings={() => setShowMyBookings(true)} 
-          onDashboard={() => setActiveSection('dashboard')}
-          activeSection={activeSection}
-        />
+      <DashboardMobileMenu
+        hasBookings={bookings.length > 0}
+        onListNew={() => {
+        setShowForm(true);
+        setActiveSection('list');
+       }}
+        onSettings={() => setActiveSection('settings')}
+       onMyVenues={() => setShowMyVenues(true)}
+       onMyBookings={() => setShowMyBookings(true)}
+        onDashboard={() => setActiveSection('dashboard')}
+       activeSection={activeSection}
+      />
       </div>
 
       {/* Desktop sidebar menu */}
@@ -149,21 +152,21 @@ export default function Profile() {
 
     {/* Mobile */}
     <div className="block lg:hidden">
-      <BottomSheet title="Create Venue" onClose={() => {
-        setShowForm(false);
-        setActiveSection('dashboard');
-      }}>
-        <AddVenueForm
-          userName={user.name}
-          onCreated={() => {
-            setShowForm(false);
-            setActiveSection('dashboard');
-          }}
-        />
-      </BottomSheet>
+      <AddVenueForm
+        userName={user.name}
+        onCreated={() => {
+          setShowForm(false);
+          setActiveSection('dashboard');
+        }}
+        onClose={() => {
+          setShowForm(false);
+          setActiveSection('dashboard');
+        }}
+      />
     </div>
   </>
 )}
+
 
 
       {/* Edit Venue Modal */}
@@ -174,7 +177,7 @@ export default function Profile() {
             existingVenue={selectedVenue}
             onCreated={() => {
               setShowEditForm(false);
-              // optionally refresh profile data here
+              
             }}
             onClose={() => setShowEditForm(false)}
           />
