@@ -17,6 +17,7 @@ import BottomSheet from '../components/ui/mobildemodal/BottomSheet';
 import ProfileSettingsPage from '../components/profile/desktop/ProfileSettings';
 import AddVenuePage from '../components/profile/desktop/AddVenuePage';
 import MyVenuesDashboardDesktop from '../components/profile/desktop/MyVenuesDashboardDesktop';
+import MyBookingsDashboardDesktop from '../components/profile/desktop/MyBookingsDashboardDesktop';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -61,7 +62,7 @@ export default function Profile() {
         onListNew={() => {setShowForm(true);setActiveSection('list');}}
         onSettings={() => setActiveSection('settings')}
         onMyVenues={() => { setShowMyVenues(true); setActiveSection('venues'); }}
-       onMyBookings={() => setShowMyBookings(true)}
+        onMyBookings={() => { setShowMyBookings(true); setActiveSection('bookings'); }}
         onDashboard={() => setActiveSection('dashboard')}
        activeSection={activeSection}
       />
@@ -75,7 +76,7 @@ export default function Profile() {
           onListNew={() => { setShowForm(true); setActiveSection('list'); }}
           onSettings={() => setActiveSection('settings')}
           onMyVenues={() => { setShowMyVenues(true); setActiveSection('venues'); }}
-          onMyBookings={() => setShowMyBookings(true)} 
+          onMyBookings={() => { setShowMyBookings(true); setActiveSection('bookings'); }}
           onDashboard={() => setActiveSection('dashboard')}
           activeSection={activeSection}
         />
@@ -210,11 +211,23 @@ export default function Profile() {
 )}
 
 
-      {/* My Bookings Modal */}
-      {showMyBookings && (
-        <BottomSheet title="My Bookings" onClose={() => setShowMyBookings(false)}>
-          <MyBookingsDashboard onClose={() => setShowMyBookings(false)} />
-        </BottomSheet>
+{/* My Bookings Section */}
+{showMyBookings && activeSection === 'bookings' && (
+        <>
+          <div className="hidden lg:block lg:ml-64 lg:pl-2 px-16">
+            <MyBookingsDashboardDesktop onClose={() => { setShowMyBookings(false); setActiveSection('dashboard'); }} />
+          </div>
+          <div className="block lg:hidden">
+            <BottomSheet
+              title="My Bookings"
+              onClose={() => { setShowMyBookings(false); setActiveSection('dashboard'); }}
+            >
+              <MyBookingsDashboard
+                onClose={() => { setShowMyBookings(false); setActiveSection('dashboard'); }}
+              />
+            </BottomSheet>
+          </div>
+        </>
       )}
     </div>
   );
