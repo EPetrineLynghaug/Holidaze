@@ -2,118 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { PROFILE_BY_NAME_VENUES_URL } from '../../constants/api';
 import { getAccessToken } from '../../../services/tokenService';
-import useBookingRanges from '../../../hooks/useBookingRanges';
 import BookingCancelledPopup from '../../ui/mobildemodal/BookingCancelledPopup';
-
-function VenueRow({ venue, onDeleteVenue, onEditVenue, onViewVenue, onAskCancel }) {
-  const { bookingRanges } = useBookingRanges(venue.bookings);
-  const [open, setOpen] = useState(false);
-  const now = new Date();
-  const current = bookingRanges.find(r => r.startDate <= now && r.endDate >= now);
-  const next = bookingRanges.find(r => r.startDate > now);
-  const latest = bookingRanges.at(-1);
-
-  let status = 'Never booked';
-  let statusDetail = '—';
-
-  if (current) {
-    status = 'Rented';
-    const daysLeft = Math.ceil((current.endDate - now) / (1000 * 60 * 60 * 24));
-    statusDetail = `${daysLeft} day${daysLeft !== 1 ? 's' : ''} left`;
-  } else if (next) {
-    status = 'Upcoming';
-    const daysUntil = Math.ceil((next.startDate - now) / (1000 * 60 * 60 * 24));
-    statusDetail = `in ${daysUntil} day${daysUntil !== 1 ? 's' : ''}`;
-  } else if (latest) {
-    status = 'Previously booked';
-    const daysAgo = Math.ceil((now - latest.endDate) / (1000 * 60 * 60 * 24));
-    statusDetail = `last booked ${daysAgo} day${daysAgo !== 1 ? 's' : ''} ago`;
-  }
-
-  const bookingCount = venue.bookings.length;
-  const badgeColor = bookingCount > 0 ? 'bg-green-600' : 'bg-red-600';
-
-  return (
-    <section className="bg-white shadow rounded-xl ring-1 ring-gray-100 p-6 space-y-4">
-      <div className="grid grid-cols-12 gap-4 items-center">
-        <img
-          src={venue.media[0]?.url}
-          alt={venue.media[0]?.alt || venue.name}
-          className="col-span-2 h-20 w-full object-cover rounded-lg"
-        />
-        <div className="col-span-4">
-          <h3 className="text-lg font-semibold text-gray-900">{venue.name}</h3>
-          <p className="text-sm text-gray-500">{venue.location.city}, {venue.location.country}</p>
-        </div>
-        <div className="col-span-3 space-y-1">
-          <p className="text-sm font-medium">{status}</p>
-          <p className="text-xs text-gray-500 italic">{statusDetail}</p>
-          <span
-            className={`inline-block text-xs font-medium text-white px-2 py-0.5 rounded-full ${badgeColor}`}
-            aria-label={`${bookingCount} bookings`}
-          >
-            {bookingCount} booking{bookingCount !== 1 ? 's' : ''}
-          </span>
-        </div>
-        <div className="col-span-3 flex justify-end space-x-3 text-sm">
-          {bookingCount > 0 && (
-            <button
-              onClick={() => setOpen(!open)}
-              className="text-purple-600 hover:underline"
-              aria-expanded={open}
-              aria-controls={`bookings-${venue.id}`}
-              aria-label={open ? 'Hide bookings' : 'Show bookings'}
-            >
-              {open ? 'Hide' : 'Show'}
-            </button>
-          )}
-          <button onClick={() => onViewVenue(venue.id)} className="text-blue-600 hover:underline">
-            View
-          </button>
-          <button onClick={() => onEditVenue(venue.id)} className="text-yellow-600 hover:underline">
-            Edit
-          </button>
-          <button onClick={() => onDeleteVenue(venue.id)} className="text-red-600 hover:underline">
-            Delete
-          </button>
-        </div>
-      </div>
-
-      {open && bookingCount > 0 && (
-        <div
-          id={`bookings-${venue.id}`}
-          className="mt-4 space-y-3 max-h-60 overflow-y-auto"
-        >
-          {venue.bookings.map((b) => (
-            <div
-              key={b.id}
-              className="bg-gray-50 px-4 py-3 rounded-lg"
-            >
-              <p className="text-sm">
-                <strong>Date:</strong>{' '}
-                {new Date(b.dateFrom).toLocaleDateString()} – {new Date(b.dateTo).toLocaleDateString()}
-              </p>
-              <p className="text-sm">
-                <strong>Booked by:</strong> {b.customer?.name || 'Unknown'}
-              </p>
-              {b.customer?.email && (
-                <p className="text-xs text-gray-500">
-                  <strong>Email:</strong> {b.customer.email}
-                </p>
-              )}
-              <button
-                onClick={() => onAskCancel(b.id)}
-                className="mt-2 inline-block text-xs font-medium text-red-600 hover:underline"
-              >
-                Cancel booking
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-    </section>
-  );
-}
+import VenueCard from '../shared/VenueCard'; // 👈 Gjenbrukes korrekt
 
 export default function MyVenuesDashboardDesktop() {
   const navigate = useNavigate();
@@ -177,16 +67,16 @@ export default function MyVenuesDashboardDesktop() {
         ) : error ? (
           <p className="text-center text-red-600">{error}</p>
         ) : venues.length === 0 ? (
-          <p className="italic text-gray-500">You haven't listed any venues yet.</p>
+          <p className="italic text-gray-500">You haven’t listed any venues yet.</p>
         ) : (
           venues.map(v => (
-            <VenueRow
+            <VenueCard
               key={v.id}
               venue={v}
               onDeleteVenue={delV}
               onEditVenue={edit}
               onViewVenue={view}
-              onAskCancel={(bid) => setSelectedBookingId(bid)}
+              onAskCancel={bid => setSelectedBookingId(bid)}
             />
           ))
         )}
