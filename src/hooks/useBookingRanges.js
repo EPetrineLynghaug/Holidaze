@@ -1,6 +1,4 @@
-
 import { useMemo } from "react";
-
 
 export default function useBookingRanges(bookings = []) {
   return useMemo(() => {
@@ -8,14 +6,18 @@ export default function useBookingRanges(bookings = []) {
       return { bookingRanges: [], disabledDates: [] };
     }
 
+    const bookingRanges = bookings.map(({ dateFrom, dateTo }, i) => {
+      const start = new Date(dateFrom);
+      const end = new Date(dateTo);
+      return {
+        startDate: start,
+        endDate: end,
+        key: `booked-${i}`,
+        color: "#f56565", 
+        disabled: true,
+      };
+    });
 
-    const bookingRanges = bookings.map(({ dateFrom, dateTo }, i) => ({
-      startDate: new Date(dateFrom),
-      endDate: new Date(dateTo),
-      key: `booked-${i}`,
-    }));
-
-  
     const disabledDates = bookingRanges.flatMap(({ startDate, endDate }) => {
       const dates = [];
       const cur = new Date(startDate);

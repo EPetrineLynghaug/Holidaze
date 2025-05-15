@@ -14,7 +14,6 @@ import {
 
 export function useVenueForm(userName, onCreated) {
   const [step, setStep] = useState(0);
-  // Include location fields: address, city, country
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -24,19 +23,38 @@ export function useVenueForm(userName, onCreated) {
     facilities: [],
     bathrooms: 1,
     rating: 0,
-    dateRange: { startDate: new Date(), endDate: new Date(), key: "selection" },
+    dateRange: {
+      startDate: new Date(),
+      endDate: new Date(),
+      key: "selection",
+    },
+    rentalDays: 1,
+    bookings: [], // ← lagt til
     price: "",
     guests: 1,
+    type: "", // ← lagt til
     location: {
       address: "",
       city: "",
+      zip: "",
       country: "",
+      continent: "",
+      lat: 0,
+      lng: 0,
     },
   });
   const [feedback, setFeedback] = useState({ error: "", success: "" });
 
+  // Generic updater for top‐level fields
   const updateField = (field, value) =>
     setForm((prev) => ({ ...prev, [field]: value }));
+
+  // Specific updater for nested location fields
+  const updateLocationField = (field, value) =>
+    setForm((prev) => ({
+      ...prev,
+      location: { ...prev.location, [field]: value },
+    }));
 
   const toggleField = (field, key) =>
     setForm((prev) => {
@@ -71,10 +89,14 @@ export function useVenueForm(userName, onCreated) {
   const next = () => setStep((s) => Math.min(s + 1, STEPS.length - 1));
   const back = () => setStep((s) => Math.max(s - 1, 0));
 
+  // Compute inclusive number of days
+  const computeDays = (start, end) =>
+    Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1);
+
   const submit = async () => {
     setFeedback({ error: "", success: "" });
     try {
-      // build metadata from toggles
+      // Build metadata flags
       const meta = {
         ...ENV_OPTIONS.reduce(
           (m, o) => ({ ...m, [o.key]: form.environments.includes(o.key) }),
@@ -91,7 +113,7 @@ export function useVenueForm(userName, onCreated) {
         bathrooms: form.bathrooms,
       };
 
-      // assemble payload including location
+      // Assemble payload
       const payload = {
         name: form.title,
         description: form.description,
@@ -100,17 +122,19 @@ export function useVenueForm(userName, onCreated) {
         maxGuests: form.guests,
         rating: form.rating,
         meta,
-        location: {
-          address: form.location.address,
-          city: form.location.city,
-          country: form.location.country,
-        },
+        location: { ...form.location },
         availability: {
           start: form.dateRange.startDate.toISOString().slice(0, 10),
           end: form.dateRange.endDate.toISOString().slice(0, 10),
         },
+        validUntil: new Date(
+          form.dateRange.endDate.getTime() + 24 * 60 * 60 * 1000
+        )
+          .toISOString()
+          .slice(0, 10),
       };
 
+      // POST to create venue
       const token = getAccessToken();
       let res = await fetch(VENUES_URL, {
         method: "POST",
@@ -122,8 +146,9 @@ export function useVenueForm(userName, onCreated) {
         body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error(`Error ${res.status}`);
+      await res.json(); // ignore body
 
-      // refresh list after creation
+      // Fetch updated list of this user's venues (with bookings)
       res = await fetch(
         `${PROFILE_BY_NAME_VENUES_URL(userName)}?_bookings=true`,
         {
@@ -133,8 +158,9 @@ export function useVenueForm(userName, onCreated) {
           },
         }
       );
-      const { data } = await res.json();
-      onCreated(data);
+      const listJson = await res.json();
+      onCreated(listJson.data);
+
       setFeedback({ success: "Venue created successfully!", error: "" });
     } catch (err) {
       setFeedback({ success: "", error: err.message });
@@ -146,6 +172,7 @@ export function useVenueForm(userName, onCreated) {
     form,
     feedback,
     updateField,
+    updateLocationField,
     toggleField,
     addImage,
     setImage,
