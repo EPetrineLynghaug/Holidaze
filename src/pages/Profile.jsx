@@ -186,7 +186,7 @@ export default function Profile() {
 {showMyVenues && activeSection === 'venues' && (
   <>
     {/* Desktop */}
-    <div className="hidden lg:block lg:ml-64 lg:pl-2 px-16">
+    <div className="hidden lg:block  lg:pl-90 ">
       <MyVenuesDashboardDesktop onClose={() => setShowMyVenues(false)} />
     </div>
 
@@ -214,8 +214,8 @@ export default function Profile() {
 {/* My Bookings Section */}
 {showMyBookings && activeSection === 'bookings' && (
         <>
-          <div className="hidden lg:block lg:ml-64 lg:pl-2 px-16">
-            <MyBookingsDashboardDesktop onClose={() => { setShowMyBookings(false); setActiveSection('dashboard'); }} />
+  <div className="hidden lg:block  lg:pl-2 px-20 ">
+  <MyBookingsDashboardDesktop onClose={() => { setShowMyBookings(false); setActiveSection('dashboard'); }} />
           </div>
           <div className="block lg:hidden">
             <BottomSheet

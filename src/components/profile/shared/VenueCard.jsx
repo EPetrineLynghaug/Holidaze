@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import useBookingRanges from '../../../hooks/useBookingRanges';
+import React, { useState } from "react";
+import useBookingRanges from "../../../hooks/useBookingRanges";
 
 export default function VenueCard({ venue, onDeleteVenue, onEditVenue, onViewVenue, onAskCancel }) {
   const [open, setOpen] = useState(false);
@@ -10,39 +10,39 @@ export default function VenueCard({ venue, onDeleteVenue, onEditVenue, onViewVen
   const next = bookingRanges.find(r => r.startDate > now);
   const latest = bookingRanges.at(-1);
 
-  let status = 'Never booked';
-  let statusDetail = '—';
+  let status = "Never booked";
+  let statusDetail = "—";
 
   if (current) {
     const daysLeft = Math.ceil((current.endDate - now) / (1000 * 60 * 60 * 24));
-    status = 'Rented';
-    statusDetail = `${daysLeft} day${daysLeft !== 1 ? 's' : ''} left`;
+    status = "Rented";
+    statusDetail = `${daysLeft} day${daysLeft !== 1 ? "s" : ""} left`;
   } else if (next) {
     const daysUntil = Math.ceil((next.startDate - now) / (1000 * 60 * 60 * 24));
-    status = 'Upcoming';
-    statusDetail = `in ${daysUntil} day${daysUntil !== 1 ? 's' : ''}`;
+    status = "Upcoming";
+    statusDetail = `in ${daysUntil} day${daysUntil !== 1 ? "s" : ""}`;
   } else if (latest) {
     const daysAgo = Math.ceil((now - latest.endDate) / (1000 * 60 * 60 * 24));
-    status = 'Previously booked';
-    statusDetail = `last booked ${daysAgo} day${daysAgo !== 1 ? 's' : ''} ago`;
+    status = "Previously booked";
+    statusDetail = `last booked ${daysAgo} day${daysAgo !== 1 ? "s" : ""} ago`;
   }
 
   const bookingCount = venue.bookings?.length || 0;
-  const badgeColor = bookingCount > 0 ? 'bg-green-600' : 'bg-red-600';
+  const badgeColor = bookingCount > 0 ? "bg-green-600" : "bg-red-600";
 
   return (
-    <section className="bg-white rounded-2xl shadow-lg p-6 ring-1 ring-gray-200 space-y-6">
-      {/* Top row: image, details, badge */}
-      <div className="grid md:grid-cols-12 gap-6 items-center">
+    <section className="bg-white shadow rounded-lg w-full max-w-5xl p-6 md:p-8 space-y-6 ring-1 ring-gray-100 text-left">
+      {/* Image, details, booking status */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
         <div className="md:col-span-2">
           <img
-            src={venue.media[0]?.url || 'https://via.placeholder.com/150'}
+            src={venue.media[0]?.url || "https://via.placeholder.com/150"}
             alt={venue.media[0]?.alt || venue.name}
-            className="w-full aspect-[4/3] object-cover rounded-lg"
+            className="w-full h-40 object-cover rounded-lg border border-gray-300 shadow-lg"
           />
         </div>
         <div className="md:col-span-4 space-y-1">
-          <h3 className="text-lg md:text-xl font-semibold text-gray-900 line-clamp-2 md:line-clamp-1">
+          <h3 className="text-lg md:text-xl font-semibold text-gray-900">
             {venue.name}
           </h3>
           <p className="text-sm text-gray-500">
@@ -53,12 +53,12 @@ export default function VenueCard({ venue, onDeleteVenue, onEditVenue, onViewVen
           <p className="text-sm font-medium text-gray-700">{status}</p>
           <p className="text-xs italic text-gray-400">{statusDetail}</p>
           <span className={`inline-block text-xs font-medium text-white px-2 py-0.5 rounded-full ${badgeColor}`}>
-            {bookingCount} booking{bookingCount !== 1 ? 's' : ''}
+            {bookingCount} booking{bookingCount !== 1 ? "s" : ""}
           </span>
         </div>
       </div>
 
-      {/* Buttons at bottom */}
+      {/* Action Buttons */}
       <div className="flex flex-wrap justify-end gap-3 text-sm">
         {bookingCount > 0 && (
           <button
@@ -67,7 +67,7 @@ export default function VenueCard({ venue, onDeleteVenue, onEditVenue, onViewVen
             aria-expanded={open}
             aria-controls={`bookings-${venue.id}`}
           >
-            {open ? 'Hide Bookings' : 'Show Bookings'}
+            {open ? "Hide Bookings" : "Show Bookings"}
           </button>
         )}
         <button
@@ -90,16 +90,16 @@ export default function VenueCard({ venue, onDeleteVenue, onEditVenue, onViewVen
         </button>
       </div>
 
-      {/* Bookings list */}
+      {/* Bookings List (no internal scroll) */}
       {open && bookingCount > 0 && (
-        <div id={`bookings-${venue.id}`} className="mt-4 space-y-4 max-h-60 overflow-y-auto">
+        <div id={`bookings-${venue.id}`} className="mt-4 space-y-4">
           {venue.bookings.map((b) => (
             <div key={b.id} className="bg-gray-50 px-5 py-4 rounded-lg">
               <p className="text-sm text-gray-700">
                 <strong>Date:</strong> {new Date(b.dateFrom).toLocaleDateString()} – {new Date(b.dateTo).toLocaleDateString()}
               </p>
               <p className="text-sm text-gray-700">
-                <strong>Booked by:</strong> {b.customer?.name || 'Unknown'}
+                <strong>Booked by:</strong> {b.customer?.name || "Unknown"}
               </p>
               {b.customer?.email && (
                 <p className="text-xs text-gray-500">
