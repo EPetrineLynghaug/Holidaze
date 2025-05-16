@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-
 import useBookingRanges from '../../../hooks/useBookingRanges';
 
 export default function VenueCard({ venue, onDeleteVenue, onEditVenue, onViewVenue, onAskCancel }) {
@@ -32,8 +31,9 @@ export default function VenueCard({ venue, onDeleteVenue, onEditVenue, onViewVen
   const badgeColor = bookingCount > 0 ? 'bg-green-600' : 'bg-red-600';
 
   return (
-    <section className="bg-white rounded-xl shadow p-4 md:p-6 ring-1 ring-gray-100 space-y-4">
-      <div className="grid md:grid-cols-12 gap-4">
+    <section className="bg-white rounded-2xl shadow-lg p-6 ring-1 ring-gray-200 space-y-6">
+      {/* Top row: image, details, badge */}
+      <div className="grid md:grid-cols-12 gap-6 items-center">
         <div className="md:col-span-2">
           <img
             src={venue.media[0]?.url || 'https://via.placeholder.com/150'}
@@ -41,48 +41,64 @@ export default function VenueCard({ venue, onDeleteVenue, onEditVenue, onViewVen
             className="w-full aspect-[4/3] object-cover rounded-lg"
           />
         </div>
-
         <div className="md:col-span-4 space-y-1">
-          <h3 className="text-lg font-semibold text-gray-900 break-words line-clamp-2 md:line-clamp-1">
+          <h3 className="text-lg md:text-xl font-semibold text-gray-900 line-clamp-2 md:line-clamp-1">
             {venue.name}
           </h3>
-          <p className="text-sm text-gray-500">{venue.location?.city}, {venue.location?.country}</p>
+          <p className="text-sm text-gray-500">
+            {venue.location?.city}, {venue.location?.country}
+          </p>
         </div>
-
-        <div className="md:col-span-3 space-y-1">
-          <p className="text-sm font-medium">{status}</p>
+        <div className="md:col-span-3 space-y-2">
+          <p className="text-sm font-medium text-gray-700">{status}</p>
           <p className="text-xs italic text-gray-400">{statusDetail}</p>
           <span className={`inline-block text-xs font-medium text-white px-2 py-0.5 rounded-full ${badgeColor}`}>
             {bookingCount} booking{bookingCount !== 1 ? 's' : ''}
           </span>
         </div>
-
-        <div className="md:col-span-3 flex flex-col md:flex-row md:flex-wrap justify-end md:justify-start items-start gap-2 md:gap-3 text-sm">
-          {bookingCount > 0 && (
-            <button
-              onClick={() => setOpen(!open)}
-              className="text-purple-600 hover:underline"
-              aria-expanded={open}
-              aria-controls={`bookings-${venue.id}`}
-              aria-label={open ? 'Hide bookings' : 'Show bookings'}
-            >
-              {open ? 'Hide' : 'Show'}
-            </button>
-          )}
-          <button onClick={() => onViewVenue(venue.id)} className="text-blue-600 hover:underline">View</button>
-          <button onClick={() => onEditVenue(venue.id)} className="text-yellow-600 hover:underline">Edit</button>
-          <button onClick={() => onDeleteVenue(venue.id)} className="text-red-600 hover:underline">Delete</button>
-        </div>
       </div>
 
+      {/* Buttons at bottom */}
+      <div className="flex flex-wrap justify-end gap-3 text-sm">
+        {bookingCount > 0 && (
+          <button
+            onClick={() => setOpen(!open)}
+            className="px-4 py-2 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition"
+            aria-expanded={open}
+            aria-controls={`bookings-${venue.id}`}
+          >
+            {open ? 'Hide Bookings' : 'Show Bookings'}
+          </button>
+        )}
+        <button
+          onClick={() => onViewVenue(venue.id)}
+          className="px-4 py-2 rounded-lg bg-teal-50 text-teal-600 hover:bg-teal-100 transition"
+        >
+          View
+        </button>
+        <button
+          onClick={() => onEditVenue(venue.id)}
+          className="px-4 py-2 rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100 transition"
+        >
+          Edit
+        </button>
+        <button
+          onClick={() => onDeleteVenue(venue.id)}
+          className="px-4 py-2 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition"
+        >
+          Delete
+        </button>
+      </div>
+
+      {/* Bookings list */}
       {open && bookingCount > 0 && (
-        <div id={`bookings-${venue.id}`} className="mt-4 space-y-3 max-h-60 overflow-y-auto">
+        <div id={`bookings-${venue.id}`} className="mt-4 space-y-4 max-h-60 overflow-y-auto">
           {venue.bookings.map((b) => (
-            <div key={b.id} className="bg-gray-50 px-4 py-3 rounded-lg">
-              <p className="text-sm">
+            <div key={b.id} className="bg-gray-50 px-5 py-4 rounded-lg">
+              <p className="text-sm text-gray-700">
                 <strong>Date:</strong> {new Date(b.dateFrom).toLocaleDateString()} – {new Date(b.dateTo).toLocaleDateString()}
               </p>
-              <p className="text-sm">
+              <p className="text-sm text-gray-700">
                 <strong>Booked by:</strong> {b.customer?.name || 'Unknown'}
               </p>
               {b.customer?.email && (
@@ -92,7 +108,7 @@ export default function VenueCard({ venue, onDeleteVenue, onEditVenue, onViewVen
               )}
               <button
                 onClick={() => onAskCancel(b.id)}
-                className="mt-2 text-xs font-medium text-red-600 hover:underline"
+                className="mt-3 px-3 py-1 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition text-xs"
               >
                 Cancel booking
               </button>
