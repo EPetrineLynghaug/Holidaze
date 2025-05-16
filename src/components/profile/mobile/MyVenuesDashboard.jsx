@@ -1,46 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { PROFILE_BY_NAME_VENUES_URL } from '../../constants/api';
-import { getAccessToken } from '../../../services/tokenService';
+import useVenues from '../../../hooks/api/useVenues';
 import BookingCancelledPopup from '../../ui/mobildemodal/BookingCancelledPopup';
 import VenueCard from '../shared/VenueCard'; 
+
 export default function MyVenuesDashboard() {
   const navigate = useNavigate();
-  const [venues, setVenues] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const { venues, loading, error, setVenues } = useVenues(navigate);
   const [selectedBookingId, setSelectedBookingId] = useState(null);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const stored = localStorage.getItem('user');
-        if (!stored) return navigate('/', { replace: true });
-
-        const user = JSON.parse(stored);
-        const token = getAccessToken();
-        const res = await fetch(
-          `${PROFILE_BY_NAME_VENUES_URL(user.name)}?_bookings=true&_customer=true`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              'X-Noroff-API-Key': import.meta.env.VITE_NOROFF_API_KEY,
-            },
-          }
-        );
-
-        if (!res.ok) throw new Error(res.statusText);
-        const { data } = await res.json();
-        const withBookings = data.map(v => ({ ...v, bookings: v.bookings || [] }));
-        const sorted = withBookings.sort((a, b) => new Date(b.created) - new Date(a.created));
-        setVenues(sorted);
-      } catch (e) {
-        setError(e.message);
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [navigate]);
 
   const view = id => navigate(`/venues/${id}`);
   const edit = id => navigate(`/venues/${id}/edit`);

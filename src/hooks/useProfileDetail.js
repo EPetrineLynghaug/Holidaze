@@ -1,4 +1,3 @@
-// src/hooks/useProfileDetail.js
 import { useState, useEffect } from "react";
 import { getAccessToken } from "../services/tokenService";
 import {
@@ -6,10 +5,6 @@ import {
   PROFILE_BY_NAME_VENUES_URL,
 } from "../components/constants/api";
 
-/**
- * Custom hook to fetch user profile and their venues
- * @param {string} username - The user's username
- */
 export default function useProfileDetail(username) {
   const [profile, setProfile] = useState(null);
   const [venues, setVenues] = useState([]);
