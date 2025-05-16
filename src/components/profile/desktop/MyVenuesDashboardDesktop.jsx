@@ -6,7 +6,7 @@ import VenueCard from "../shared/VenueCard";
 
 
 const Section = ({ icon, title, children }) => (
-  <section className="bg-white shadow rounded-lg w-full max-w-6xl p-6 md:p-8 space-y-6 ring-1 ring-gray-100 text-left">
+  <section className="bg-white shadow rounded-lg w-full  p-6 md:p-8 space-y-6 ring-1 ring-gray-100 text-left">
     <h2 className="flex items-center gap-2 text-lg md:text-xl font-semibold text-purple-700">
       <span className="material-symbols-outlined text-purple-600" aria-hidden>
         {icon}
@@ -24,12 +24,12 @@ export default function MyVenuesDashboardDesktop() {
 
   const view = (id) => navigate(`/venues/${id}`);
   const edit = (id) => navigate(`/venues/${id}/edit`);
-  const delV = (id) => setVenues((prev) => prev.filter((v) => v.id !== id));
+  const delV = (id) => setVenues(prev => prev.filter(v => v.id !== id));
   const delB = (bid) => {
-    setVenues((prev) =>
-      prev.map((v) => ({
+    setVenues(prev =>
+      prev.map(v => ({
         ...v,
-        bookings: v.bookings.filter((b) => b.id !== bid),
+        bookings: v.bookings.filter(b => b.id !== bid),
       }))
     );
     setSelectedBookingId(null);
@@ -45,22 +45,23 @@ export default function MyVenuesDashboardDesktop() {
 
         {/* Venue Listings */}
         <Section icon="location_city" title="Your Venues">
-          <div className="space-y-6 pr-2">
+          <div className="w-full  overflow-y-auto pr-2 ">
+
             {loading ? (
               <p className="text-center text-gray-500 py-20">Loading…</p>
             ) : error ? (
               <p className="text-center text-red-600">{error}</p>
             ) : venues.length === 0 ? (
-              <p className="italic text-gray-500">You haven’t listed any venues yet.</p>
+              <p className="italic text-gray-500">You haven't listed any venues yet.</p>
             ) : (
-              venues.map((v) => (
+              venues.map(v => (
                 <VenueCard
                   key={v.id}
                   venue={v}
                   onDeleteVenue={delV}
                   onEditVenue={edit}
                   onViewVenue={view}
-                  onAskCancel={(bid) => setSelectedBookingId(bid)}
+                  onAskCancel={bid => setSelectedBookingId(bid)}
                 />
               ))
             )}
