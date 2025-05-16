@@ -120,7 +120,7 @@ export default function Profile() {
       {/* Settings Section */}
       {activeSection === 'settings' && (
         <>
-<div className="hidden lg:block lg:ml-64 lg:pl-2 px-16" aria-labelledby="settings-heading">
+  <div className="hidden lg:block  lg:pl-2 px-20 ">
             <ProfileSettingsPage userName={user.name} onSave={handleSaveSettings} />
           </div>
           <div className="block lg:hidden">
