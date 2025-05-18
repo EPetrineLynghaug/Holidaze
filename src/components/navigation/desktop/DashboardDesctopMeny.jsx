@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router';
 
 export default function DashboardDesktopMenu({
   user,
@@ -8,7 +7,7 @@ export default function DashboardDesktopMenu({
   onSettings = () => {},
   onMyVenues = () => {},
   onMyBookings = () => {},
-  onDashboard = () => {}, // Add onDashboard function here
+  onDashboard = () => {},
   activeSection = 'dashboard',
 }) {
   if (!user) return null;
@@ -28,8 +27,8 @@ export default function DashboardDesktopMenu({
   const capitalizedFirstName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
 
   return (
-<aside className="hidden lg:block absolute top: calc(100px + 1rem) left-0 w-64 h-full bg-white shadow-md p-0 overflow-hidden">
-    <div className="flex flex-col items-center px-6 pt-6 pb-4 relative">
+    <aside className="hidden lg:block fixed top-[64px] left-0 w-64 h-[calc(100vh-64px)] bg-white shadow-md overflow-y-auto z-40">
+      <div className="flex flex-col items-center px-6 pb-4">
         <div className="relative">
           <img
             src={avatarSrc}
@@ -60,11 +59,6 @@ export default function DashboardDesktopMenu({
                 className={`material-symbols-outlined text-xl transition-all duration-300 ${
                   isActive ? 'text-[var(--profile-btn-text)] fill-current' : 'group-hover:text-indigo-600'
                 }`}
-                style={{
-                  fontVariationSettings: isActive
-                    ? `'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24`
-                    : `'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24`,
-                }}
               >
                 {icon}
               </span>

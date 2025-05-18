@@ -85,7 +85,7 @@ const TABS = [
         </div>
   
         {open && (
-          <div className="absolute left-0 top-full mt-2 w-64 sm:w-80 bg-white rounded-lg shadow-lg ring-1 ring-gray-200 z-50" role="dialog" aria-modal="false">
+          <div className="absolute left-0 top-[100%] mt-2 w-64 sm:w-80 bg-white rounded-lg shadow-lg ring-1 ring-gray-200 z-50" role="dialog" aria-modal="false">
             {/* Tabs */}
             <div role="tablist" className="flex bg-gray-50">
               {tabs.map(tab => (

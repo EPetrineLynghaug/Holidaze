@@ -1,4 +1,3 @@
-// src/hooks/forms/useNewVenueValidation.js
 import { useState } from "react";
 
 export default function useNewVenueValidation(initialValues, validationRules) {
@@ -7,7 +6,8 @@ export default function useNewVenueValidation(initialValues, validationRules) {
 
   const handleChange = (field) => (e) => {
     const value = e.target.value;
-    const { required, minLength, maxLength } = validationRules[field] || {};
+    const { required, minLength, maxLength, pattern, patternMessage } =
+      validationRules[field] || {};
     let error = "";
 
     if (required && !value.trim()) {
@@ -16,20 +16,20 @@ export default function useNewVenueValidation(initialValues, validationRules) {
       error = `Must be at least ${minLength} characters`;
     } else if (maxLength && value.length > maxLength) {
       error = `Cannot exceed ${maxLength} characters`;
+    } else if (pattern && !pattern.test(value)) {
+      error = patternMessage || "Invalid format";
     }
 
-    setValues((v) => ({ ...v, [field]: value }));
-    setErrors((v) => ({ ...v, [field]: error }));
+    setValues((prev) => ({ ...prev, [field]: value }));
+    setErrors((prev) => ({ ...prev, [field]: error }));
   };
 
   const remainingChars = (field) => {
     const max = validationRules[field]?.maxLength;
-    if (max != null) return max - (values[field]?.length || 0);
-    return null;
+    return max != null ? max - (values[field]?.length || 0) : null;
   };
 
   const isValid = (field) => {
-    // valid if no error AND non-empty (you can tweak "non-empty" logic)
     return !errors[field] && values[field]?.length > 0;
   };
 
