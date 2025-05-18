@@ -3,7 +3,7 @@ import DateRangePicker from '../../../components/ui/calender/DateRangePicker';
 import useBookingRanges from '../../../hooks/useBookingRanges';
 import BottomSheet from '../../../components/ui/mobildemodal/BottomSheet';
 import { useVenueForm } from '../../../hooks/useVenueForm';
-import { useManageVenues } from '../../../hooks/api/useVenues';
+import useManageVenues from '../../../hooks/api/useVenues';
 import {
     STEPS,
     ENV_OPTIONS,

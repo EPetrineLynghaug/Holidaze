@@ -13,7 +13,7 @@ export default function MyBookingsDashboard({ onClose, userName }) {
     error,
     cancelBooking,
     submitReview,
-  } = useManageBookings(userName);
+  } = useBookings(userName);
 
   const [filter, setFilter] = useState('upcoming');
   const [reviews, setReviews] = useState({});
