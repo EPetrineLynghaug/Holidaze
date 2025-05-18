@@ -28,8 +28,8 @@ export default function DashboardDesktopMenu({
   const capitalizedFirstName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
 
   return (
-    <aside className="hidden lg:block fixed inset-y-0 left-0 w-64 bg-white shadow-md p-0 rounded-tr-[2.5rem] overflow-hidden">
-      <div className="flex flex-col items-center px-6 pt-6 pb-4 relative">
+<aside className="hidden lg:block absolute top: calc(100px + 1rem) left-0 w-64 h-full bg-white shadow-md p-0 overflow-hidden">
+    <div className="flex flex-col items-center px-6 pt-6 pb-4 relative">
         <div className="relative">
           <img
             src={avatarSrc}

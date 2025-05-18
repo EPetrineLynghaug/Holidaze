@@ -3,60 +3,70 @@ import DateRangePicker from '../../../components/ui/calender/DateRangePicker';
 import useBookingRanges from '../../../hooks/useBookingRanges';
 import { useVenueForm } from '../../../hooks/useVenueForm';
 import { ENV_OPTIONS, AUD_OPTIONS, FAC_OPTIONS } from '../../constants/VenueFormConfig';
+import useNewVenueValidation from '../../../hooks/forms/useNewVenueValidation';
+
 
 export default function AddVenuePage({ userName, onCreated }) {
-   
-        const {
-          form,
-          feedback,
-          updateField,
-          updateLocationField,
-          toggleField,
-          addImage,
-          setImage,
-          removeImage,
-          submit,
-        } = useVenueForm(userName, onCreated);
-      
-        // Lokal state for beskrivelse
-        const [localDescription, setLocalDescription] = useState(form.description);
-
-          const { bookingRanges, disabledDates } = useBookingRanges(form.bookings);
-      
-        // Unkontrollerte inputs: oppdater på blur
-        const handleDescriptionChange = e => setLocalDescription(e.target.value);
-        const handleDescriptionBlur = () => updateField('description', localDescription);
-      
+    const {
+      form,
+      feedback,
+      updateField,
+      updateLocationField,
+      toggleField,
+      addImage,
+      setImage,
+      removeImage,
+      submit,
+    } = useVenueForm(userName, onCreated);
   
-        // Body-scroll når date picker er åpen
-        useEffect(() => {
-          document.body.style.overflow = form.datePickerOpen ? 'hidden' : 'auto';
-          return () => { document.body.style.overflow = 'auto'; };
-        }, [form.datePickerOpen]);
-      
-     
-        const Chip = ({ active, children, ...rest }) => (
-          <button
-            {...rest}
-            type="button"
-            className={`inline-flex items-center gap-1 px-4 py-1.5 rounded-full border text-xs font-medium shadow-sm transition hover:shadow-md ${
-              active ? 'bg-purple-600 text-white border-transparent' : 'bg-white text-gray-800 border-gray-300'
-            }`}
-          >
-            {children}
-          </button>
-        );
-      
-        const Section = ({ icon, title, children }) => (
-          <section className="bg-white shadow rounded-lg p-6 md:p-8 space-y-6 ring-1 ring-gray-100">
-            <h2 className="flex items-center gap-2 text-lg md:text-xl font-semibold text-purple-700">
-              <span className="material-symbols-outlined text-purple-600" aria-hidden>{icon}</span>{title}
-            </h2>
-            {children}
-          </section>
-        );
-      
-        const TYPE_ICONS = { House: 'home', Apartment: 'apartment', Hotel: 'hotel', Other: 'home_work' };
+    const { bookingRanges, disabledDates } = useBookingRanges(form.bookings);
+  
+    // Pre-validation for form fields
+    const { values, errors, handleChange, remainingChars } = useNewVenueValidation(
+      {
+        title: form.title,
+        description: form.description,
+        address: form.location.address,
+        city: form.location.city,
+        country: form.location.country,
+      },
+      {
+        title:       { required: true, minLength: 4, maxLength: 100 },
+        description: { required: true, minLength: 10,maxLength: 4000, },
+        address:     { required: true,  minLength: 4, maxLength: 200},
+        city:        { required: true,   pattern: /\d+/, patternMessage:'Must include at least one number', minLength: 4, maxLength: 100 },
+        country:     { required: true, minLength: 4, maxLength: 100 },
+      }
+    );
+  
+    // Body-scroll når date picker er åpen
+    useEffect(() => {
+      document.body.style.overflow = form.datePickerOpen ? 'hidden' : 'auto';
+      return () => { document.body.style.overflow = 'auto'; };
+    }, [form.datePickerOpen]);
+  
+    const Chip = ({ active, children, ...rest }) => (
+      <button
+        {...rest}
+        type="button"
+        className={`inline-flex items-center gap-1 px-4 py-1.5 rounded-full border text-xs font-medium shadow-sm transition hover:shadow-md ${
+          active ? 'bg-purple-600 text-white border-transparent' : 'bg-white text-gray-800 border-gray-300'
+        }`}
+      >
+        {children}
+      </button>
+    );
+  
+    const Section = ({ icon, title, children }) => (
+      <section className="bg-white shadow rounded-lg p-6 md:p-8 space-y-6 ring-1 ring-gray-100">
+        <h2 className="flex items-center gap-2 text-lg md:text-xl font-semibold text-purple-700">
+          <span className="material-symbols-outlined text-purple-600" aria-hidden>{icon}</span>{title}
+        </h2>
+        {children}
+      </section>
+    );
+  
+    const TYPE_ICONS = { House: 'home', Apartment: 'apartment', Hotel: 'hotel', Other: 'home_work' };
       
         return (
           <form
@@ -72,75 +82,143 @@ export default function AddVenuePage({ userName, onCreated }) {
               </p>
             </header>
       
-            {/* Basic Information */}
-            <Section icon="info" title="Basic information">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="mb-6">
-                  <label htmlFor="title" className="block text-sm font-medium text-gray-700">Title</label>
-                  <input
-                    id="title"
-                    name="title"
-                    type="text"
-                    defaultValue={form.title}
-                    onBlur={e => updateField('title', e.target.value)}
-                    placeholder="Nordic lake cabin"
-                    className="mt-2 w-full rounded-xl border border-gray-300 px-4 py-2 focus:ring-4 focus:ring-purple-200 focus:border-purple-400"
-                  />
-                </div>
-      
-                <div className="mb-6">
-                  <label htmlFor="address" className="block text-sm font-medium text-gray-700">Street address</label>
-                  <input
-                    id="address"
-                    name="address"
-                    type="text"
-                    defaultValue={form.location.address}
-                    onBlur={e => updateLocationField('address', e.target.value)}
-                    placeholder="123 Main St"
-                    className="mt-2 w-full rounded-xl border border-gray-300 px-4 py-2 focus:ring-4 focus:ring-purple-200 focus:border-purple-400"
-                  />
-                </div>
-      
-                <div className="mb-6">
-                  <label htmlFor="city" className="block text-sm font-medium text-gray-700">City</label>
-                  <input
-                    id="city"
-                    name="city"
-                    type="text"
-                    defaultValue={form.location.city}
-                    onBlur={e => updateLocationField('city', e.target.value)}
-                    placeholder="Oslo"
-                    className="mt-2 w-full rounded-xl border border-gray-300 px-4 py-2 focus:ring-4 focus:ring-purple-200 focus:border-purple-400"
-                  />
-                </div>
-      
-                <div className="mb-6">
-                  <label htmlFor="country" className="block text-sm font-medium text-gray-700">Country</label>
-                  <input
-                    id="country"
-                    name="country"
-                    type="text"
-                    defaultValue={form.location.country}
-                    onBlur={e => updateLocationField('country', e.target.value)}
-                    placeholder="Norway"
-                    className="mt-2 w-full rounded-xl border border-gray-300 px-4 py-2 focus:ring-4 focus:ring-purple-200 focus:border-purple-400"
-                  />
-                </div>
-      
-                <div className="md:col-span-2 mb-6">
-                  <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
-                  <textarea
-                    id="description"
-                    name="description"
-                    rows={8}
-                    defaultValue={form.description}
-                    onBlur={e => updateField('description', e.target.value)}
-                    placeholder="What makes your place special?"
-                    className="mt-2 w-full rounded-xl border border-gray-300 px-4 py-2 focus:ring-4 focus:ring-purple-200 focus:border-purple-400 overflow-y-auto"
-                  />
-                </div>
-              </div>
-            </Section>
+         {/* Basic Information */}
+<Section icon="info" title="Basic information">
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+ {/* Title */}
+<div className="mb-6">
+  <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+  Title<span className="text-red-500 ml-1">*</span>
+  
+  </label>
+  <input
+    id="title"
+    name="title"
+    type="text"
+    defaultValue={form.title}
+    onBlur={e => {
+      handleChange('title')(e);                 // run validation
+      updateField('title', e.target.value);     // update form on blur
+    }}
+    onKeyDown={e => e.key === 'Enter' && e.preventDefault()}  // prevent Enter-submit
+    maxLength={100}
+    placeholder="Nordic lake cabin"
+    className={`
+      mt-2 w-full rounded-xl border border-gray-300 px-4 py-2 focus:ring-4
+        ${errors.description
+          ? 'border-red-500 focus:border-red-500'
+          : ' focus:ring-purple-200 focus:border-purple-400'
+        }
+      `}
+  />
+  <div className="flex justify-between text-xs text-gray-500 mt-1">
+    <span>{remainingChars('title')} characters left</span>
+    {errors.title && <span className="text-red-500">{errors.title}</span>}
+  </div>
+</div>
+    {/* Street address */}
+    <div className="mb-6">
+      <label htmlFor="address" className="block text-sm font-medium text-gray-700">
+        Street address<span className="text-red-500 ml-1">*</span>
+      </label>
+      <input
+        id="address"
+        name="address"
+        type="text"
+        defaultValue={form.location.address}
+        onBlur={e => {
+          handleChange('address')(e);
+          updateLocationField('address', e.target.value);
+        }}
+        onKeyDown={e => e.key === 'Enter' && e.preventDefault()}
+        maxLength={200}
+        placeholder="123 Main St"
+        className="mt-2 w-full rounded-xl border border-gray-300 px-4 py-2 focus:ring-4 focus:ring-purple-200 focus:border-purple-400"
+      />
+      <div className="flex justify-between text-xs text-gray-500 mt-1">
+        <span>{remainingChars('address')} characters left</span>
+        {errors.description && <span className="text-red-500">{errors.description}</span>}
+      </div>
+    </div>
+
+    {/* City */}
+    <div className="mb-6">
+      <label htmlFor="city" className="block text-sm font-medium text-gray-700">
+        City<span className="text-red-500 ml-1">*</span>
+      </label>
+      <input
+        id="city"
+        name="city"
+        type="text"
+        defaultValue={form.location.city}
+        onBlur={e => {
+          handleChange('city')(e);
+          updateLocationField('city', e.target.value);
+        }}
+        onKeyDown={e => e.key === 'Enter' && e.preventDefault()}
+        maxLength={100}
+        placeholder="Oslo"
+        className="mt-2 w-full rounded-xl border border-gray-300 px-4 py-2 focus:ring-4 focus:ring-purple-200 focus:border-purple-400"
+      />
+      <div className="flex justify-between text-xs text-gray-500 mt-1">
+        <span>{remainingChars('city')} characters left</span>
+        {errors.description && <span className="text-red-500">{errors.description}</span>}
+      </div>
+    </div>
+
+    {/* Country */}
+    <div className="mb-6">
+      <label htmlFor="country" className="block text-sm font-medium text-gray-700">
+        Country<span className="text-red-500 ml-1">*</span>
+      </label>
+      <input
+        id="country"
+        name="country"
+        type="text"
+        defaultValue={form.location.country}
+        onBlur={e => {
+          handleChange('country')(e);
+          updateLocationField('country', e.target.value);
+        }}
+        onKeyDown={e => e.key === 'Enter' && e.preventDefault()}
+        maxLength={100}
+        placeholder="Norway"
+        className="mt-2 w-full rounded-xl border border-gray-300 px-4 py-2 focus:ring-4 focus:ring-purple-200 focus:border-purple-400"
+      />
+      <div className="flex justify-between text-xs text-gray-500 mt-1">
+        <span>{remainingChars('country')} characters left</span>
+        {errors.description && <span className="text-red-500">{errors.description}</span>}
+      </div>
+    </div>
+
+  {/* Description */}
+  <div className="md:col-span-2 mb-6">
+      <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+        Description<span className="text-red-500 ml-1">*</span>
+      </label>
+      <textarea
+        id="description"
+        name="description"
+        rows={8}
+        defaultValue={form.description}
+        onBlur={e => {
+          handleChange('description')(e);
+          updateField('description', e.target.value);
+        }}
+        onKeyDown={e => e.key === 'Enter' && e.preventDefault()}
+        maxLength={500}
+        placeholder="What makes your place special?"
+        className="mt-2 w-full rounded-xl border border-gray-300 px-4 py-2 focus:ring-4 focus:ring-purple-200 focus:border-purple-400 overflow-y-auto"
+      />
+       <div className="flex justify-between text-xs text-gray-500 mt-1">
+    <span>{remainingChars('description')} characters left</span>
+    {errors.description && <span className="text-red-500">{errors.description}</span>}
+  </div>
+    </div>
+
+  </div>
+</Section>
 
       {/* Venue Details */}
       <Section icon="home_pin" title="Venue details">
@@ -157,25 +235,35 @@ export default function AddVenuePage({ userName, onCreated }) {
         </div>
 
         <div className="space-y-4">
-          <p className="text-sm font-medium text-gray-700">Images (URLs)</p>
-          {form.images.map((url, i) => (
-            <div key={i} className="flex gap-3 items-center">
-              <input
-                type="url"
-                defaultValue={url}
-                onBlur={e => setImage(i, e.target.value)}
-                className="flex-1 rounded-xl border border-gray-300 px-4 py-2 focus:ring-4 focus:ring-purple-200 focus:border-purple-400"
-                placeholder="https://example.com/photo.jpg"
-              />
-              <button onClick={() => removeImage(i)} className="p-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-full">
-                <span className="material-symbols-outlined text-lg" aria-hidden>delete</span>
-              </button>
-            </div>
-          ))}
-          <button onClick={addImage} className="inline-flex items-center gap-2 px-4 py-2 bg-purple-50 hover:bg-purple-100 rounded-lg text-purple-700 text-sm">
-            <span className="material-symbols-outlined text-base" aria-hidden>add_photo_alternate</span>Add image URL
-          </button>
-        </div>
+  <p className="text-sm font-medium text-gray-700">Images (URLs)</p>
+  {form.images.map((url, i) => (
+    <div key={i} className="flex gap-3 items-center">
+      <input
+        type="url"
+        defaultValue={url}
+        onBlur={e => setImage(i, e.target.value)}
+        className="flex-1 rounded-xl border border-gray-300 px-4 py-2 focus:ring-4 focus:ring-purple-200 focus:border-purple-400"
+        placeholder="https://example.com/photo.jpg"
+      />
+      <button
+        type="button"
+        onClick={() => removeImage(i)}
+        className="p-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-full"
+      >
+        <span className="material-symbols-outlined text-lg" aria-hidden>delete</span>
+      </button>
+    </div>
+  ))}
+  <button
+    type="button"
+    onClick={addImage}
+    className="inline-flex items-center gap-2 px-4 py-2 bg-purple-50 hover:bg-purple-100 rounded-lg text-purple-700 text-sm"
+  >
+    <span className="material-symbols-outlined text-base" aria-hidden>add_photo_alternate</span>
+    Add image URL
+  </button>
+</div>
+
 
         <div className="grid lg:grid-cols-3 gap-8">
           {[
