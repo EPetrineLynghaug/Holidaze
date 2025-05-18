@@ -215,7 +215,7 @@ export default function Profile() {
 {/* My Bookings Section */}
 {showMyBookings && activeSection === 'bookings' && (
         <>
-          <div className="hidden lg:block mt-6 lg:ml-64 lg:pl-12 px-12">
+         <div className="hidden lg:block mt-6 lg:ml-64 lg:pl-6 px-6 ">
           <MyBookingsDashboardDesktop onClose={() => { setShowMyBookings(false); setActiveSection('dashboard'); }} />
           </div>
           <div className="block lg:hidden">
