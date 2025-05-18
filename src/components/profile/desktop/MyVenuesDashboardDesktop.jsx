@@ -1,89 +1,79 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
-import { PROFILE_BY_NAME_VENUES_URL } from '../../constants/api';
-import { getAccessToken } from '../../../services/tokenService';
-import ActiveVenuesSection from '../mobile/ActiveVenueCard';
+import React, { useState } from "react";
+import { useNavigate } from "react-router";
+import useVenues from "../../../hooks/api/useVenues";
+import BookingCancelledPopup from "../../ui/mobildemodal/BookingCancelledPopup";
+import VenueCard from "../shared/VenueCard";
+
+const Section = ({ icon, title, children }) => (
+  <section className="bg-white shadow rounded-lg w-full p-6 md:p-8 space-y-6 ring-1 ring-gray-100 text-left">
+    <h2 className="flex items-center gap-2 text-lg md:text-xl font-semibold text-purple-700">
+      <span className="material-symbols-outlined text-purple-600" aria-hidden>
+        {icon}
+      </span>
+      {title}
+    </h2>
+    {children}
+  </section>
+);
+
 export default function MyVenuesDashboardDesktop() {
-    const navigate = useNavigate();
-    const [venues, setVenues] = useState([]);
-    const [filter, setFilter] = useState('active');
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
-  
-    useEffect(() => {
-      const stored = localStorage.getItem('user');
-      if (!stored) { navigate('/', { replace: true }); return; }
-      (async () => {
-        setLoading(true);
-        setError('');
-        try {
-          const user = JSON.parse(stored);
-          const token = getAccessToken();
-          const res = await fetch(
-            PROFILE_BY_NAME_VENUES_URL(user.name),
-            { headers: { Authorization: `Bearer ${token}`, 'X-Noroff-API-Key': import.meta.env.VITE_NOROFF_API_KEY } }
-          );
-          if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
-          const { data } = await res.json();
-          setVenues(data);
-        } catch (err) {
-          setError(err.message || 'Failed to load venues.');
-        } finally {
-          setLoading(false);
-        }
-      })();
-    }, [navigate]);
-  
-    const now = new Date();
-    const isExpired = (v) => v.bookings?.every(b => new Date(b.dateTo) < now);
-    const activeVenues = venues.filter(v => !isExpired(v));
-    const expiredVenues = venues.filter(v => isExpired(v));
-  
-    return (
-      <div className="w-full max-w-7xl mx-auto mt-12 mb-20 p-6 md:p-8 bg-gray-50 rounded-2xl max-h-[calc(100vh-200px)] overflow-y-auto">
-        <header className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">My Venues</h1>
-            <p className="mt-1 text-gray-600">Manage and track your venue listings.</p>
-          </div>
-          <div className="flex gap-4 mt-4 md:mt-0">
-            <button
-              onClick={() => setFilter('active')}
-              className={`px-4 py-1.5 rounded-md border font-semibold text-sm transition hover:shadow-md focus:outline-none focus:ring-2 focus:ring-purple-300 ${
-                filter === 'active' ? 'bg-purple-600 text-white border-transparent' : 'bg-white text-gray-700 border-gray-300'
-              }`}
-            >
-              Active ({activeVenues.length})
-            </button>
-            <button
-              onClick={() => setFilter('expired')}
-              className={`px-6 py-2 rounded-lg border font-semibold text-base transition hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-300 ${
-                filter === 'expired' ? 'bg-purple-600 text-white border-transparent' : 'bg-white text-gray-700 border-gray-300'
-              }`}
-            >
-              Expired ({expiredVenues.length})
-            </button>
-          </div>
+  const navigate = useNavigate();
+  const { venues, loading, error, setVenues } = useVenues(navigate);
+  const [selectedBookingId, setSelectedBookingId] = useState(null);
+
+  const view = (id) => navigate(`/venues/${id}`);
+  const edit = (id) => navigate(`/venues/${id}/edit`);
+  const delV = (id) => setVenues((prev) => prev.filter((v) => v.id !== id));
+  const delB = (bid) => {
+    setVenues((prev) =>
+      prev.map((v) => ({
+        ...v,
+        bookings: v.bookings.filter((b) => b.id !== bid),
+      }))
+    );
+    setSelectedBookingId(null);
+  };
+
+  return (
+    <main className="w-full max-w-none ml-0 max-h-screen overflow-y-auto">
+      <div className="w-full max-w-7xl mx-auto mt-10 mb-20 px-4 md:px-8 space-y-8">
+        <header className="space-y-2 text-left">
+          <h1 className="text-4xl font-extrabold tracking-tight text-gray-900">My Venues</h1>
+          <p className="text-gray-600">All your listings and booking history.</p>
         </header>
-  
-        {/* Venue List */}
-        {loading ? (
-          <div className="flex justify-center py-16">
-            <span className="loader" />
+
+        {/* Venue Listings */}
+        <Section icon="location_city" title="Your Venues">
+          <div className="w-full space-y-6">
+            {loading ? (
+              <p className="text-center text-gray-500 py-20">Loading…</p>
+            ) : error ? (
+              <p className="text-center text-red-600">{error}</p>
+            ) : venues.length === 0 ? (
+              <p className="italic text-gray-500">You haven't listed any venues yet.</p>
+            ) : (
+              venues.map((v) => (
+                <VenueCard
+                  key={v.id}
+                  venue={v}
+                  onDeleteVenue={delV}
+                  onEditVenue={edit}
+                  onViewVenue={view}
+                  onAskCancel={(bid) => setSelectedBookingId(bid)}
+                />
+              ))
+            )}
           </div>
-        ) : error ? (
-          <div className="py-16 text-center text-red-500">{error}</div>
-        ) : (
-          <div className="space-y-6">
-            <ActiveVenuesSection
-              venues={filter === 'active' ? activeVenues : expiredVenues}
-              loading={loading}
-              error={error}
-              onDelete={id => setVenues(prev => prev.filter(v => v.id !== id))}
-            />
-          </div>
+        </Section>
+
+        {/* Cancel Booking Popup */}
+        {selectedBookingId && (
+          <BookingCancelledPopup
+            onClose={() => setSelectedBookingId(null)}
+            onConfirm={() => delB(selectedBookingId)}
+          />
         )}
       </div>
-    );
-  }
-  
+    </main>
+  );
+}

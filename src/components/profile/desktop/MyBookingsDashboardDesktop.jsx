@@ -1,163 +1,213 @@
-
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { getAccessToken } from '../../../services/tokenService';
-import { PROFILE_BY_NAME_BOOKINGS_URL } from '../../constants/api';
+import useBookings from '../../../hooks/api/useBookings';
+import { OrderCancelledPopup } from '../../ui/mobildemodal/OrderCancelledPopup';
 
 const FILTERS = [
   { key: 'upcoming', label: 'Upcoming' },
-  { key: 'expired',  label: 'Expired'  },
+  { key: 'expired', label: 'Past' },
 ];
 
-const RATING_ASPECTS = [
-  'Location', 'Price', 'Host', 'Accuracy', 'Cleanliness',
-];
+const Section = ({ icon, title, children }) => (
+  <section className="w-full bg-white shadow rounded-lg p-6 space-y-5 ring-1 ring-gray-100">
+    <h2 className="flex items-center gap-2 text-xl font-semibold text-purple-700">
+      <span className="material-symbols-outlined text-purple-600" aria-hidden>{icon}</span>
+      {title}
+    </h2>
+    {children}
+  </section>
+);
 
 export default function MyBookingsDashboardDesktop() {
-  const navigate   = useNavigate();
-  const [bookings, setBookings] = useState([]);
-  const [filter,   setFilter]   = useState('upcoming');
-  const [selected, setSelected] = useState(null);
-  const [draft,    setDraft]    = useState({});
-  const [loading,  setLoading]  = useState(false);
-  const [error,    setError]    = useState('');
+  const navigate = useNavigate();
+  const storedUser = localStorage.getItem('user');
+  const userName = storedUser ? JSON.parse(storedUser).name : null;
+  const { bookings, setBookings, loading, error, deleteBooking } = useBookings(userName);
 
-  useEffect(() => {
-    const stored = localStorage.getItem('user');
-    if (!stored) { navigate('/', { replace:true }); return; }
+ // STATE: current filter, selection, and popup control
+ const [filter, setFilter]             = useState('upcoming');
+ const [selected, setSelected]         = useState(null);
+ const [cancelBookingId, setCancelBookingId] = useState(null);
 
-    (async () => {
-      try {
-        setLoading(true); setError('');
-        const user  = JSON.parse(stored);
-        const token = getAccessToken();
-        const res   = await fetch(
-          `${PROFILE_BY_NAME_BOOKINGS_URL(user.name)}?_venue=true`,
-          { headers:{ Authorization:`Bearer ${token}`,
-                      'X-Noroff-API-Key':import.meta.env.VITE_NOROFF_API_KEY } }
-        );
-        if (!res.ok) throw new Error(`Fetch failed (${res.status})`);
-        const { data } = await res.json();
-        setBookings(data);
-      } catch (e) { setError(e.message || 'Failed to load bookings.'); }
-      finally      { setLoading(false); }
-    })();
-  }, [navigate]);
 
-  const today    = new Date();
-  const upcoming = bookings.filter(b => new Date(b.dateTo) >= today);
-  const expired  = bookings.filter(b => new Date(b.dateTo) <  today);
-  const list     = filter === 'expired' ? expired : upcoming;
-  const current  = list.find(b => b.id === selected);
-
-  const setRating  = (id,a,v) => setDraft(p => ({ ...p, [id]:{ ...p[id], [a]:v }}));
-  const setComment = (id,t)   => setDraft(p => ({ ...p, [id]:{ ...p[id], comment:t }}));
-  const submitReview = id     => console.table('review →', draft[id]);
+  const today = new Date();
+  const upcomingList = bookings.filter(b => new Date(b.dateTo) >= today);
+  const pastList = bookings.filter(b => new Date(b.dateTo) < today);
+  const list = filter === 'expired' ? pastList : upcomingList;
+  const current = list.find(b => b.id === selected);
+  // Helper: remove booking and close popup
+  const handleDelete = (id, reason) => {
+    deleteBooking(id);
+    setCancelBookingId(null);
+    if (selected === id) setSelected(null);
+    // TODO: send `reason` to backend if needed
+  };
 
   return (
-    <div className="w-full max-w-7xl mx-auto mt-12 mb-20 p-6 md:p-8 bg-gray-50 rounded-2xl max-h-[calc(100vh-200px)] overflow-y-auto">
-      <header className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8">
-        <div>
-          <h1 className="text-4xl font-extrabold text-gray-900">My Bookings</h1>
-          <p className="mt-1 text-gray-600">Manage&nbsp;&amp;&nbsp;review your upcoming and past bookings.</p>
+    <main className="w-full pl-2 pr-2">
+        {/* ← Render popup here, above all else */}
+        {cancelBookingId && (
+        <OrderCancelledPopup
+          onClose={() => setCancelBookingId(null)}          // ← Close callback
+          onConfirm={reason => handleDelete(cancelBookingId, reason)} // ← Confirm callback
+        />
+      )}
+      {/* Header */}
+      <header className="flex justify-between items-center my-8">
+        <div className="space-y-2 text-left">
+          <h1 className="text-4xl font-bold text-gray-900">My Bookings</h1>
+          <p className="text-gray-600">Your bookings and history.</p>
         </div>
-
-        <div className="flex gap-4 mt-4 md:mt-0">
+        <div className="flex gap-4">
           {FILTERS.map(f => (
-            <button key={f.key}
-              onClick={() => { setFilter(f.key); setSelected(null); }}
-              className={`px-4 py-1.5 rounded-md border text-sm font-semibold transition hover:shadow-md focus:outline-none focus:ring-2 focus:ring-purple-300 ${
-                filter===f.key
-                  ? 'bg-purple-600 text-white border-transparent'
-                  : 'bg-white text-gray-700 border-gray-300'
-              }`}>
-              {f.label} ({f.key==='upcoming' ? upcoming.length : expired.length})
+            <button
+              key={f.key}
+              onClick={() => {
+                setFilter(f.key);
+                setSelected(null);
+              }}
+              className={`px-6 py-2 rounded-md text-sm font-medium transition ${
+                filter === f.key
+                  ? 'bg-purple-600 text-white'
+                  : 'bg-white text-gray-700 ring-1 ring-gray-300'
+              }`}
+            >
+              {f.label} ({f.key === 'upcoming' ? upcomingList.length : pastList.length})
             </button>
           ))}
         </div>
       </header>
 
-      {loading ? (
-        <p className="flex justify-center py-24 text-gray-500">Loading …</p>
-      ) : error ? (
-        <p className="flex justify-center py-24 text-red-500">{error}</p>
-      ) : list.length === 0 ? (
-        <p className="flex justify-center py-24 text-gray-600">No&nbsp;{filter}&nbsp;bookings.</p>
-      ) : (
-        <div className="grid gap-10 lg:grid-cols-[350px_1fr]">
-          <ul className="space-y-2 pr-1">
-            {list.map(b => (
-              <li key={b.id}>
-                <button
+      {error && <p className="text-red-600 mt-4">Error: {error}</p>}
+      {loading && <p className="text-gray-500 mt-4">Loading bookings...</p>}
+
+      <Section
+        icon={filter === 'upcoming' ? 'event_available' : 'history'}
+        title={filter === 'upcoming' ? 'Upcoming Bookings' : 'Past Bookings'}
+      >
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+          {/* Booking list */}
+          <div
+            className="md:col-span-8 overflow-y-scroll scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-300 pr-3 max-h-[calc(100vh-250px)]"
+            style={{ scrollbarGutter: 'stable' }}
+          >
+            <ul className="space-y-5">
+              {list.map(b => (
+                <li
+                  key={b.id}
                   onClick={() => setSelected(b.id)}
-                  className={`w-full flex items-center justify-between px-4 py-2 rounded-2xl border border-gray-200 shadow-sm transition ${
-                    b.id===selected ? 'bg-purple-50 ring-2 ring-purple-300 text-purple-700'
-                                     : 'bg-white hover:bg-gray-50 text-gray-900'
-                  }`}>
-                  <span className={`mr-2 h-2 w-2 rounded-full ${b.id===selected ? 'bg-purple-600' : 'bg-transparent'}`}/>
-                  <span className="flex-1 truncate">{b.venue?.name}</span>
-                  <span className="text-xs text-gray-500 shrink-0">
-                    {new Date(b.dateFrom).toLocaleDateString()} – {new Date(b.dateTo).toLocaleDateString()}
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
-
-          {!current ? (
-            <div className="h-full flex items-center justify-center text-gray-500">Select a booking to see details</div>
-          ) : filter==='upcoming' ? (
-            <div className="bg-white rounded-3xl shadow p-10 space-y-6 max-w-full break-words">
-              <h2 className="text-2xl font-semibold text-gray-900 break-words">{current.venue?.name}</h2>
-              <p className="text-gray-600">
-                <strong>{new Date(current.dateFrom).toLocaleDateString()}</strong> – <strong>{new Date(current.dateTo).toLocaleDateString()}</strong>
-              </p>
-              <button
-                onClick={() => setBookings(prev=>prev.filter(b=>b.id!==current.id))}
-                className="px-5 py-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 transition font-medium">
-                Cancel booking
-              </button>
-            </div>
-          ) : (
-            <div className="bg-white rounded-3xl shadow p-4 space-y-6 max-w-full overflow-wrap:break-word">
-          <h2 className="text-xl font-semibold break-words whitespace-normal max-w-[32ch]">
-                Review your stay at <span className="text-purple-600">{current.venue?.name}</span>
-              </h2>
-
-              {RATING_ASPECTS.map(a => (
-                <div key={a} className="flex items-center">
-                  <span className="w-32 text-sm font-medium text-gray-700">{a}</span>
-                  <div className="flex gap-1">
-                    {[1,2,3,4,5].map(i => {
-                      const filled = (draft[current.id]?.[a] || 0) >= i;
-                      return (
-                        <span key={i}
-                          onClick={() => setRating(current.id,a,i)}
-                          className={`material-symbols-outlined text-xl cursor-pointer select-none transition-transform hover:scale-110 ${filled ? 'text-purple-600' : 'text-gray-300'}`}
-                          style={{fontVariationSettings:`'FILL' ${filled?1:0}`}}>
-                          star
-                        </span>
-                      );
-                    })}
+                  className={`w-full p-5 border rounded-xl flex flex-col gap-1 min-h-[80px] cursor-pointer transition hover:shadow-md ${
+                    b.id === selected ? 'bg-purple-50 border-purple-600' : 'border-gray-300'
+                  }`}
+                >
+                  <div className="text-gray-800 font-medium text-sm md:text-base">
+                    {b.venue?.name}
                   </div>
-                </div>
+                  <div className="text-gray-500 text-xs md:text-sm">
+                    {new Date(b.dateFrom).toLocaleDateString()} – {new Date(b.dateTo).toLocaleDateString()}
+                  </div>
+                </li>
               ))}
+            </ul>
+          </div>
 
-              <textarea
-                value={draft[current.id]?.comment || ''}
-                onChange={e => setComment(current.id,e.target.value)}
-                placeholder="Write your review…"
-                className="w-full h-24 rounded-2xl border border-gray-300 p-4 focus:ring-4 focus:ring-purple-200 outline-none resize-none" />
+          {/* Details panel */}
+          <div className="md:col-span-4 self-start mt-[-1.5rem] overflow-y-auto max-h-[calc(100vh-250px)] flex flex-col">
+            {current ? (
+              <Section
+                icon={filter === 'upcoming' ? 'event' : 'history'}
+                title={filter === 'upcoming' ? 'Upcoming Booking' : 'Past Booking'}
+              >
+                {/* Image with larger fixed height */}
+                <div className="relative  h-62 lg:h-40 min-w-70 overflow-hidden rounded-lg shrink-0">
+                  {current.venue?.media?.[0]?.url ? (
+                    <img
+                      src={current.venue.media[0].url}
+                      alt={current.venue.name}
+                      className="absolute inset-0 w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center bg-gray-100 text-gray-400">
+                      <span className="material-symbols-outlined text-5xl" aria-hidden>
+                        image
+                      </span>
+                    </div>
+                  )}
+                </div>
 
-              <button
-                onClick={() => submitReview(current.id)}
-                className="w-full py-3 rounded-xl bg-purple-600 text-white font-semibold hover:bg-purple-700 transition">
-                Submit Review
-              </button>
-            </div>
-          )}
+                {/* Key details */}
+                <div className="mt-4 space-y-2 text-gray-600 text-sm">
+                  <p>
+                    <span className="font-semibold">
+                      {new Date(current.dateFrom).toLocaleDateString()} –{' '}
+                      {new Date(current.dateTo).toLocaleDateString()}
+                    </span>
+                  </p>
+                  {current.venue?.location?.address && (
+                    <p className="flex items-start gap-1">
+                      <span className="material-symbols-outlined text-base" aria-hidden>
+                        location_on
+                      </span>
+                      {current.venue.location.address}
+                    </p>
+                  )}
+                  {current.venue?.owner?.name && (
+                    <p className="flex items-start gap-1">
+                      <span className="material-symbols-outlined text-base" aria-hidden>
+                        person
+                      </span>
+                      Host: {current.venue.owner.name}
+                    </p>
+                  )}
+                  {current.venue?.price && (
+                    <p className="flex items-start gap-1">
+                      <span className="material-symbols-outlined text-base" aria-hidden>
+                        payments
+                      </span>
+                      {current.venue.price.toLocaleString()}&nbsp;NOK&nbsp;per&nbsp;night
+                    </p>
+                  )}
+                  {current.venue?.maxGuests && (
+                    <p className="flex items-start gap-1">
+                      <span className="material-symbols-outlined text-base" aria-hidden>
+                        group
+                      </span>
+                      {current.venue.maxGuests} guests
+                    </p>
+                  )}
+                  {current.guests && (
+                    <p className="flex items-start gap-1">
+                      <span className="material-symbols-outlined text-base" aria-hidden>
+                        event_seat
+                      </span>
+                      {current.guests} guests booked
+                    </p>
+                  )}
+                </div>
+
+                {filter === 'upcoming' && (
+                <button onClick={() => setCancelBookingId(current.id)} className="mt-6 px-5 py-2 bg-red-100 text-red-600 rounded-full hover:bg-red-200">Cancel Booking</button>
+
+                )}
+              </Section>
+            ) : (
+              <Section icon="info" title="Booking Details">
+                <p className="text-gray-500">Select a booking to view details.</p>
+              </Section>
+            )}
+          </div>
         </div>
-      )}
-    </div>
+      </Section>
+
+      {cancelBookingId && (
+  <OrderCancelledPopup
+    onClose={() => setCancelBookingId(null)}
+    onConfirm={reason => handleDelete(cancelBookingId, reason)}
+  />
+)}
+
+
+    </main>
   );
 }

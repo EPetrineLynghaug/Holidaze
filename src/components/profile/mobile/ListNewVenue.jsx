@@ -1,10 +1,9 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { DateRange } from 'react-date-range';
-import 'react-date-range/dist/styles.css';
-import 'react-date-range/dist/theme/default.css';
-
+import DateRangePicker from '../../../components/ui/calender/DateRangePicker';
 import { useVenueForm } from '../../../hooks/useVenueForm';
+import useBookingRanges from '../../../hooks/useBookingRanges';
+
 import {
   STEPS,
   ENV_OPTIONS,
@@ -33,6 +32,7 @@ export default function AddVenueForm({ userName, onCreated, onClose }) {
     document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = ''; };
   }, []);
+  const { bookingRanges, disabledDates } = useBookingRanges(form.bookings);
 
   const renderStepFields = () => {
     switch (step) {
@@ -178,15 +178,20 @@ export default function AddVenueForm({ userName, onCreated, onClose }) {
       case 3:
         return (
           <>
-            <p className="text-sm font-medium text-purple-700 mb-2 mt-4">Availability</p>
-            <div className="border rounded-lg overflow-hidden">
-              <DateRange
-                ranges={[form.dateRange]}
-                onChange={r => updateField('dateRange', r.selection)}
-                editableDateInputs
-                moveRangeOnFirstSelection={false}
-                minDate={new Date()}
-              />
+            <p className="text-s font-medium text-purple-700  mt-2">Availability</p>
+            <div className="rounded-lg ">
+            <DateRangePicker
+              value={form.dateRange}
+               onChange={({ startDate, endDate, rentalDays }) => {
+            updateField('dateRange', { startDate, endDate, key: 'selection' });
+              updateField('rentalDays', rentalDays);
+               }}
+  bookingRanges={bookingRanges}
+  disabledDates={disabledDates}
+  minDate={new Date()}
+  className="mt-2"
+
+/>
             </div>
           </>
         );

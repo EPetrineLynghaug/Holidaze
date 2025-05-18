@@ -56,7 +56,7 @@ export default function ActiveItemsSection({ venues, loading, error, onDelete, o
               <Link to={`/venues/${id}`} className="relative block w-full h-40 overflow-hidden">
                 <img src={imgUrl} alt={name} className="w-full h-full object-cover" />
                 <span
-                  className="absolute top-2 right-2 text-xs font-semibold px-2 py-0.5 rounded-full text-white"
+                  className="absolute top: 0.5rem; right-2 text-xs font-semibold px-2 py-0.5 rounded-full text-white"
                   style={{ backgroundColor: bgColor }}
                 >
                   {bookingText}

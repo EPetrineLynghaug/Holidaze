@@ -1,97 +1,61 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { PROFILE_BY_NAME_VENUES_URL } from '../../constants/api';
-import { getAccessToken } from '../../../services/tokenService';
-import ActiveVenuesSection from './ActiveVenueCard';
+import useVenues from '../../../hooks/api/useVenues';
+import BookingCancelledPopup from '../../ui/mobildemodal/BookingCancelledPopup';
+import VenueCard from '../shared/VenueCard'; 
 
-export default function MyVenuesDashboard({ onClose }) {
-    const navigate = useNavigate();
-    const [venues, setVenues] = useState([]);
-    const [filter, setFilter] = useState('active');
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
-  
-    // Fetch venues with bookings
-    useEffect(() => {
-      const stored = localStorage.getItem('user');
-      if (!stored) {
-        navigate('/', { replace: true });
-        return;
-      }
-      async function loadVenues() {
-        setLoading(true);
-        setError('');
-        try {
-          const user = JSON.parse(stored);
-          const token = getAccessToken();
-          const res = await fetch(
-            `${PROFILE_BY_NAME_VENUES_URL(user.name)}?_bookings=true`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                'X-Noroff-API-Key': import.meta.env.VITE_NOROFF_API_KEY,
-              },
-            }
-          );
-          if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
-          const { data } = await res.json();
-          setVenues(data);
-        } catch (err) {
-          setError(err.message || 'Failed to load venues.');
-        } finally {
-          setLoading(false);
-        }
-      }
-      loadVenues();
-    }, [navigate]);
-  
-    // Determine expiration by checking each venue's bookings
-    const isExpired = venue => {
-      if (!venue.bookings || venue.bookings.length === 0) return false;
-      const now = new Date();
-      return venue.bookings.every(
-        booking => new Date(booking.dateTo) < now
-      );
-    };
-  
-    // Split active vs expired
-    const activeVenues = venues.filter(v => !isExpired(v));
-    const expiredVenues = venues.filter(v => isExpired(v));
-    const displayed = filter === 'active' ? activeVenues : expiredVenues;
-  
-    return (
-      <div className="px-4">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold">My Venues</h2>
-          <button onClick={onClose} className="text-blue-500">Close</button>
-        </div>
-  
-        <select
-          value={filter}
-          onChange={e => setFilter(e.target.value)}
-          className="w-full p-2 border rounded mb-4"
-        >
-          <option value="active">
-            Active venues ({activeVenues.length})
-          </option>
-          <option value="expired">
-            Expired venues ({expiredVenues.length})
-          </option>
-        </select>
-  
+export default function MyVenuesDashboard() {
+  const navigate = useNavigate();
+  const { venues, loading, error, setVenues } = useVenues(navigate);
+  const [selectedBookingId, setSelectedBookingId] = useState(null);
+
+  const view = id => navigate(`/venues/${id}`);
+  const edit = id => navigate(`/venues/${id}/edit`);
+  const delV = id => setVenues(prev => prev.filter(v => v.id !== id));
+  const delB = bid => {
+    setVenues(prev =>
+      prev.map(v => ({
+        ...v,
+        bookings: v.bookings.filter(b => b.id !== bid),
+      }))
+    );
+    setSelectedBookingId(null);
+  };
+
+  return (
+    <div className="p-4 max-w-xl mx-auto">
+      <header className="mb-6">
+        <h1 className="text-2xl font-extrabold text-gray-900">My Venues</h1>
+        <p className="text-gray-600 text-sm">All your listings and booking history.</p>
+      </header>
+
+      <div className="space-y-6">
         {loading ? (
-          <p className="text-center py-4">Loading venues...</p>
+          <p className="text-center text-gray-500 py-20">Loading…</p>
         ) : error ? (
-          <p className="text-center py-4 text-red-500">{error}</p>
+          <p className="text-center text-red-600">{error}</p>
+        ) : venues.length === 0 ? (
+          <p className="italic text-gray-500 text-center">You haven’t listed any venues yet.</p>
         ) : (
-          <ActiveVenuesSection
-            venues={displayed}
-            loading={loading}
-            error={error}
-            onDelete={id => setVenues(prev => prev.filter(v => v.id !== id))}
-          />
+          venues.map(v => (
+            <VenueCard
+              key={v.id}
+              venue={v}
+              onDeleteVenue={delV}
+              onEditVenue={edit}
+              onViewVenue={view}
+              onAskCancel={bid => setSelectedBookingId(bid)}
+            />
+          ))
         )}
       </div>
-    );
-  }
-  
+
+      {selectedBookingId && (
+        <BookingCancelledPopup
+          onClose={() => setSelectedBookingId(null)}
+          onConfirm={() => delB(selectedBookingId)}
+        />
+      )}
+    </div>
+  );
+}
