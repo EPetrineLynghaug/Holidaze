@@ -1,10 +1,11 @@
-import  { useState } from "react";
+import { useState } from "react";
 import useProfileSettings from "../../../hooks/api/useProfileSettings";
 import ToggleSwitch from "../../ui/buttons/Toggle";
 import AlertPopup from "../../ui/popup/AlertPopup";
 
+// Seksjonskomponent som matcher dashboard-stil
 const Section = ({ icon, title, children }) => (
-  <section className="bg-white shadow rounded-lg w-full max-w-6xl p-6 md:p-8 space-y-6 ring-1 ring-gray-100 text-left">
+  <section className="bg-white shadow rounded-lg w-lvh max-w-full p-6 md:p-8 space-y-6 ring-1 ring-gray-100 text-left">
     <h2 className="flex items-center gap-2 text-lg md:text-xl font-semibold text-purple-700">
       <span className="material-symbols-outlined text-purple-600" aria-hidden>
         {icon}
@@ -26,7 +27,6 @@ export default function ProfileSettingsPage({ userName, onSave }) {
     saveProfile,
   } = useProfileSettings(userName);
 
-  // --- Alert state ---
   const [alert, setAlert] = useState({
     open: false,
     type: "success",
@@ -34,7 +34,7 @@ export default function ProfileSettingsPage({ userName, onSave }) {
     message: "",
   });
 
-  // Update profile fields
+  // Profile field handlers
   const handleField = (section, key) => (e) => {
     const value = e.target.value;
     setProfile((prev) => ({
@@ -43,17 +43,15 @@ export default function ProfileSettingsPage({ userName, onSave }) {
     }));
   };
 
-  // Toggle venueManager
   const handleToggle = (enabled) => {
     setProfile((prev) => ({ ...prev, venueManager: enabled }));
   };
 
-  // Submit handler
   const onSubmit = async (e) => {
     e.preventDefault();
     try {
       const updated = await saveProfile();
-      onSave(updated); // Oppdater dashboard/parent, viktig!
+      onSave(updated);
       setAlert({
         open: true,
         type: "success",
@@ -74,7 +72,8 @@ export default function ProfileSettingsPage({ userName, onSave }) {
   if (errorProfile) return <p className="text-red-500">{errorProfile}</p>;
 
   return (
-    <main className="w-full max-w-none ml-0 max-h-screen overflow-y-auto scrollbar-hide">
+    <main className="w-full max-h-screen overflow-y-auto scrollbar-hide">
+
       {/* ALERT POPUP */}
       {alert.open && (
         <AlertPopup
@@ -89,7 +88,7 @@ export default function ProfileSettingsPage({ userName, onSave }) {
 
       <form
         onSubmit={onSubmit}
-        className="mt-10 mb-20 px-4 md:px-20 lg:px-64 max-h-screen overflow-y-auto scrollbar-hide space-y-8"
+            className="w-full mx-auto mt-10 mb-20 px-2 md:px-8 space-y-10"
       >
         <header className="space-y-2 text-left">
           <h1 className="text-4xl font-extrabold tracking-tight text-gray-900">
@@ -116,15 +115,15 @@ export default function ProfileSettingsPage({ userName, onSave }) {
 
         {/* Profile & Banner Images Section */}
         <Section icon="image" title="Profile & Banner Images">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
-            {/* Avatar Preview + Inputs */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 w-full max-w-[1000px]">
+            {/* Avatar */}
             <div className="space-y-6 w-full">
               {profile.avatar.url && (
                 <div className="flex justify-center">
                   <img
                     src={profile.avatar.url}
                     alt={profile.avatar.alt || "Profile preview"}
-                    className="w-40 h-40 object-cover rounded-full border-4 border-purple-500 shadow-lg"
+                    className="w-44 h-44 object-cover rounded-full border-4 border-purple-500 shadow-lg"
                   />
                 </div>
               )}
@@ -149,15 +148,14 @@ export default function ProfileSettingsPage({ userName, onSave }) {
                 className="w-full rounded-xl border border-gray-300 px-4 py-2"
               />
             </div>
-
-            {/* Banner Preview + Inputs */}
+            {/* Banner */}
             <div className="space-y-6 w-full">
               {profile.banner.url && (
                 <div className="flex justify-center">
                   <img
                     src={profile.banner.url}
                     alt={profile.banner.alt || "Banner preview"}
-                    className="w-full h-40 object-cover rounded-lg shadow-lg border border-gray-300"
+                    className="w-full h-44 object-cover rounded-lg shadow-lg border border-gray-300"
                   />
                 </div>
               )}

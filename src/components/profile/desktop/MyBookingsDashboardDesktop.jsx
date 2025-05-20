@@ -86,7 +86,7 @@ export default function MyBookingsDashboardDesktop({ onClose, userName }) {
       {/* Empty state */}
       {!loading && bookings.length === 0 && (
         <Section icon="info" title="No Bookings Yet">
-          <p className="text-gray-600">You haven’t made any bookings yet.</p>
+          <p className="text-gray-600">You haven't made any bookings yet.</p>
         </Section>
       )}
 

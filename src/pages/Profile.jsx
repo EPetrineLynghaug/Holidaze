@@ -120,7 +120,7 @@ export default function Profile() {
       {/* Settings Section */}
       {activeSection === 'settings' && (
         <>
-  <div className="hidden lg:block  lg:pl-2 px- ">
+  <div className="hidden lg:block ">
             <ProfileSettingsPage userName={user.name} onSave={handleSaveSettings} />
           </div>
           <div className="block lg:hidden">
