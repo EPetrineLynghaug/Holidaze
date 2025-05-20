@@ -5,7 +5,7 @@ import useProfileData from '../hooks/useProfileData';
 import ProfileHeader from '../components/profile/mobile/ProfileHeader';
 import DashboardInfoSection from '../components/profile/mobile/DashboardInfoSection';
 import ProfileChartSection from '../components/profile/mobile/ProfileChart';
-import ActiveVenuesSection from '../components/profile/mobile/ActiveVenueCard';
+import ActiveVenuesSection from '../components/profile/shared/ActiveVenueCard';
 import DashboardMobileMenu from '../components/navigation/mobile/DashboardMobileMenu';
 import DashboardDesktopMenu from '../components/navigation/desktop/DashboardDesctopMeny';
 import AddVenueForm from '../components/profile/mobile/ListNewVenue';

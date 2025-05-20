@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import DeleteVenueButton from '../../ui/buttons/DeleteVenueButton';
 import EditVenueButton from '../../ui/buttons/EditVenueButton';
+import BookingBadge from '../../ui/styles/BookingBadge'; // <-- NY!
 import { getAccessToken } from '../../../services/tokenService';
 import { FAC_OPTIONS } from '../../constants/VenueFormConfig';
 
@@ -40,7 +41,6 @@ export default function ActiveItemsSection({ venues, loading, error, onDelete, o
           const imgUrl = media[0]?.url || 'https://via.placeholder.com/400x200?text=No+Image';
           const { city = '', country = '' } = location;
           const bookingCount = bookings.length;
-          const bookingText = `${bookingCount} booking${bookingCount !== 1 ? 's' : ''}`;
 
           const facilityOptions = facilities
             .map(key => FAC_OPTIONS.find(o => o.key === key))
@@ -72,13 +72,10 @@ export default function ActiveItemsSection({ venues, loading, error, onDelete, o
                   alt={name}
                   className="object-cover w-full h-full rounded-t-2xl transition-transform duration-300 group-hover:scale-105"
                 />
-                {/* Booking badge */}
-                <span
-                  className="absolute top-4 left-4 bg-white/90 text-gray-800 font-semibold px-3 py-1 rounded-full text-xs shadow backdrop-blur-sm border border-gray-200"
-                  aria-label={bookingText}
-                >
-                  {bookingText}
-                </span>
+                {/* Booking badge (NY) */}
+                <div className="absolute top-4 left-4">
+                  <BookingBadge count={bookingCount} />
+                </div>
               </div>
 
               {/* Innhold */}

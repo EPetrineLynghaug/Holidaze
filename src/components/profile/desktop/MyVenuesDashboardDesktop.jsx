@@ -6,8 +6,8 @@ import VenueCard from "../shared/VenueCard";
 
 // Seksjon-header med stil
 const Section = ({ icon, title, children }) => (
-  <section className="bg-white shadow rounded-2xl w-full p-6 md:p-8 space-y-6 ring-1 ring-gray-100 text-left">
-    <h2 className="flex items-center gap-2 text-lg md:text-xl font-bold text-purple-700 mb-2">
+          <section className="bg-white shadow rounded-lg p-6 md:p-8 space-y-6 ring-1 ring-gray-100">
+            <h2 className="flex items-center gap-2 text-lg md:text-xl font-semibold text-purple-700">
       <span className="material-symbols-outlined text-purple-600" aria-hidden>
         {icon}
       </span>
@@ -37,7 +37,7 @@ export default function MyVenuesDashboardDesktop() {
   };
 
   return (
-    <main className="w-full max-w-none ml-0 max-h-screen overflow-y-auto bg-gray-50">
+    <main className="w-full max-h-screen overflow-y-auto scrollbar-hide bg-gray-50">
       <div className="w-full max-w-7xl mx-auto mt-10 mb-20 px-4 md:px-8 space-y-10">
         <header className="space-y-2 text-left">
           <h1 className="text-4xl font-extrabold tracking-tight text-gray-900">My Venues</h1>
@@ -46,7 +46,8 @@ export default function MyVenuesDashboardDesktop() {
 
         {/* Venue Listings */}
         <Section icon="location_city" title="Your Venues">
-          <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-8 auto-rows-fr">
+  <div className="w-full flex flex-col gap-8">
+
             {loading ? (
               <p className="text-center text-gray-500 py-20">Loading…</p>
             ) : error ? (
