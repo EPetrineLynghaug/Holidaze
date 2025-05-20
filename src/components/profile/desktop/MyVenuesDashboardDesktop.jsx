@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import useVenues from "../../../hooks/api/useVenues";
-import BookingCancelledPopup from "../../ui/mobildemodal/BookingCancelledPopup";
+import BookingCancelledPopup from "../../ui/popup/BookingCancelledPopup";
 import VenueCard from "../shared/VenueCard";
 
+// Seksjon-header med stil
 const Section = ({ icon, title, children }) => (
-  <section className="bg-white shadow rounded-lg w-full p-6 md:p-8 space-y-6 ring-1 ring-gray-100 text-left">
-    <h2 className="flex items-center gap-2 text-lg md:text-xl font-semibold text-purple-700">
+  <section className="bg-white shadow rounded-2xl w-full p-6 md:p-8 space-y-6 ring-1 ring-gray-100 text-left">
+    <h2 className="flex items-center gap-2 text-lg md:text-xl font-bold text-purple-700 mb-2">
       <span className="material-symbols-outlined text-purple-600" aria-hidden>
         {icon}
       </span>
@@ -21,22 +22,23 @@ export default function MyVenuesDashboardDesktop() {
   const { venues, loading, error, setVenues } = useVenues(navigate);
   const [selectedBookingId, setSelectedBookingId] = useState(null);
 
-  const view = (id) => navigate(`/venues/${id}`);
-  const edit = (id) => navigate(`/venues/${id}/edit`);
-  const delV = (id) => setVenues((prev) => prev.filter((v) => v.id !== id));
-  const delB = (bid) => {
-    setVenues((prev) =>
-      prev.map((v) => ({
+  // Action handlers
+  const view = id => navigate(`/venues/${id}`);
+  const edit = id => navigate(`/venues/${id}/edit`);
+  const delV = id => setVenues(prev => prev.filter(v => v.id !== id));
+  const delB = bid => {
+    setVenues(prev =>
+      prev.map(v => ({
         ...v,
-        bookings: v.bookings.filter((b) => b.id !== bid),
+        bookings: v.bookings.filter(b => b.id !== bid),
       }))
     );
     setSelectedBookingId(null);
   };
 
   return (
-    <main className="w-full max-w-none ml-0 max-h-screen overflow-y-auto">
-      <div className="w-full max-w-7xl mx-auto mt-10 mb-20 px-4 md:px-8 space-y-8">
+    <main className="w-full max-w-none ml-0 max-h-screen overflow-y-auto bg-gray-50">
+      <div className="w-full max-w-7xl mx-auto mt-10 mb-20 px-4 md:px-8 space-y-10">
         <header className="space-y-2 text-left">
           <h1 className="text-4xl font-extrabold tracking-tight text-gray-900">My Venues</h1>
           <p className="text-gray-600">All your listings and booking history.</p>
@@ -44,7 +46,7 @@ export default function MyVenuesDashboardDesktop() {
 
         {/* Venue Listings */}
         <Section icon="location_city" title="Your Venues">
-          <div className="w-full space-y-6">
+          <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-8 auto-rows-fr">
             {loading ? (
               <p className="text-center text-gray-500 py-20">Loading…</p>
             ) : error ? (
@@ -52,14 +54,13 @@ export default function MyVenuesDashboardDesktop() {
             ) : venues.length === 0 ? (
               <p className="italic text-gray-500">You haven't listed any venues yet.</p>
             ) : (
-              venues.map((v) => (
+              venues.filter(Boolean).map(v => (
                 <VenueCard
                   key={v.id}
                   venue={v}
                   onDeleteVenue={delV}
                   onEditVenue={edit}
                   onViewVenue={view}
-                  onAskCancel={(bid) => setSelectedBookingId(bid)}
                 />
               ))
             )}

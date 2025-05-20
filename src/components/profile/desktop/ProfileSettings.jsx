@@ -1,7 +1,7 @@
 import  { useState } from "react";
 import useProfileSettings from "../../../hooks/api/useProfileSettings";
 import ToggleSwitch from "../../ui/buttons/Toggle";
-import AlertPopup from "../../ui/mobildemodal/AlertPopup";
+import AlertPopup from "../../ui/popup/AlertPopup";
 
 const Section = ({ icon, title, children }) => (
   <section className="bg-white shadow rounded-lg w-full max-w-6xl p-6 md:p-8 space-y-6 ring-1 ring-gray-100 text-left">

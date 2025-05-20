@@ -1,6 +1,6 @@
 import  { useState } from 'react';
 import useBookings from '../../../hooks/api/useBookings';
-import { OrderCancelledPopup } from '../../ui/mobildemodal/OrderCancelledPopup';
+import { OrderCancelledPopup } from '../../ui/popup/OrderCancelledPopup';
 
 const FILTERS = [
   { key: 'upcoming', label: 'Upcoming' },

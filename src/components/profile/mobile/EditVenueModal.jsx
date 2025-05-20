@@ -8,7 +8,7 @@ import {
   AUD_OPTIONS,
   FAC_OPTIONS,
 } from '../../constants/VenueFormConfig';
-import BottomSheet from '../../../components/ui/mobildemodal/BottomSheet';
+import BottomSheet from '../../ui/popup/BottomSheet';
 import useNewVenueValidation from '../../../hooks/forms/useNewVenueValidation';
 import { venueValidationRules } from '../../constants/NewVenueValidationConfig';
 

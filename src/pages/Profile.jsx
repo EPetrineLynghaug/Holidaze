@@ -13,7 +13,7 @@ import EditVenueForm from '../components/profile/mobile/EditVenueModal';
 import ProfileSettings from '../components/profile/mobile/ProfileSettings';
 import MyVenuesDashboard from '../components/profile/mobile/MyVenuesDashboard';
 import MyBookingsDashboard from '../components/profile/mobile/MyBookingsDashboard';
-import BottomSheet from '../components/ui/mobildemodal/BottomSheet';
+import BottomSheet from '../components/ui/popup/BottomSheet';
 import ProfileSettingsPage from '../components/profile/desktop/ProfileSettings';
 import AddVenuePage from '../components/profile/desktop/AddVenuePage';
 import MyVenuesDashboardDesktop from '../components/profile/desktop/MyVenuesDashboardDesktop';

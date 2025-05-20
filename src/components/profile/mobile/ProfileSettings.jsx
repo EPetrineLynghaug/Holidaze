@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import useProfileSettings from "../../../hooks/api/useProfileSettings";
 import ToggleSwitch from "../../ui/buttons/Toggle";
-import AlertPopup from "../../ui/mobildemodal/AlertPopup";
+import AlertPopup from "../../ui/popup/AlertPopup";
 
 export default function ProfileSettingsMobile({ userName, onSave, onClose }) {
   const {

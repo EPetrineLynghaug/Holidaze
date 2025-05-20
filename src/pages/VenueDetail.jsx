@@ -10,8 +10,8 @@ import BookingBottomSheet    from "../components/venue/venuedetail/Booking";
 import VenueSkeleton         from "../components/venue/venuedetail/VenueSkeleton";
 import useBookingRanges      from "../hooks/useBookingRanges";
 
-import BookingSuccessPopup   from "../components/ui/mobildemodal/BookingSuccessPopup";
-import LoginPromptPopup      from "../components/ui/mobildemodal/LoginPromptPopup";
+import BookingSuccessPopup   from "../components/ui/popup/BookingSuccessPopup";
+import LoginPromptPopup      from "../components/ui/popup/LoginPromptPopup";
 
 import { BOOKINGS_URL }      from "../components/constants/api";
 import { getAccessToken }    from "../services/tokenService";

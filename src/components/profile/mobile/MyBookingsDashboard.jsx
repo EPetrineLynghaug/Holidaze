@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import useBookings from '../../../hooks/api/useBookings';
-import { OrderCancelledPopup } from '../../ui/mobildemodal/OrderCancelledPopup';
-import BottomSheet from '../../../components/ui/mobildemodal/BottomSheet';
+import { OrderCancelledPopup } from '../../ui/popup/OrderCancelledPopup';
+import BottomSheet from '../../ui/popup/BottomSheet';
 
 const REVIEW_ASPECTS = ['Location', 'Price', 'Host', 'Accuracy', 'Cleanliness'];
 const FILTERS = [

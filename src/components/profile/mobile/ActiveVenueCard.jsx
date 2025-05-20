@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { useNavigate } from 'react-router';
 import DeleteVenueButton from '../../ui/buttons/DeleteVenueButton';
+import EditVenueButton from '../../ui/buttons/EditVenueButton';
 import { getAccessToken } from '../../../services/tokenService';
 import { FAC_OPTIONS } from '../../constants/VenueFormConfig';
 
@@ -16,12 +17,12 @@ export default function ActiveItemsSection({ venues, loading, error, onDelete, o
     setItems(prev => prev.map(v => (v.id === updated.id ? updated : v)));
   };
 
-  if (loading) return <p className="text-center text-gray-500">Loading...</p>;
-  if (error) return <p className="text-center text-red-600">{error}</p>;
-  if (!items.length) return <p className="text-center text-gray-500">No active items.</p>;
+  if (loading) return <p className="text-center text-gray-500" aria-live="polite">Loading...</p>;
+  if (error) return <p className="text-center text-red-600" role="alert">{error}</p>;
+  if (!items.length) return <p className="text-center text-gray-500" aria-live="polite">No active items.</p>;
 
   return (
-    <section className="mt-8">
+    <section className="mt-8 mb-[40px]">
       <h3 className="text-2xl font-semibold mb-6">Your Active Listings</h3>
       <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {items.map(item => {
@@ -40,7 +41,6 @@ export default function ActiveItemsSection({ venues, loading, error, onDelete, o
           const { city = '', country = '' } = location;
           const bookingCount = bookings.length;
           const bookingText = `${bookingCount} booking${bookingCount !== 1 ? 's' : ''}`;
-          const bgColor = bookingCount > 0 ? '#4CAF50' : '#DC3545';
 
           const facilityOptions = facilities
             .map(key => FAC_OPTIONS.find(o => o.key === key))
@@ -51,68 +51,83 @@ export default function ActiveItemsSection({ venues, loading, error, onDelete, o
           return (
             <article
               key={id}
-              className="bg-white border border-gray-100 rounded-xl shadow-md hover:shadow-lg transition duration-300 flex flex-col overflow-hidden"
+              tabIndex={0}
+              role="button"
+              aria-label={`View venue ${name}`}
+              onClick={e => {
+                if (
+                  e.target.closest('.action-btn') ||
+                  e.target.closest('.delete-btn')
+                ) {
+                  return;
+                }
+                navigate(`/venues/${id}`);
+              }}
+              className="group flex flex-col bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-xl transition-shadow duration-200 overflow-hidden cursor-pointer relative focus:ring-2 focus:ring-purple-300 mb-10"
             >
-              <Link to={`/venues/${id}`} className="relative block w-full h-40 overflow-hidden">
-                <img src={imgUrl} alt={name} className="w-full h-full object-cover" />
+              {/* Bilde */}
+              <div className="relative w-full aspect-[3/2] overflow-hidden">
+                <img
+                  src={imgUrl}
+                  alt={name}
+                  className="object-cover w-full h-full rounded-t-2xl transition-transform duration-300 group-hover:scale-105"
+                />
+                {/* Booking badge */}
                 <span
-                  className="absolute top: 0.5rem; right-2 text-xs font-semibold px-2 py-0.5 rounded-full text-white"
-                  style={{ backgroundColor: bgColor }}
+                  className="absolute top-4 left-4 bg-white/90 text-gray-800 font-semibold px-3 py-1 rounded-full text-xs shadow backdrop-blur-sm border border-gray-200"
+                  aria-label={bookingText}
                 >
                   {bookingText}
                 </span>
-              </Link>
+              </div>
 
-              <div className="p-5 flex flex-col flex-1">
-                <h4 className="text-lg font-semibold text-gray-900 mb-1">{name}</h4>
+              {/* Innhold */}
+              <div className="flex-1 flex flex-col gap-1 px-5 py-4 pb-5 relative">
+                <h4 className="text-lg font-bold text-gray-900 truncate mb-0.5">{name}</h4>
                 {(city || country) && (
-                  <p className="text-sm text-gray-500 mb-3 truncate">
+                  <p className="text-xs text-gray-500 mb-2 truncate">
                     {[city, country].filter(Boolean).join(', ')}
                   </p>
                 )}
 
-                <div className="flex flex-wrap items-center gap-4 text-sm text-gray-700 mb-4">
-                  <div className="flex items-center gap-1">
-                    <span className="material-symbols-outlined text-base">home</span>
+                {/* Facilities & type */}
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <span className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-full text-xs text-gray-700">
+                    <span className="material-symbols-outlined text-base" aria-hidden="true">home</span>
                     {type}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="material-symbols-outlined text-base">king_bed</span>
+                  </span>
+                  <span className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-full text-xs text-gray-700">
+                    <span className="material-symbols-outlined text-base" aria-hidden="true">king_bed</span>
                     {maxGuests}
-                  </div>
+                  </span>
                   {iconsToShow.map(opt => (
-                    <span key={opt.key} className="material-symbols-outlined text-base" title={opt.label}>
-                      {opt.icon}
+                    <span
+                      key={opt.key}
+                      className="flex items-center justify-center w-7 h-7 rounded-full bg-gray-100 text-purple-700"
+                      title={opt.label}
+                    >
+                      <span className="material-symbols-outlined text-base" aria-hidden="true">{opt.icon}</span>
                     </span>
                   ))}
                   {extraCount > 0 && (
-                    <span className="text-xs text-gray-400">+{extraCount}</span>
+                    <span className="flex items-center justify-center w-7 h-7 rounded-full bg-gray-50 text-gray-400 text-xs">
+                      +{extraCount}
+                    </span>
                   )}
                 </div>
 
-                <div className="mt-auto">
-                  <div className="flex items-center gap-4 justify-end text-sm">
-                    <button
-                      onClick={() => navigate(`/venues/${id}`)}
-                      className="text-indigo-600 hover:underline"
-                    >
-                      View
-                    </button>
-                    <button
-                      onClick={() => onEdit(item, handleUpdated)}
-                      className="text-gray-600 hover:underline"
-                    >
-                      Edit
-                    </button>
-                    <DeleteVenueButton
-                      venueId={id}
-                      accessToken={getAccessToken()}
-                      onDeleted={() => setItems(prev => prev.filter(v => v.id !== id))}
-                      className="text-red-600 hover:underline"
-                    >
-                      Delete
-                    </DeleteVenueButton>
-                  </div>
+                {/* Edit & Delete knappene */}
+                <div className="absolute bottom-7 right-5 flex gap-4 z-10">
+                  <EditVenueButton
+                    onClick={() => onEdit(item, handleUpdated)}
+                    className="action-btn"
+                  />
+                  <DeleteVenueButton
+                    venueId={id}
+                    accessToken={getAccessToken()}
+                    onDeleted={() => setItems(prev => prev.filter(v => v.id !== id))}
+                    className="delete-btn"
+                  />
                 </div>
               </div>
             </article>
