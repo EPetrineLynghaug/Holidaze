@@ -1,16 +1,12 @@
-import React from 'react';
-
 export default function DashboardInfoSection({ user }) {
-  const isVenue = user?.venueManager;
-
+    const isVenue = user?.venueManager;
   return (
     <section className="w-full px-2 space-y-5 mt-6 lg:px-0 lg:w-full">
-      {/* Seksjonstittel */}
       <h2 className="text-xl lg:text-2xl font-semibold text-gray-900">
         Dashboard
       </h2>
 
-      {/* 1 – Velkomst */}
+      {/* Velkomst */}
       <div className="space-y-2">
         <p className="text-base lg:text-lg font-medium text-gray-900">
           {isVenue
@@ -20,11 +16,11 @@ export default function DashboardInfoSection({ user }) {
         <p className="text-sm lg:text-base font-normal text-gray-700">
           {isVenue
             ? "Get an instant visual overview of your venue's booking activity. Easily monitor booking trends, occupancy rates, and manage your active venues efficiently."
-            : "Here you can manage your profile and access other important features."}
+            : "Here you can manage your profile, view your bookings and explore venues. Upgrade to Venue mode to unlock analytics and management tools!"}
         </p>
       </div>
 
-      {/* 2 – Rask redigering */}
+      {/* Venue - ekstra info */}
       {isVenue && (
         <div className="space-y-2">
           <p className="text-base lg:text-lg font-medium text-gray-900">
@@ -36,7 +32,7 @@ export default function DashboardInfoSection({ user }) {
         </div>
       )}
 
-      {/* 3 – Tilbakemelding */}
+      {/* Tilbakemelding */}
       <div className="space-y-2">
         <p className="text-base lg:text-lg font-medium text-gray-900">
           Feedback Matters:
@@ -46,7 +42,7 @@ export default function DashboardInfoSection({ user }) {
         </p>
       </div>
 
-      {/* 4 – Profiladministrasjon */}
+      {/* Profiladministrasjon */}
       <div className="space-y-2">
         <p className="text-base lg:text-lg font-medium text-gray-900">
           Manage Your Profile:
@@ -54,7 +50,7 @@ export default function DashboardInfoSection({ user }) {
         <p className="text-sm lg:text-base font-normal text-gray-700">
           {isVenue
             ? "Visit Settings to change your venue status, update your profile image, and modify other important information about your venue."
-            : "Visit Settings to update your profile information and manage your account."}
+            : "Visit Settings to update your profile and manage your account. You can upgrade to Venue mode at any time."}
         </p>
       </div>
     </section>

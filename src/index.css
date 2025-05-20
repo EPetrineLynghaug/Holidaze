@@ -111,6 +111,15 @@
     border-bottom-right-radius: 0.75rem !important;
   }
   
+  .custom-select {
+  /* Fjern default arrow på alle browsers */
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em;
+}
   
 
 
