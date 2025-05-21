@@ -83,7 +83,7 @@ export default function AllVenueCard({ venue }) {
   <span className="text-[18px] text-gray-900 font-bold flex items-center gap-1">
     {Number(price || 0).toLocaleString("no-NO")}
     <span className="text-[14px] font-medium text-gray-500">NOK</span>
-    <span className="text-[13px] text-gray-400 ml-1 font-medium">/night</span>
+    <span className="text-[13px] text-gray-400 ml-1 font-medium">/ night</span>
   </span>
 </div>
       </div>
