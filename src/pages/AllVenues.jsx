@@ -1,71 +1,23 @@
-
-import { useState, useEffect, useRef } from "react";
-import { VENUES_URL } from "../components/constants/api";
+import { useState } from "react";
 import AllVenueCard from "../components/venue/allvenues/AllVenueCard";
 import ScrollToTopButton from "../components/ui/buttons/ScrollToTopButton";
 import VenueCategoryBar from "../components/ui/buttons/VenueCategoryBar";
 import { useVenueFilter } from "../hooks/filter/useVenueFilter";
+import LoadMoreButton from "../components/ui/buttons/LoadMoreVenuesButton";
+import RefreshButton from "../components/ui/buttons/RefreshVenuesButton";
+import { useAllVenues } from "../hooks/api/useAllVenues";
 
 export default function AllVenues() {
-  const [venues, setVenues] = useState([]);
-  const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [activeCategory, setActiveCategory] = useState("all");
-  const limit = 100;
-  const isFirst = useRef(true);
-
-  const fetchVenues = async ({ pageNum = 1, replace = false }) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const resp = await fetch(
-        `${VENUES_URL}?limit=${limit}&page=${pageNum}&sort=created&sortOrder=desc`
-      );
-      if (!resp.ok) throw new Error(`Error ${resp.status}`);
-      const { data } = await resp.json();
-      const categoryKeys = [
-        'beach','cabin','ski','city','mountain','lake','desert',
-        'forest','island','countryside','farm','luxury','historical',
-        'pets','wifi','parking','family','all_inclusive'
-      ];
-      const enhanced = data.map(item => {
-        const categoryKeys = [
-          'beach','cabin','ski','city','mountain','lake','desert',
-          'forest','island','countryside','farm','luxury','historical',
-          'pets','wifi','parking','family','all_inclusive'
-        ];
-        // Velg tilfeldig kategori
-        const randomCat = categoryKeys[Math.floor(Math.random() * categoryKeys.length)];
-        // Randomiser meta flags for wifi, pets og parking
-        const randomMeta = {
-          wifi: Math.random() < 0.5,
-          pets: Math.random() < 0.5,
-          parking: Math.random() < 0.5,
-          ...item.meta
-        };
-        return {
-          ...item,
-          category: randomCat,
-          meta: randomMeta
-        };
-      });
-      setVenues(prev => (replace ? enhanced : [...prev, ...enhanced]));
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (isFirst.current) {
-      fetchVenues({ pageNum: 1, replace: true });
-      isFirst.current = false;
-    } else {
-      fetchVenues({ pageNum: page, replace: page === 1 });
-    }
-  }, [page]);
+  const {
+    venues,
+    setVenues,
+    page,
+    setPage,
+    loading,
+    error,
+    fetchVenues,
+  } = useAllVenues(100);
 
   const filteredVenues = useVenueFilter(venues, activeCategory);
 
@@ -87,7 +39,7 @@ export default function AllVenues() {
         bg-gradient-to-br from-gray-50 via-white to-purple-50 min-h-screen
       ">
         <h1 className="
-          text-3xl md:text-4xl font-regular mb-4 mt-1
+          text-3xl md:text-4xl font-regular mt-6 mb-10
           text-center sm:text-left text-gray-900
           xl:pl-8 2xl:pl-16
         ">
@@ -110,24 +62,22 @@ export default function AllVenues() {
           ))}
         </div>
 
-        <div className="mt-12 flex justify-center space-x-4">
-          <button
+        <div className="mt-12 flex justify-center gap-3 sm:gap-6">
+          <RefreshButton
             onClick={handleRefresh}
+            loading={loading && page === 1}
             disabled={loading && page === 1}
-            className="px-6 py-2 bg-white font-semibold rounded-xl shadow hover:bg-purple-50 hover:text-purple-700 disabled:opacity-50 border border-gray-100 transition"
-          >
-            {loading && page === 1 ? 'Refreshing...' : 'Refresh'}
-          </button>
-          <button
+          />
+          <LoadMoreButton
             onClick={handleLoadMore}
+            loading={loading && page > 1}
             disabled={loading}
-            className="px-6 py-2 bg-purple-600 text-white font-semibold rounded-xl shadow hover:bg-purple-700 disabled:opacity-50 transition"
-          >
-            {loading && page > 1 ? 'Loading...' : 'Load Next'}
-          </button>
+          />
         </div>
 
-        {loading && page > 1 && <p className="mt-4 text-center text-gray-500">Loading more…</p>}
+        {loading && page > 1 && (
+          <p className="mt-4 text-center text-gray-500">Loading more…</p>
+        )}
       </div>
       <ScrollToTopButton />
     </>

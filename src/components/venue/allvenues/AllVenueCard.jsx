@@ -1,8 +1,5 @@
-// src/components/venue/allvenues/AllVenueCard.jsx
-import React from "react";
 import { useNavigate } from "react-router";
 import RatingStars from "../../ui/RatingStars";
-import ScrollToTopButton from "../../ui/buttons/ScrollToTopButton";
 
 const PLACEHOLDER_IMG =
   "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80";
@@ -61,6 +58,7 @@ export default function AllVenueCard({ venue }) {
             shadow hover:bg-white transition
           "
           tabIndex={-1}
+          aria-label="Favoritt"
           onClick={e => e.stopPropagation()}
         >
           <span className="material-symbols-outlined text-base text-purple-700">favorite</span>
@@ -80,12 +78,14 @@ export default function AllVenueCard({ venue }) {
           {location?.country || ""}
         </p>
         <RatingStars value={rating} starSize={15} showValue className="mt-0.5 mb-1" />
-        <div className="flex items-center justify-between mt-0">
-          <span className="text-[18px] text-gray-900 font-bold">
-            ${Number(price || 0).toFixed(2)}
-          </span>
-          <span className="text-[13px] text-gray-400 ml-1 font-medium">/night</span>
-        </div>
+
+<div className="flex items-center justify-end mt-0">
+  <span className="text-[18px] text-gray-900 font-bold flex items-center gap-1">
+    {Number(price || 0).toLocaleString("no-NO")}
+    <span className="text-[14px] font-medium text-gray-500">NOK</span>
+    <span className="text-[13px] text-gray-400 ml-1 font-medium">/night</span>
+  </span>
+</div>
       </div>
     </div>
   );
