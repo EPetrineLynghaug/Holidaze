@@ -1,9 +1,9 @@
+// src/components/venue/allvenues/AllVenueCard.jsx
 import React from "react";
 import { useNavigate } from "react-router";
 import RatingStars from "../../ui/RatingStars";
 import ScrollToTopButton from "../../ui/buttons/ScrollToTopButton";
 
-// Ekte Unsplash placeholder (under 200kb, stabil kvalitet):
 const PLACEHOLDER_IMG =
   "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80";
 
@@ -25,7 +25,7 @@ export default function AllVenueCard({ venue }) {
   return (
     <div
       className="
-     rounded-2xl border border-gray-100
+        rounded-2xl border border-gray-100
         shadow-sm hover:shadow-md overflow-hidden
         transition hover:-translate-y-0.5 cursor-pointer
         max-w-[340px] w-full font-sans
@@ -35,7 +35,6 @@ export default function AllVenueCard({ venue }) {
       role="button"
       aria-label={`Vis venue ${name}`}
     >
-      {/* Bilde + overlay */}
       <div className="relative">
         <img
           src={imgSrc}
@@ -48,7 +47,6 @@ export default function AllVenueCard({ venue }) {
             }
           }}
         />
-        {/* Soft bottom gradient for smooth fade */}
         <div
           className="absolute bottom-0 left-0 w-full h-1/2 pointer-events-none rounded-t-2xl"
           style={{
@@ -56,7 +54,6 @@ export default function AllVenueCard({ venue }) {
               "linear-gradient(to top, rgba(34,34,34,0.12) 0%, rgba(255,255,255,0.0) 90%)",
           }}
         />
-        {/* Hjerte */}
         <button
           className="
             absolute top-2 right-2 bg-white/70 rounded-full
@@ -68,13 +65,11 @@ export default function AllVenueCard({ venue }) {
         >
           <span className="material-symbols-outlined text-base text-purple-700">favorite</span>
         </button>
-        {/* Bildeteller */}
         <span className="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-0.5 rounded-full">
-          1/{imageCount || 1}
+          {`1/${imageCount || 1}`}
         </span>
       </div>
 
-      {/* Tekstinnhold */}
       <div className="px-4 py-2 min-h-[100px] flex flex-col justify-center">
         <h3 className="text-[18px] font-normal tracking-wider text-gray-900 mb-0 truncate">
           {name}

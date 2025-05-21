@@ -1,13 +1,17 @@
-import React, { useState, useEffect, useRef } from "react";
+
+import { useState, useEffect, useRef } from "react";
 import { VENUES_URL } from "../components/constants/api";
 import AllVenueCard from "../components/venue/allvenues/AllVenueCard";
 import ScrollToTopButton from "../components/ui/buttons/ScrollToTopButton";
+import VenueCategoryBar from "../components/ui/buttons/VenueCategoryBar";
+import { useVenueFilter } from "../hooks/filter/useVenueFilter";
 
 export default function AllVenues() {
   const [venues, setVenues] = useState([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [activeCategory, setActiveCategory] = useState("all");
   const limit = 100;
   const isFirst = useRef(true);
 
@@ -20,7 +24,33 @@ export default function AllVenues() {
       );
       if (!resp.ok) throw new Error(`Error ${resp.status}`);
       const { data } = await resp.json();
-      setVenues(prev => (replace ? data : [...prev, ...data]));
+      const categoryKeys = [
+        'beach','cabin','ski','city','mountain','lake','desert',
+        'forest','island','countryside','farm','luxury','historical',
+        'pets','wifi','parking','family','all_inclusive'
+      ];
+      const enhanced = data.map(item => {
+        const categoryKeys = [
+          'beach','cabin','ski','city','mountain','lake','desert',
+          'forest','island','countryside','farm','luxury','historical',
+          'pets','wifi','parking','family','all_inclusive'
+        ];
+        // Velg tilfeldig kategori
+        const randomCat = categoryKeys[Math.floor(Math.random() * categoryKeys.length)];
+        // Randomiser meta flags for wifi, pets og parking
+        const randomMeta = {
+          wifi: Math.random() < 0.5,
+          pets: Math.random() < 0.5,
+          parking: Math.random() < 0.5,
+          ...item.meta
+        };
+        return {
+          ...item,
+          category: randomCat,
+          meta: randomMeta
+        };
+      });
+      setVenues(prev => (replace ? enhanced : [...prev, ...enhanced]));
     } catch (err) {
       setError(err.message);
     } finally {
@@ -37,6 +67,8 @@ export default function AllVenues() {
     }
   }, [page]);
 
+  const filteredVenues = useVenueFilter(venues, activeCategory);
+
   const handleRefresh = () => {
     fetchVenues({ pageNum: 1, replace: true });
     setPage(1);
@@ -49,28 +81,34 @@ export default function AllVenues() {
   return (
     <>
       <div className="
-        max-w-full 
+        max-w-full
         px-2 sm:px-6 md:px-18 xl:px-20
-        py-8 pb-28   
+        py-8 pb-28
         bg-gradient-to-br from-gray-50 via-white to-purple-50 min-h-screen
       ">
- <h1 className="
-  text-3xl md:text-4xl font-regular mb-7 mt-1
-  text-center sm:text-left text-gray-900
-  xl:pl-8 2xl:pl-16
-">
-  All Venues
-</h1>
-<div className="
-  grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3
-  gap-x-10 gap-y-14
-  place-items-center
-  max-w-full mx-auto
-">
-  {venues.map(v => (
-    <AllVenueCard key={v.id} venue={v} />
-  ))}
-</div>
+        <h1 className="
+          text-3xl md:text-4xl font-regular mb-4 mt-1
+          text-center sm:text-left text-gray-900
+          xl:pl-8 2xl:pl-16
+        ">
+          All Venues
+        </h1>
+
+        <VenueCategoryBar
+          activeCategory={activeCategory}
+          onCategoryChange={setActiveCategory}
+        />
+
+        <div className="
+          grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3
+          gap-x-10 gap-y-14
+          place-items-center
+          max-w-full mx-auto
+        ">
+          {filteredVenues.map(v => (
+            <AllVenueCard key={v.id} venue={v} />
+          ))}
+        </div>
 
         <div className="mt-12 flex justify-center space-x-4">
           <button
@@ -88,6 +126,7 @@ export default function AllVenues() {
             {loading && page > 1 ? 'Loading...' : 'Load Next'}
           </button>
         </div>
+
         {loading && page > 1 && <p className="mt-4 text-center text-gray-500">Loading more…</p>}
       </div>
       <ScrollToTopButton />
