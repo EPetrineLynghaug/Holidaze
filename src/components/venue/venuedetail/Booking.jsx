@@ -1,7 +1,7 @@
 // src/components/venuedetail/Booking.jsx
 import React from "react";
-import BottomSheet from "../../ui/mobildemodal/BottomSheet";
-import BookingSuccessPopup from "../../ui/mobildemodal/BookingSuccessPopup";
+import BottomSheet from "../../ui/popup/BottomSheet";
+import BookingSuccessPopup from "../../ui/popup/BookingSuccessPopup";
 import { BOOKING_STEPS, useBookingForm } from "../../../hooks/useBookingForm";
 
 export default function BookingBottomSheet({

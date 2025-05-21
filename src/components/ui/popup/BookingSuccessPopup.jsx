@@ -1,5 +1,4 @@
-// src/components/ui/mobildemodal/BookingSuccessPopup.jsx
-import React from "react";
+
 import { useNavigate } from "react-router";
 
 /**

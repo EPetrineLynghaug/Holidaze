@@ -119,7 +119,8 @@ export function useVenueForm(userName, onCreated) {
         description: form.description,
         media: form.images.filter((u) => u).map((url) => ({ url, alt: "" })),
         price: Number(form.price),
-        maxGuests: form.guests,
+        maxGuests: Number(form.guests),
+
         rating: form.rating,
         meta,
         location: { ...form.location },

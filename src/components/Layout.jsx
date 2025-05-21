@@ -21,7 +21,7 @@ export default function Layout() {
           </div>
         </>
       )}
-      <main className="flex-1  mx-auto">
+      <main className="flex-1  ">
         <Outlet />
       </main>
     </div>

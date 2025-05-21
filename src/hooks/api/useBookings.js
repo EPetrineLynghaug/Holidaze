@@ -3,9 +3,12 @@ import { getAccessToken } from "../../services/tokenService";
 import {
   PROFILE_BY_NAME_BOOKINGS_URL,
   BOOKING_BY_ID_URL,
+  BOOKING_REVIEW_URL,
 } from "../../components/constants/api";
+export default function useBookings(passedUserName) {
+  const stored = localStorage.getItem("user");
+  const userName = passedUserName || (stored && JSON.parse(stored).name);
 
-export default function useBookings(userName) {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -32,15 +35,7 @@ export default function useBookings(userName) {
             signal,
           }
         );
-
-        if (!res.ok) {
-          let msg = "Something went wrong. Please try again.";
-          if (res.status === 401) msg = "Unauthorized. Please log in again.";
-          if (res.status === 404) msg = "No bookings found.";
-          if (res.status >= 500) msg = "Server error. Please try again later.";
-          throw new Error(msg);
-        }
-
+        if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
         const { data } = await res.json();
         setBookings(data);
       } catch (e) {
@@ -54,12 +49,8 @@ export default function useBookings(userName) {
     return () => controller.abort();
   }, [userName]);
 
-  const deleteBooking = async (bookingId) => {
-    if (!bookingId) {
-      console.error("Booking ID is missing!");
-      return;
-    }
-
+  // Cancel (delete) a booking
+  const cancelBooking = async (bookingId) => {
     setLoading(true);
     setError(null);
     try {
@@ -71,21 +62,37 @@ export default function useBookings(userName) {
           "X-Noroff-API-Key": import.meta.env.VITE_NOROFF_API_KEY,
         },
       });
-
-      if (!res.ok) {
-        let msg = "Failed to cancel the booking.";
-        if (res.status === 401) msg = "Unauthorized.";
-        if (res.status === 404) msg = "Booking ID not found.";
-        throw new Error(msg);
-      }
-
+      if (!res.ok) throw new Error(`Cancel failed: ${res.status}`);
       setBookings((prev) => prev.filter((b) => b.id !== bookingId));
     } catch (e) {
-      setError(e.message || "Error occurred while canceling.");
+      setError(e.message);
     } finally {
       setLoading(false);
     }
   };
 
-  return { bookings, loading, error, deleteBooking };
+  // Submit a review for a booking
+  const submitReview = async (bookingId, payload) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const token = getAccessToken();
+      const res = await fetch(BOOKING_REVIEW_URL(bookingId), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+          "X-Noroff-API-Key": import.meta.env.VITE_NOROFF_API_KEY,
+        },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error(`Review failed: ${res.status}`);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { bookings, loading, error, cancelBooking, submitReview };
 }

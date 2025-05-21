@@ -4,8 +4,8 @@ import useProfileData from '../hooks/useProfileData';
 
 import ProfileHeader from '../components/profile/mobile/ProfileHeader';
 import DashboardInfoSection from '../components/profile/mobile/DashboardInfoSection';
-import ProfileChart from '../components/profile/mobile/ProfileChart';
-import ActiveVenuesSection from '../components/profile/mobile/ActiveVenueCard';
+import ProfileChartSection from '../components/profile/mobile/ProfileChart';
+import ActiveVenuesSection from '../components/profile/shared/ActiveVenueCard';
 import DashboardMobileMenu from '../components/navigation/mobile/DashboardMobileMenu';
 import DashboardDesktopMenu from '../components/navigation/desktop/DashboardDesctopMeny';
 import AddVenueForm from '../components/profile/mobile/ListNewVenue';
@@ -13,7 +13,7 @@ import EditVenueForm from '../components/profile/mobile/EditVenueModal';
 import ProfileSettings from '../components/profile/mobile/ProfileSettings';
 import MyVenuesDashboard from '../components/profile/mobile/MyVenuesDashboard';
 import MyBookingsDashboard from '../components/profile/mobile/MyBookingsDashboard';
-import BottomSheet from '../components/ui/mobildemodal/BottomSheet';
+import BottomSheet from '../components/ui/popup/BottomSheet';
 import ProfileSettingsPage from '../components/profile/desktop/ProfileSettings';
 import AddVenuePage from '../components/profile/desktop/AddVenuePage';
 import MyVenuesDashboardDesktop from '../components/profile/desktop/MyVenuesDashboardDesktop';
@@ -87,12 +87,12 @@ export default function Profile() {
         <>
           <div className="block lg:hidden mt-6">
             <DashboardInfoSection user={user} />
-            <ProfileChart venues={venues} bookings={bookings} />
+                  <ProfileChartSection user={user} venues={venues} bookings={bookings} />
           </div>
-          <div className="hidden lg:grid lg:ml-64 lg:pl-12 lg:mt-6 lg:grid-cols-[1fr_1fr] lg:gap-6 lg:items-end">
+          <div className="hidden lg:grid lg:ml-64 lg:pl-12 lg:mt-6 lg:grid-cols-[1fr_1fr] lg:gap-6 lg:items-end px-9">
             <DashboardInfoSection user={user} />
             <div className="self-end mt-4 lg:mt-0">
-              <ProfileChart venues={venues} bookings={bookings} />
+          <ProfileChartSection user={user} venues={venues} bookings={bookings} />
             </div>
           </div>
 
@@ -120,7 +120,7 @@ export default function Profile() {
       {/* Settings Section */}
       {activeSection === 'settings' && (
         <>
-  <div className="hidden lg:block  lg:pl-2 px- ">
+    <div className="hidden lg:block mt-6 lg:ml-64 lg:pl-12 px-12">
             <ProfileSettingsPage userName={user.name} onSave={handleSaveSettings} />
           </div>
           <div className="block lg:hidden">

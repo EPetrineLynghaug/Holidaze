@@ -1,111 +1,89 @@
-import React, { useEffect, useState } from 'react';
-import { Switch } from '@headlessui/react';
-import { getAccessToken } from '../../../services/tokenService';
-import { PROFILE_BY_NAME_URL } from '../../constants/api';
+import React, { useState } from "react";
+import useProfileSettings from "../../../hooks/api/useProfileSettings";
+import ToggleSwitch from "../../ui/buttons/Toggle";
+import AlertPopup from "../../ui/popup/AlertPopup";
 
-export default function ProfileSettings({ userName, onSave, onClose }) {
-  const [isVenueManager, setIsVenueManager] = useState(false);
-  const [profileUrl, setProfileUrl]         = useState('');
-  const [bannerUrl, setBannerUrl]           = useState('');
-  const token = getAccessToken();
+export default function ProfileSettingsMobile({ userName, onSave, onClose }) {
+  const {
+    profile,
+    setProfile,
+    loadingProfile,
+    errorProfile,
+    savingProfile,
+    errorSave,
+    saveProfile,
+  } = useProfileSettings(userName);
 
-  useEffect(() => {
-    document.body.style.overflow = 'hidden';
+  const [alert, setAlert] = useState({
+    open: false,
+    type: "success",
+    title: "",
+    message: "",
+  });
 
-   
-    (async () => {
-      try {
-        const res = await fetch(PROFILE_BY_NAME_URL(userName), {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'X-Noroff-API-Key': import.meta.env.VITE_NOROFF_API_KEY,
-          },
-        });
-        if (!res.ok) throw new Error(`Error ${res.status}`);
-        const { data } = await res.json();
-
-        // Use localStorage override if present, otherwise server value
-        const storedVM = localStorage.getItem('venueManager');
-        setIsVenueManager(storedVM != null
-          ? JSON.parse(storedVM)
-          : data.venueManager);
-
-        const storedProfile = localStorage.getItem('profileUrl');
-        setProfileUrl(storedProfile || data.avatar.url);
-
-        const storedBanner = localStorage.getItem('bannerUrl');
-        setBannerUrl(storedBanner || data.banner.url);
-      } catch (e) {
-        console.error('Could not load profile:', e);
-      }
-    })();
-
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [userName, token]);
-
-  const toggleVenueManager = (on) => {
-    setIsVenueManager(on);
-    localStorage.setItem('venueManager', JSON.stringify(on));
+  // Field updaters
+  const handleField = (section, key) => (e) => {
+    const value = e.target.value;
+    setProfile((prev) => ({
+      ...prev,
+      [section]: { ...prev[section], [key]: value },
+    }));
   };
 
-  const handleProfileUrlChange = (e) => {
-    const url = e.target.value;
-    setProfileUrl(url);
-    localStorage.setItem('profileUrl', url);
+  // Toggle venueManager
+  const handleToggle = (enabled) => {
+    setProfile((prev) => ({ ...prev, venueManager: enabled }));
   };
 
-  const handleBannerUrlChange = (e) => {
-    const url = e.target.value;
-    setBannerUrl(url);
-    localStorage.setItem('bannerUrl', url);
-  };
-
-  const saveToApi = async () => {
-    const body = {
-      bio: '',
-      avatar: { url: profileUrl, alt: '' },
-      banner: { url: bannerUrl, alt: '' },
-      venueManager: isVenueManager,
-    };
-    const res = await fetch(PROFILE_BY_NAME_URL(userName), {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-        'X-Noroff-API-Key': import.meta.env.VITE_NOROFF_API_KEY,
-      },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) throw new Error(`Error ${res.status}`);
-    return res.json();
-  };
-
-  const handleSave = async () => {
+  // Submit
+  const onSubmit = async (e) => {
+    e.preventDefault();
     try {
-      const { data } = await saveToApi();
-
-      // Update stored user so other components pick up new URLs
-      localStorage.setItem('user', JSON.stringify(data));
-      window.dispatchEvent(new Event('authChange'));
-
-      alert('Settings saved!');
-      onSave(data);
+      const updated = await saveProfile();
+      onSave(updated);
+      setAlert({
+        open: true,
+        type: "success",
+        title: "Settings Saved!",
+        message: "Your profile settings have been updated.",
+      });
       onClose();
-    } catch (e) {
-      console.error(e);
-      alert(`Could not save: ${e.message}`);
+    } catch (err) {
+      setAlert({
+        open: true,
+        type: "error",
+        title: "Oops! Something went wrong",
+        message: "We couldn't save your changes. Please try again.",
+      });
     }
   };
 
+  if (loadingProfile) return <p>Laster profil…</p>;
+  if (errorProfile) return <p className="text-red-500">{errorProfile}</p>;
+
   return (
     <section className="fixed inset-x-0 bottom-0 h-4/5 z-50">
-      <div className="absolute inset-0 bg-white rounded-t-3xl shadow-lg flex flex-col">
+      {/* ALERT POPUP */}
+      {alert.open && (
+        <AlertPopup
+          open={alert.open}
+          type={alert.type}
+          title={alert.title}
+          message={alert.message}
+          onClose={() => setAlert(a => ({ ...a, open: false }))}
+          duration={2200}
+        />
+      )}
+
+      <form
+        onSubmit={onSubmit}
+        className="absolute inset-0 bg-white rounded-t-3xl shadow-lg flex flex-col"
+      >
         {/* Header */}
         <div className="sticky top-0 bg-white z-10 flex items-center justify-between px-4 py-3 border-b border-purple-100">
           <button
             onClick={onClose}
+            type="button"
             className="material-symbols-outlined text-xl text-purple-700"
           >
             close
@@ -125,20 +103,11 @@ export default function ProfileSettings({ userName, onSave, onClose }) {
                 Switch between Traveler & Venue modes
               </p>
             </div>
-            <Switch
-              checked={isVenueManager}
-              onChange={toggleVenueManager}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ${
-                isVenueManager ? 'bg-purple-300' : 'bg-purple-100'
-              }`}
-            >
-              <span className="sr-only">Toggle venue manager</span>
-              <span
-                className={`inline-block h-4 w-4 transform bg-white rounded-full transition-transform duration-200 ${
-                  isVenueManager ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </Switch>
+            <ToggleSwitch
+              checked={profile.venueManager}
+              onChange={handleToggle}
+              label="Toggle venue manager"
+            />
           </div>
 
           <div className="space-y-1">
@@ -148,8 +117,8 @@ export default function ProfileSettings({ userName, onSave, onClose }) {
             <input
               id="profileUrl"
               type="url"
-              value={profileUrl}
-              onChange={handleProfileUrlChange}
+              value={profile.avatar.url || ""}
+              onChange={handleField("avatar", "url")}
               placeholder="https://…/profile.jpg"
               className="block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-purple-300 focus:border-purple-300"
             />
@@ -162,8 +131,8 @@ export default function ProfileSettings({ userName, onSave, onClose }) {
             <input
               id="bannerUrl"
               type="url"
-              value={bannerUrl}
-              onChange={handleBannerUrlChange}
+              value={profile.banner.url || ""}
+              onChange={handleField("banner", "url")}
               placeholder="https://…/banner.jpg"
               className="block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-purple-300 focus:border-purple-300"
             />
@@ -173,13 +142,15 @@ export default function ProfileSettings({ userName, onSave, onClose }) {
         {/* Footer Save */}
         <div className="p-4 bg-white border-t border-purple-100">
           <button
-            onClick={handleSave}
+            type="submit"
+            disabled={savingProfile}
             className="w-full py-3 bg-purple-300 hover:bg-purple-400 text-white rounded-lg font-semibold"
           >
-            Save Settings
+            {savingProfile ? "Saving…" : "Save Settings"}
           </button>
+          {errorSave && <p className="text-red-500">{errorSave}</p>}
         </div>
-      </div>
+      </form>
     </section>
   );
 }
