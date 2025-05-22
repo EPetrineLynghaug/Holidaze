@@ -1,7 +1,6 @@
 import React from 'react';
 import { ENV_OPTIONS, AUD_OPTIONS, FAC_OPTIONS } from '../../constants/VenueFormConfig';
 
-
 const STAT_OPTIONS = [
   { key: 'guests', icon: 'person', labelKey: 'maxGuests' },
   { key: 'beds', icon: 'bed', labelKey: 'maxGuests' },
@@ -11,19 +10,39 @@ const STAT_OPTIONS = [
 
 export function StatsIcons({ maxGuests }) {
   return (
-    <div className="border-t  border-b border-[var(--color-border-soft)] py-6 my-4">
+    <div className="border-t border-b border-[var(--color-border-soft)] py-6 my-4">
       <ul className="flex justify-around text-gray-600">
         {STAT_OPTIONS.map((option) => {
           const { key, icon, label, labelKey } = option;
-          const text = labelKey === 'maxGuests'
-            ? `${maxGuests} ${key === 'beds' ? 'beds' : 'guests'}`
-            : label;
+          const text =
+            labelKey === 'maxGuests'
+              ? `${maxGuests} ${key === 'beds' ? 'beds' : 'guests'}`
+              : label;
           return (
             <li key={key} className="flex flex-col items-center gap-2">
-              <span className="material-symbols-outlined  mb-1" style={{ fontVariationSettings: " 'wght' 300,  'opsz' 32" }}>
-              {icon}
-            </span>
-              <span className="text-xs leading-tight">{text}</span>
+              <span
+                className={`
+                  material-symbols-outlined mb-1
+                  text-2xl            // mobil
+                  md:text-3xl         // tablet
+                  lg:text-4xl         // desktop
+                `}
+                style={{
+                  fontVariationSettings: "'wght' 300,  'opsz' 32",
+                }}
+              >
+                {icon}
+              </span>
+              <span
+                className={`
+                  text-xs            // mobil
+                  md:text-sm         // tablet
+                  lg:text-base       // desktop
+                  leading-tight
+                `}
+              >
+                {text}
+              </span>
             </li>
           );
         })}
@@ -38,8 +57,26 @@ export function MetadataList({ meta }) {
       .filter((opt) => meta && meta[opt.key])
       .map((opt) => (
         <li key={opt.key} className="flex items-center gap-1">
-          <span className="material-symbols-outlined text-xl">{opt.icon}</span>
-          <span className="text-sm text-gray-800">{opt.label}</span>
+          <span
+            className={`
+              material-symbols-outlined
+              text-xl           // mobil
+              md:text-2xl       // tablet
+              lg:text-3xl       // desktop
+            `}
+          >
+            {opt.icon}
+          </span>
+          <span
+            className={`
+              text-sm           // mobil
+              md:text-base      // tablet
+              lg:text-lg        // desktop
+              text-gray-800
+            `}
+          >
+            {opt.label}
+          </span>
         </li>
       ));
   };

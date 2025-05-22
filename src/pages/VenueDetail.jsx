@@ -8,8 +8,9 @@ import VenueInfo           from "../components/venue/venuedetail/VenueInfo";
 import BookingBar          from "../components/venue/venuedetail/BookingBar";
 import BookingBottomSheet  from "../components/venue/venuedetail/Booking";
 import VenueSkeleton       from "../components/venue/venuedetail/VenueSkeleton";
-import useBookingRanges    from "../hooks/data/useBookingRanges";
+import VenueDescription    from "../components/venue/venuedetail/VenueDescription";
 
+import useBookingRanges    from "../hooks/data/useBookingRanges";
 import BookingSuccessPopup from "../components/ui/popup/BookingSuccessPopup";
 import LoginPromptPopup    from "../components/ui/popup/LoginPromptPopup";
 
@@ -23,26 +24,21 @@ export default function VenueDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // Hent venue-data
   const { data: venue, loading, error } = useVenueDetail(id);
 
-  // UI-state for modaler
-  const [showCalendar,    setShowCalendar]    = useState(false);
-  const [showSheet,       setShowSheet]       = useState(false);
-  const [showSuccess,     setShowSuccess]     = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [showSheet, setShowSheet] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
-  // Booking-datoer
   const [selection, setSelection] = useState({
     startDate: new Date(),
     endDate:   new Date(),
     key:       "selection",
   });
 
-  // For å lukke kalender ved klikking utenfor
   const calendarRef = useRef(null);
 
-  // Derived: rating, ranges og antall netter
   const ratingNum = useMemo(() => {
     const r = parseFloat(venue?.rating);
     return isNaN(r) ? 0 : r;
@@ -57,7 +53,6 @@ export default function VenueDetail() {
 
   const priceString = formatNOK((venue?.price || 0) * nights);
 
-  // Lukk kalender ved utenfor-klikk
   useEffect(() => {
     const onClick = e => {
       if (calendarRef.current && !calendarRef.current.contains(e.target)) {
@@ -68,9 +63,8 @@ export default function VenueDetail() {
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
 
-  // API-kall for booking
   const [submitting, setSubmitting] = useState(false);
-  const [errMsg,     setErrMsg]     = useState("");
+  const [errMsg, setErrMsg] = useState("");
 
   const handleBook = async formData => {
     const token = getAccessToken();
@@ -118,11 +112,11 @@ export default function VenueDetail() {
 
   const {
     name,
-    media       = [],
+    media = [],
     description,
     maxGuests,
-    location    = {},
-    reviews     = [],
+    location = {},
+    reviews = [],
     owner,
   } = venue;
 
@@ -133,10 +127,10 @@ export default function VenueDetail() {
       py-8 pb-28
       bg-gradient-to-br from-gray-50 via-white to-purple-50 min-h-screen
     ">
-      {/* Bildekarusell */}
+      {/* Image Carousel */}
       <ImageCarousel media={media} name={name} />
 
-      {/* Info-seksjon */}
+      {/* Info section */}
       <VenueInfo
         name={name}
         location={location}
@@ -144,11 +138,14 @@ export default function VenueDetail() {
         reviewCount={reviews.length}
         owner={owner}
         maxGuests={maxGuests}
-        description={description}
+        // Remove description prop here if you already took it out of VenueInfo component's display
         onOpenCalendar={() => setShowCalendar(true)}
       />
 
-      {/* Booking-knapp nederst */}
+      {/* Nice Description */}
+      <VenueDescription description={description} />
+
+      {/* Booking bar at the bottom */}
       <BookingBar
         priceString={priceString}
         nights={nights}
@@ -162,7 +159,7 @@ export default function VenueDetail() {
         submitting={submitting}
       />
 
-      {/* Kalender-modal */}
+      {/* Calendar modal */}
       {showCalendar && (
         <div ref={calendarRef}>
           <CalendarModal
@@ -170,14 +167,16 @@ export default function VenueDetail() {
             disabledDates={disabledDates}
             bookingRanges={bookingRanges}
             pricePerNight={venue.price}
-            onSelectRange={(s,e) => setSelection({ startDate: s, endDate: e, key: "selection" })}
+            onSelectRange={(s, e) =>
+              setSelection({ startDate: s, endDate: e, key: "selection" })
+            }
             onClose={() => setShowCalendar(false)}
             onConfirm={() => setShowCalendar(false)}
           />
         </div>
       )}
 
-      {/* Booking-modal */}
+      {/* Booking modal */}
       {showSheet && (
         <BookingBottomSheet
           startDate={selection.startDate}
@@ -189,7 +188,7 @@ export default function VenueDetail() {
         />
       )}
 
-      {/* Suksess-popup */}
+      {/* Success popup */}
       {showSuccess && (
         <BookingSuccessPopup
           onClose={() => {
@@ -199,12 +198,12 @@ export default function VenueDetail() {
         />
       )}
 
-      {/* Login-prompt */}
+      {/* Login prompt popup */}
       {showLoginPrompt && (
         <LoginPromptPopup onClose={() => setShowLoginPrompt(false)} />
       )}
 
-      {/* Feilmelding */}
+      {/* Error message */}
       {errMsg && (
         <p className="fixed bottom-20 inset-x-0 text-center text-red-500 text-xs">
           {errMsg}
