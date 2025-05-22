@@ -6,7 +6,10 @@ export default function BookingBar({
   submitting,
 }) {
   return (
-    <div className="fixed bottom-0 inset-x-0 w-full bg-white p-4 shadow-lg flex items-center border-t border-[var(--color-border-soft)]">
+    <div className="
+      fixed bottom-0 inset-x-0 w-full bg-white p-4 shadow-lg flex items-center border-t border-[var(--color-border-soft)]
+      md:py-5
+    ">
       <button
         onClick={onBook}
         disabled={submitting}
@@ -22,6 +25,7 @@ export default function BookingBar({
           transition
           disabled:opacity-50
           disabled:cursor-not-allowed
+          md:px-5 md:py-2.5
         "
       >
         {submitting ? "Booking…" : "Book now"}
