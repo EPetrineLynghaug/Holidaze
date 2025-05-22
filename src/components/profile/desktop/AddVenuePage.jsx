@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import DateRangePicker from '../../../components/ui/calender/DateRangePicker';
-import useBookingRanges from '../../../hooks/useBookingRanges';
+import useBookingRanges from '../../../hooks/data/useBookingRanges';
 import { useVenueForm } from '../../../hooks/useVenueForm';
 import { ENV_OPTIONS, AUD_OPTIONS, FAC_OPTIONS } from '../../constants/VenueFormConfig';
 import useNewVenueValidation from '../../../hooks/forms/useNewVenueValidation';

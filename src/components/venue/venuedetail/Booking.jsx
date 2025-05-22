@@ -2,7 +2,7 @@
 import React from "react";
 import BottomSheet from "../../ui/popup/BottomSheet";
 import BookingSuccessPopup from "../../ui/popup/BookingSuccessPopup";
-import { BOOKING_STEPS, useBookingForm } from "../../../hooks/useBookingForm";
+import { BOOKING_STEPS, useBookingForm } from "../../../hooks/forms/useBookingForm";
 
 export default function BookingBottomSheet({
   startDate,
