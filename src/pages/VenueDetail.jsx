@@ -1,4 +1,5 @@
-import  { useState, useMemo, useRef, useEffect } from "react";
+
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
 
 import useVenueDetail      from "../hooks/api/useVenueDetail";
@@ -9,6 +10,7 @@ import BookingBar          from "../components/venue/venuedetail/BookingBar";
 import BookingBottomSheet  from "../components/venue/venuedetail/Booking";
 import VenueSkeleton       from "../components/venue/venuedetail/VenueSkeleton";
 import VenueDescription    from "../components/venue/venuedetail/VenueDescription";
+import VenueMetaSection from "../components/venue/venuedetail/VenueMetaSection";
 
 import useBookingRanges    from "../hooks/data/useBookingRanges";
 import BookingSuccessPopup from "../components/ui/popup/BookingSuccessPopup";
@@ -219,6 +221,7 @@ export default function VenueDetail() {
         {/* Beskrivelse */}
         <div className="col-span-1 lg:col-span-2">
           <VenueDescription description={description} />
+              <VenueMetaSection meta={venue.meta} />
         </div>
         {/* Kalender på desktop */}
         {isDesktop && (

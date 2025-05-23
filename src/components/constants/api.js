@@ -16,6 +16,8 @@ export const VENUE_BY_ID_URL = (id) => `${VENUES_URL}/${id}`;
 export const BOOKINGS_URL = `${BASE_URL}/holidaze/bookings`;
 export const BOOKING_BY_ID_URL = (id) => `${BOOKINGS_URL}/${id}`;
 export const BOOKING_REVIEW_URL = (id) => `${BOOKING_BY_ID_URL(id)}/reviews`;
+export const VENUE_REVIEW_URL = (venueId) =>
+  `${VENUE_BY_ID_URL(venueId)}/reviews`;
 
 // Holidaze – søk
 export const PROFILES_SEARCH = `${PROFILES_URL}/search`;

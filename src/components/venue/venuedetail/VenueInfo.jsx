@@ -36,7 +36,9 @@ export default function VenueInfo({
 
   function handleRate(val) {
     setSelectedRating(val);
-    if (onUserRate) onUserRate(val); 
+    if (typeof onUserRate === "function") {
+      onUserRate(val); // Sender rating til parent
+    }
   }
 
   return (
@@ -63,10 +65,10 @@ export default function VenueInfo({
 
       <div className="flex flex-col mb-3">
         <RatingStars
-          value={selectedRating || rating}
+          value={selectedRating !== null ? selectedRating : rating}
           showValue={true}
           starSize={starSize}
-          interactive
+          interactive={!!onUserRate}
           className="cursor-pointer"
           onRate={handleRate}
         />
