@@ -1,3 +1,4 @@
+// src/pages/VenueDetail.jsx
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
 
@@ -26,10 +27,12 @@ export default function VenueDetail() {
 
   const { data: venue, loading, error } = useVenueDetail(id);
 
-  const [showCalendar, setShowCalendar] = useState(false);
-  const [showSheet, setShowSheet] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
+  const [showCalendar, setShowCalendar]       = useState(false);
+  const [showSheet, setShowSheet]             = useState(false);
+  const [showSuccess, setShowSuccess]         = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [submitting, setSubmitting]           = useState(false);
+  const [errMsg, setErrMsg]                   = useState("");
 
   const [selection, setSelection] = useState({
     startDate: new Date(),
@@ -37,21 +40,36 @@ export default function VenueDetail() {
     key:       "selection",
   });
 
-  // Desktop-sjekk (oppdateres på resize)
-  const [isDesktop, setIsDesktop] = useState(
-    typeof window !== "undefined" ? window.innerWidth >= 1024 : false
-  );
-  const calendarRef = useRef(null);
-
-  useEffect(() => {
-    function handleResize() {
-      setIsDesktop(window.innerWidth >= 1024);
-      // Om du bytter til mobil: lukk inline-calendar!
-      if (window.innerWidth < 1024) setShowCalendar(false);
+  // Beregn antall ledige gjester for valgt periode
+  const availableGuests = useMemo(() => {
+    if (!venue) return 0;
+    const maxTotal = venue.maxGuests;
+    const bookings = venue.bookings || [];
+    const { startDate, endDate } = selection;
+    if (!startDate || !endDate || endDate <= startDate) {
+      return maxTotal;
     }
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+
+    const dayMs = 86_400_000;
+    const daysCount = Math.ceil((endDate - startDate) / dayMs);
+    let maxBooked = 0;
+
+    for (let i = 0; i < daysCount; i++) {
+      const day = new Date(startDate.getTime() + i * dayMs);
+      const bookedThisDay = bookings.reduce((sum, b) => {
+        const from = new Date(b.dateFrom);
+        const to   = new Date(b.dateTo);
+        if (day >= from && day < to) {
+          return sum + b.guests;
+        }
+        return sum;
+      }, 0);
+      maxBooked = Math.max(maxBooked, bookedThisDay);
+    }
+
+    const avail = maxTotal - maxBooked;
+    return avail > 0 ? avail : 0;
+  }, [venue, selection]);
 
   const ratingNum = useMemo(() => {
     const r = parseFloat(venue?.rating);
@@ -67,25 +85,38 @@ export default function VenueDetail() {
 
   const priceString = formatNOK((venue?.price || 0) * nights);
 
+  // Håndter desktop vs mobil
+  const [isDesktop, setIsDesktop] = useState(
+    typeof window !== "undefined" ? window.innerWidth >= 1024 : false
+  );
+  const calendarRef = useRef(null);
+
   useEffect(() => {
-    const onClick = e => {
+    function handleResize() {
+      setIsDesktop(window.innerWidth >= 1024);
+      if (window.innerWidth < 1024) setShowCalendar(false);
+    }
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    const onClickOutside = e => {
       if (calendarRef.current && !calendarRef.current.contains(e.target)) {
         setShowCalendar(false);
       }
     };
-    document.addEventListener("mousedown", onClick);
-    return () => document.removeEventListener("mousedown", onClick);
+    document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
   }, []);
 
-  const [submitting, setSubmitting] = useState(false);
-  const [errMsg, setErrMsg] = useState("");
-
-  // --- MOBIL: Kalender -> booking-sheet ---
+  // Bekreft calendar på mobil
   function handleCalendarConfirm() {
     setShowCalendar(false);
-    setTimeout(() => setShowSheet(true), 200); // smooth overgang
+    setTimeout(() => setShowSheet(true), 200);
   }
 
+  // Send booking til API
   const handleBook = async formData => {
     const token = getAccessToken();
     if (!token) {
@@ -116,7 +147,6 @@ export default function VenueDetail() {
         body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error(await res.text());
-
       setShowSheet(false);
       setShowSuccess(true);
     } catch (e) {
@@ -125,6 +155,24 @@ export default function VenueDetail() {
       setSubmitting(false);
     }
   };
+
+  function handleBookingBarClick() {
+    if (!getAccessToken()) {
+      setShowLoginPrompt(true);
+    } else if (!isDesktop) {
+      if (
+        selection.startDate &&
+        selection.endDate &&
+        selection.endDate > selection.startDate
+      ) {
+        setShowSheet(true);
+      } else {
+        setShowCalendar(true);
+      }
+    } else {
+      setShowSheet(true);
+    }
+  }
 
   if (loading) return <VenueSkeleton />;
   if (error)   return <p className="text-center py-10 text-red-500">{error}</p>;
@@ -139,26 +187,6 @@ export default function VenueDetail() {
     reviews = [],
     owner,
   } = venue;
-
-  // --- NY LOGIKK: onBook ---
-  function handleBookingBarClick() {
-    if (!getAccessToken()) {
-      setShowLoginPrompt(true);
-    } else if (!isDesktop) {
-      // Sjekk om dato faktisk er valgt
-      if (
-        selection.startDate &&
-        selection.endDate &&
-        selection.endDate > selection.startDate
-      ) {
-        setShowSheet(true);
-      } else {
-        setShowCalendar(true);
-      }
-    } else {
-      setShowSheet(true);
-    }
-  }
 
   return (
     <div className="
@@ -196,9 +224,7 @@ export default function VenueDetail() {
                 disabledDates={disabledDates}
                 bookingRanges={bookingRanges}
                 pricePerNight={venue.price}
-                onSelectRange={(s, e) =>
-                  setSelection({ startDate: s, endDate: e, key: "selection" })
-                }
+                onSelectRange={(s, e) => setSelection({ startDate: s, endDate: e, key: "selection" })}
                 onClose={() => setShowCalendar(false)}
                 onConfirm={() => setShowCalendar(false)}
                 isInline
@@ -208,7 +234,8 @@ export default function VenueDetail() {
         )}
       </div>
 
-      {/* Kalender-popup på mobil/tablet */}
+      {/* Kalender-popup på mobil */}
+  {/* Kalender-popup på mobil/tablet */}
       {showCalendar && !isDesktop && (
         <div ref={calendarRef}>
           <CalendarModal
@@ -224,7 +251,6 @@ export default function VenueDetail() {
           />
         </div>
       )}
-
       {/* Booking bar */}
       <BookingBar
         priceString={priceString}
@@ -240,6 +266,7 @@ export default function VenueDetail() {
           endDate={selection.endDate}
           nights={nights}
           priceString={priceString}
+          maxGuests={availableGuests}
           onClose={() => setShowSheet(false)}
           onComplete={handleBook}
         />
@@ -254,12 +281,11 @@ export default function VenueDetail() {
           }}
         />
       )}
-
       {showLoginPrompt && (
         <LoginPromptPopup onClose={() => setShowLoginPrompt(false)} />
       )}
 
-      {/* Error message */}
+      {/* Global error */}
       {errMsg && (
         <p className="fixed bottom-20 inset-x-0 text-center text-red-500 text-xs">
           {errMsg}
