@@ -1,8 +1,8 @@
-import React from 'react';
-import { Link, useParams } from 'react-router';
-import useProfileDetail from '../hooks/useProfileDetail';
-import ProfileHeader from '../components/profile/mobile/ProfileHeader';
-import { FAC_OPTIONS } from '../components/constants/VenueFormConfig';
+import React from "react";
+import { Link, useParams } from "react-router";
+import useProfileDetail from "../hooks/useProfileDetail";
+import { FAC_OPTIONS } from "../components/constants/VenueFormConfig";
+import UserProfileHeader from "../components/User-profiles/UserProfileHeader";
 
 function Loading() {
   return (
@@ -61,6 +61,10 @@ function CardActions({ id }) {
   );
 }
 
+// --------- MODERNE PROFILE HEADER ---------
+
+// --------- SLUTT PROFILE HEADER ----------
+
 export default function ProfileDetail() {
   const { username } = useParams();
   const {
@@ -80,7 +84,24 @@ export default function ProfileDetail() {
 
   return (
     <div className="max-w-5xl mx-auto p-4 space-y-8">
-      <ProfileHeader user={profile} />
+      {/* Moderne profil-header */}
+ <UserProfileHeader
+  name={profile.name}
+  avatarUrl={profile.avatar?.url}
+  bannerUrl={profile.banner?.url}
+  isVenueManager={profile.venueManager}
+  activeSince={profile.created}
+  venuesCount={venues.length}
+  bookingsCount={profile._count?.bookings || 0}
+  reviewsCount={profile._count?.reviews || 0}
+  about={profile.bio}
+  location={profile.location}
+  socials={{
+    instagram: profile.instagram,
+    facebook: profile.facebook,
+  }}
+/>
+
 
       <section>
         <h2 className="text-2xl font-semibold mb-6">Venues & Availability</h2>
