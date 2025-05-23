@@ -1,6 +1,9 @@
 import BottomSheet from "../../ui/popup/BottomSheet";
 import BookingSuccessPopup from "../../ui/popup/BookingSuccessPopup";
 import { BOOKING_STEPS, useBookingForm } from "../../../hooks/forms/useBookingForm";
+import BookingBackButton from "../../ui/buttons/BookingBackButton";
+import BookingNextButton from "../../ui/buttons/BookingNextButton";
+import EditDatesButton from "../../ui/buttons/EditDatesButton";
 
 export default function BookingBottomSheet({
   startDate,
@@ -50,20 +53,14 @@ export default function BookingBottomSheet({
                 Total: <strong>{priceString}</strong>
               </p>
             </div>
-            <button
-              type="button"
-              onClick={onEditDates ? onEditDates : back}
-              className="text-[#3E35A2] underline text-base self-start hover:opacity-80"
-              aria-label="Edit booking dates"
-            >
-              Edit dates
-            </button>
+            <EditDatesButton onClick={onEditDates ? onEditDates : back} />
           </div>
         );
       case 1:
         return (
           <form className="space-y-4" autoComplete="on" aria-label="Guest information form">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* First name */}
               <div className="flex flex-col space-y-2">
                 <label htmlFor="firstName" className="font-medium text-[#3E35A2] text-base">
                   First name
@@ -94,6 +91,7 @@ export default function BookingBottomSheet({
                   </p>
                 )}
               </div>
+              {/* Last name */}
               <div className="flex flex-col space-y-2">
                 <label htmlFor="lastName" className="font-medium text-[#3E35A2] text-base">
                   Last name
@@ -124,6 +122,7 @@ export default function BookingBottomSheet({
                   </p>
                 )}
               </div>
+              {/* Phone */}
               <div className="flex flex-col space-y-2 md:col-span-2">
                 <label htmlFor="phone" className="font-medium text-[#3E35A2] text-base">
                   Phone
@@ -154,6 +153,7 @@ export default function BookingBottomSheet({
                   </p>
                 )}
               </div>
+              {/* Guests */}
               <div className="flex flex-col space-y-2 md:col-span-2">
                 <label htmlFor="guests" className="font-medium text-[#3E35A2] text-base">
                   Guests
@@ -257,30 +257,13 @@ export default function BookingBottomSheet({
         )}
         <div className="p-3 bg-white border-t border-[#3E35A2]/10 sticky bottom-0 flex gap-2">
           {step > 0 && (
-            <button
-              type="button"
-              onClick={back}
-              className="flex-1 py-2 border border-[#3E35A2] text-[#3E35A2] rounded-lg font-semibold hover:bg-[#f4f5fa] transition"
-              aria-label="Back"
-            >
-              Back
-            </button>
+            <BookingBackButton onClick={back} />
           )}
-          <button
-            type="button"
+          <BookingNextButton
             onClick={step === BOOKING_STEPS.length - 1 ? wrappedSubmit : next}
-            disabled={submitting}
-            className="flex-1 py-2 bg-[#3E35A2] hover:bg-[#5948bb] text-white rounded-lg font-semibold disabled:opacity-50 transition"
-            aria-label={
-              step === BOOKING_STEPS.length - 1
-                ? "Pay & book"
-                : submitting
-                ? "Sending…"
-                : "Next"
-            }
-          >
-            {submitting ? "Sending…" : step === BOOKING_STEPS.length - 1 ? "Pay & book" : "Next"}
-          </button>
+            isLastStep={step === BOOKING_STEPS.length - 1}
+            submitting={submitting}
+          />
         </div>
       </div>
       {feedback.success && (

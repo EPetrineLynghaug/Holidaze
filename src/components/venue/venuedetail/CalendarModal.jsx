@@ -2,15 +2,13 @@ import React, { useRef, useEffect, useMemo } from "react";
 import BottomSheet from "../../ui/popup/BottomSheet";
 import { DateRange } from "react-date-range";
 import useWindowSize from "../../../hooks/utills/useWindowSize";
+import BookingNextButton from "../../ui/buttons/BookingNextButton";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 
-const NOK_TO_USD = 0.1;
-const usd = (n) =>
-  new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(n * NOK_TO_USD);
+
+const formatNOK = n =>
+  `${new Intl.NumberFormat("nb-NO", { minimumFractionDigits: 0 }).format(n)} NOK`;
 
 export default function CalendarModal({
   selection,
@@ -23,7 +21,6 @@ export default function CalendarModal({
 }) {
   const ref = useRef(null);
   const { width } = useWindowSize();
-
   const isMobile = width < 600;
 
   const nights = useMemo(() => {
@@ -32,7 +29,7 @@ export default function CalendarModal({
     return days > 0 ? Math.round(days) : 1;
   }, [selection]);
 
-  const totalString = usd(pricePerNight * nights);
+  const totalString = formatNOK(pricePerNight * nights);
 
   useEffect(() => {
     if (isInline) return;
@@ -96,7 +93,7 @@ export default function CalendarModal({
     );
   }
 
-  // Popup (mobil/tablet)
+
   return (
     <BottomSheet onClose={onClose}>
       <div
@@ -150,22 +147,21 @@ export default function CalendarModal({
           zIndex: 10000,
           textAlign: "center",
           width: "100vw",
-          maxWidth: 500,
+          maxWidth: "100vw",   
           margin: "0 auto"
         }}
       >
-        <button
-          type="button"
-          aria-label={`Confirm booking for ${nights} night${nights > 1 ? "s" : ""}, total ${totalString}`}
+        <BookingNextButton
           onClick={() => {
             onConfirm();
             onClose();
             window.scrollTo({ top: 0, behavior: "smooth" });
           }}
-          className="w-full bg-[#3E35A2] text-white text-base font-semibold rounded-xl shadow-2xl hover:opacity-90 transition py-3"
+          ariaLabel={`Confirm booking for ${nights} night${nights > 1 ? "s" : ""}, total ${totalString}`}
+          className="w-full"
         >
           Confirm · {totalString}
-        </button>
+        </BookingNextButton>
       </div>
     </BottomSheet>
   );

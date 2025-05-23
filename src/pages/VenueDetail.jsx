@@ -1,5 +1,4 @@
-// src/pages/VenueDetail.jsx
-import React, { useState, useMemo, useRef, useEffect } from "react";
+import  { useState, useMemo, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
 
 import useVenueDetail      from "../hooks/api/useVenueDetail";
