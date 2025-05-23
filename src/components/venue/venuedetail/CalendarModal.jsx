@@ -6,7 +6,7 @@ import BookingNextButton from "../../ui/buttons/BookingNextButton";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 
-
+// NOK-format-funksjon
 const formatNOK = n =>
   `${new Intl.NumberFormat("nb-NO", { minimumFractionDigits: 0 }).format(n)} NOK`;
 
@@ -49,6 +49,8 @@ export default function CalendarModal({
     [&_.rdrDayNumber span]:w-9 [&_.rdrDayNumber span]:h-9 [&_.rdrDayNumber span]:text-base
     [&_.rdrMonthAndYearPickers]:text-base
     transition-all
+    flex flex-col justify-start items-center
+    mx-auto
   `;
 
   // Inline (desktop)
@@ -60,18 +62,10 @@ export default function CalendarModal({
         style={{
           width: 330,
           height: 340,
-          minWidth: 0,
-          minHeight: 0,
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "flex-start",
-          alignItems: "center",
           paddingBottom: "1.2rem",
-          background: "#fff",
           borderRadius: "1.25rem",
           boxShadow: "0 4px 32px 0 rgba(80,70,180,0.12)",
           border: "1px solid #F2F2F2",
-          margin: "0 auto"
         }}
         aria-label="Select date range"
       >
@@ -93,7 +87,7 @@ export default function CalendarModal({
     );
   }
 
-
+  // Mobil/tablet modal
   return (
     <BottomSheet onClose={onClose}>
       <div
@@ -105,17 +99,8 @@ export default function CalendarModal({
         style={{
           width: isMobile ? "99vw" : "96vw",
           maxWidth: isMobile ? 340 : 400,
-          minWidth: 0,
-          minHeight: 0,
-          margin: "0 auto",
-          background: "#fff",
           borderRadius: "1.2rem",
           boxShadow: "0 4px 24px 0 rgba(80,70,180,0.10)",
-          padding: isMobile ? "1.3rem 0.2rem 1.6rem 0.2rem" : "2rem 0.8rem 1rem 0.8rem",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "flex-start",
-          position: "relative",
         }}
       >
         <DateRange
@@ -134,34 +119,48 @@ export default function CalendarModal({
         />
       </div>
       <div
+        className={`
+          fixed left-0 right-0 bottom-0
+          bg-white/95
+          rounded-b-[1.15rem]
+          shadow-2xl
+          z-[10000]
+          text-center
+          w-full
+          flex justify-center
+        `}
         style={{
-          position: "fixed",
-          left: 0,
-          right: 0,
-          bottom: 0,
-          padding: isMobile ? "1.05rem 1rem 1.15rem 1rem" : "1.25rem 1.5rem 1.35rem 1.5rem",
-          background: "rgba(255,255,255,0.98)",
-          borderBottomLeftRadius: "1.15rem",
-          borderBottomRightRadius: "1.15rem",
-          boxShadow: "0 -1px 12px rgba(80,70,180,0.09)",
-          zIndex: 10000,
-          textAlign: "center",
-          width: "100vw",
-          maxWidth: "100vw",   
-          margin: "0 auto"
+          padding: isMobile
+            ? "1.05rem 0 1.15rem 0"
+            : "1.25rem 0 1.35rem 0",
+          maxWidth: "100vw",
         }}
       >
-        <BookingNextButton
-          onClick={() => {
-            onConfirm();
-            onClose();
-            window.scrollTo({ top: 0, behavior: "smooth" });
-          }}
-          ariaLabel={`Confirm booking for ${nights} night${nights > 1 ? "s" : ""}, total ${totalString}`}
-          className="w-full"
-        >
-          Confirm · {totalString}
-        </BookingNextButton>
+      <div
+  className={`
+    fixed left-0 right-0 bottom-0
+    bg-white/95
+    rounded-b-[1.15rem]
+    shadow-2xl
+    z-[10000]
+    text-center
+    w-full
+    px-4  
+    pb-5   
+  `}
+>
+  <BookingNextButton
+    onClick={() => {
+      onConfirm();
+      onClose();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }}
+    ariaLabel={`Confirm booking for ${nights} night${nights > 1 ? "s" : ""}, total ${totalString}`}
+    className="w-full max-w-sm mx-auto py-3"
+  >
+    Confirm · {totalString}
+  </BookingNextButton>
+</div>
       </div>
     </BottomSheet>
   );

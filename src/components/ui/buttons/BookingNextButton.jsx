@@ -1,4 +1,3 @@
-// src/ui/buttons/BookingNextButton.jsx
 export default function BookingNextButton({
   onClick,
   isLastStep,

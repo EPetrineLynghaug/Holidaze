@@ -1,4 +1,3 @@
-
 export default function CalendarIconButton({
   onClick,
   ariaLabel = "Open calendar",
