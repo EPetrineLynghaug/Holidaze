@@ -34,7 +34,7 @@ export default function BookingBar({
       <div className="ml-auto flex items-baseline space-x-1">
         <span className="text-lg font-bold">{priceString}</span>
         <span className="text-sm text-gray-500">
-          {nights > 1 ? " total" : " /night"}
+          {nights > 1 ? " / total" : " / night"}
         </span>
       </div>
     </div>

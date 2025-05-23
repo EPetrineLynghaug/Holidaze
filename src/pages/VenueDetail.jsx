@@ -116,6 +116,12 @@ export default function VenueDetail() {
     setTimeout(() => setShowSheet(true), 200);
   }
 
+  // 🟢 "Edit dates" på mobil og desktop – åpner kalenderen
+  function handleEditDates() {
+    setShowSheet(false);
+    setTimeout(() => setShowCalendar(true), 200);
+  }
+
   // Send booking til API
   const handleBook = async formData => {
     const token = getAccessToken();
@@ -234,8 +240,7 @@ export default function VenueDetail() {
         )}
       </div>
 
-      {/* Kalender-popup på mobil */}
-  {/* Kalender-popup på mobil/tablet */}
+      {/* Kalender-popup på mobil/tablet */}
       {showCalendar && !isDesktop && (
         <div ref={calendarRef}>
           <CalendarModal
@@ -251,6 +256,7 @@ export default function VenueDetail() {
           />
         </div>
       )}
+
       {/* Booking bar */}
       <BookingBar
         priceString={priceString}
@@ -268,6 +274,7 @@ export default function VenueDetail() {
           priceString={priceString}
           maxGuests={availableGuests}
           onClose={() => setShowSheet(false)}
+          onEditDates={handleEditDates}  // Løsning for Edit dates på mobil!
           onComplete={handleBook}
         />
       )}

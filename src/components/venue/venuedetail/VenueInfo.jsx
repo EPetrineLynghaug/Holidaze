@@ -37,7 +37,7 @@ export default function VenueInfo({
 
   function handleRate(val) {
     setSelectedRating(val);
-    if (onUserRate) onUserRate(val); // send til parent/backend hvis ønsket
+    if (onUserRate) onUserRate(val); 
   }
 
   return (
@@ -46,16 +46,17 @@ export default function VenueInfo({
      <h1 className="text-2xl font-semibold mb-2 mt-3">
           {toTitleCase(name)}
         </h1>
-        {onOpenCalendar && (
-          <button
-            onClick={onOpenCalendar}
-            className="flex items-center justify-center bg-[#3E35A2] hover:bg-[#271e8d] text-white rounded-full w-11 h-11 shadow transition-all duration-200 translate-y-1"
-            aria-label="Open calendar"
-            style={{ fontSize: "1.7rem" }}
-          >
-            <span className="material-symbols-outlined text-2xl">calendar_month</span>
-          </button>
-        )}
+     {onOpenCalendar && (
+  <button
+    onClick={onOpenCalendar}
+    className="flex items-center justify-center bg-[#3E35A2] hover:bg-[#271e8d] text-white rounded-full w-11 h-11 shadow transition-all duration-200 translate-y-1 md:hidden"
+    aria-label="Open calendar"
+    style={{ fontSize: "1.7rem" }}
+  >
+    <span className="material-symbols-outlined text-2xl">calendar_month</span>
+  </button>
+)}
+
       </div>
 
       <p className="text-sm text-gray-600 mb-3 -mt-1">

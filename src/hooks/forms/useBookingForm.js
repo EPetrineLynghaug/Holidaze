@@ -41,15 +41,30 @@ export function useBookingForm(
     console.log("🧪 validateStep", currentStep, form);
     const errs = {};
 
-    if (currentStep === 1) {
-      if (!form.firstName.trim()) errs.firstName = "First name is required.";
-      if (!form.lastName.trim()) errs.lastName = "Last name is required.";
+    // Regex for bare bokstaver (norsk + engelsk), mellomrom, bindestrek og punktum
+    const nameRegex = /^[A-Za-zæøåÆØÅ.\- ]+$/;
 
+    if (currentStep === 1) {
+      // First name
+      if (!form.firstName.trim()) {
+        errs.firstName = "First name is required.";
+      } else if (!nameRegex.test(form.firstName)) {
+        errs.firstName = "Only letters allowed in first name.";
+      }
+      // Last name
+      if (!form.lastName.trim()) {
+        errs.lastName = "Last name is required.";
+      } else if (!nameRegex.test(form.lastName)) {
+        errs.lastName = "Only letters allowed in last name.";
+      }
+
+      // Phone
       const phoneDigits = form.phone.replace(/\s+/g, "");
       if (!/^\d{8,}$/.test(phoneDigits)) {
         errs.phone = "Phone number must be at least 8 digits.";
       }
 
+      // Guests
       const guests = Number(form.guests);
       if (isNaN(guests) || guests < 1) {
         errs.guests = "At least one guest is required.";

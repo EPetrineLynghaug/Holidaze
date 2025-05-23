@@ -24,7 +24,7 @@ export default function CalendarModal({
   const ref = useRef(null);
   const { width } = useWindowSize();
 
-  const isMobile = width < 600;     
+  const isMobile = width < 600;
 
   const nights = useMemo(() => {
     const diffMs = selection.endDate - selection.startDate;
@@ -76,6 +76,7 @@ export default function CalendarModal({
           border: "1px solid #F2F2F2",
           margin: "0 auto"
         }}
+        aria-label="Select date range"
       >
         <DateRange
           ranges={[selection]}
@@ -100,6 +101,9 @@ export default function CalendarModal({
     <BottomSheet onClose={onClose}>
       <div
         ref={ref}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Select date range"
         className={calendarClass}
         style={{
           width: isMobile ? "99vw" : "96vw",
@@ -132,7 +136,6 @@ export default function CalendarModal({
           minDate={new Date()}
         />
       </div>
-      {/* Sticky knapp helt nederst */}
       <div
         style={{
           position: "fixed",
@@ -152,6 +155,8 @@ export default function CalendarModal({
         }}
       >
         <button
+          type="button"
+          aria-label={`Confirm booking for ${nights} night${nights > 1 ? "s" : ""}, total ${totalString}`}
           onClick={() => {
             onConfirm();
             onClose();
