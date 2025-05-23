@@ -1,16 +1,17 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
+import MobileCloseButton from "../buttons/MobileCloseButton"; 
 
 export default function AlertPopup({
   open = true,
-  type = "success",        // "success" eller "error"
+  type = "success",       
   title,
   message,
   buttonText,
   onClose,
   onButton,
   to = "/profile",
-  duration = 3500,         // Tid i ms før den forsvinner (default 3.5 sek)
+  duration = 3500,         
 }) {
   const navigate = useNavigate();
   const [progress, setProgress] = useState(100); // percent
@@ -66,14 +67,12 @@ export default function AlertPopup({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 transition">
       <div className={`relative w-11/12 max-w-xs bg-white rounded-2xl shadow-xl p-6 text-center border ${border}`}>
-        {/* Close btn */}
-        <button
+        {/* Mobile Close Button */}
+        <MobileCloseButton
           onClick={onClose}
-          className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
-          aria-label="Close"
-        >
-          <span className="material-symbols-outlined text-lg">close</span>
-        </button>
+          className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2"
+          size="small"
+        />
         {/* Icon */}
         <div className={`mx-auto flex h-14 w-14 items-center justify-center rounded-full ${bgColor} mb-2`}>
           <span className={`material-symbols-outlined text-4xl ${iconColor}`}>

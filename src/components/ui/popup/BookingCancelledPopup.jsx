@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import MobileCloseButton from "../buttons/MobileCloseButton"; 
 
 const HOST_CANCEL_REASONS = [
   { key: 'noshow',      label: 'Guest no-show' },
@@ -18,28 +19,21 @@ export default function BookingCancelledPopup({ onClose, onConfirm }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="relative w-11/12 max-w-sm bg-white rounded-2xl shadow-xl p-6 text-center">
-        {/* Close */}
-        <button
+        <MobileCloseButton
           onClick={onClose}
-          className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
-        >
-          <span className="material-symbols-outlined text-lg">close</span>
-        </button>
+          className="!absolute !top-1.5 !right-1.5 sm:!top-2 sm:!right-2"
+        />
 
-        {/* Icon */}
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-200">
           <span className="material-symbols-outlined text-4xl text-red-600">cancel</span>
         </div>
 
-        {/* Title */}
         <h2 className="mt-4 text-lg font-semibold text-gray-800">Cancel venue?</h2>
 
-        {/* Info */}
         <p className="mt-2 text-sm text-gray-600 mb-6">
           This will permanently remove the venue and all its bookings. Guests will be notified.
         </p>
 
-        {/* Reasons */}
         <div className="mb-6 text-left">
           <label
             htmlFor="host-reason-select"
@@ -62,7 +56,6 @@ export default function BookingCancelledPopup({ onClose, onConfirm }) {
           </select>
         </div>
 
-        {/* Actions */}
         <div className="flex gap-3">
           <button
             onClick={onClose}

@@ -1,5 +1,4 @@
-
-import React, { useState, useMemo, useRef, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router";
 
 import useVenueDetail      from "../hooks/api/useVenueDetail";
@@ -10,7 +9,7 @@ import BookingBar          from "../components/venue/venuedetail/BookingBar";
 import BookingBottomSheet  from "../components/venue/venuedetail/Booking";
 import VenueSkeleton       from "../components/venue/venuedetail/VenueSkeleton";
 import VenueDescription    from "../components/venue/venuedetail/VenueDescription";
-import VenueMetaSection from "../components/venue/venuedetail/VenueMetaSection";
+import VenueMetaSection    from "../components/venue/venuedetail/VenueMetaSection";
 
 import useBookingRanges    from "../hooks/data/useBookingRanges";
 import BookingSuccessPopup from "../components/ui/popup/BookingSuccessPopup";
@@ -18,6 +17,7 @@ import LoginPromptPopup    from "../components/ui/popup/LoginPromptPopup";
 
 import { BOOKINGS_URL }    from "../components/constants/api";
 import { getAccessToken }  from "../services/tokenService";
+import useSingleVenueModals from "../hooks/utills/useSingleVenueModals"; 
 
 const formatNOK = n =>
   `${new Intl.NumberFormat("nb-NO", { minimumFractionDigits: 0 }).format(n)} NOK`;
@@ -28,12 +28,20 @@ export default function VenueDetail() {
 
   const { data: venue, loading, error } = useVenueDetail(id);
 
-  const [showCalendar, setShowCalendar]       = useState(false);
-  const [showSheet, setShowSheet]             = useState(false);
-  const [showSuccess, setShowSuccess]         = useState(false);
-  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
-  const [submitting, setSubmitting]           = useState(false);
-  const [errMsg, setErrMsg]                   = useState("");
+  // 👉 Hent modal-state/handlers fra hook
+  const {
+    showCalendar, setShowCalendar,
+    showSheet, setShowSheet,
+    showSuccess, setShowSuccess,
+    showLoginPrompt, setShowLoginPrompt,
+    isDesktop, calendarRef,
+    handleCalendarConfirm,
+    handleEditDates,
+  } = useSingleVenueModals();
+
+  // NB! Du har fortsatt noen få egen state som skal være her:
+  const [submitting, setSubmitting] = useState(false);
+  const [errMsg, setErrMsg]         = useState("");
 
   const [selection, setSelection] = useState({
     startDate: new Date(),
@@ -50,11 +58,9 @@ export default function VenueDetail() {
     if (!startDate || !endDate || endDate <= startDate) {
       return maxTotal;
     }
-
     const dayMs = 86_400_000;
     const daysCount = Math.ceil((endDate - startDate) / dayMs);
     let maxBooked = 0;
-
     for (let i = 0; i < daysCount; i++) {
       const day = new Date(startDate.getTime() + i * dayMs);
       const bookedThisDay = bookings.reduce((sum, b) => {
@@ -67,7 +73,6 @@ export default function VenueDetail() {
       }, 0);
       maxBooked = Math.max(maxBooked, bookedThisDay);
     }
-
     const avail = maxTotal - maxBooked;
     return avail > 0 ? avail : 0;
   }, [venue, selection]);
@@ -86,44 +91,7 @@ export default function VenueDetail() {
 
   const priceString = formatNOK((venue?.price || 0) * nights);
 
-  // Håndter desktop vs mobil
-  const [isDesktop, setIsDesktop] = useState(
-    typeof window !== "undefined" ? window.innerWidth >= 1024 : false
-  );
-  const calendarRef = useRef(null);
-
-  useEffect(() => {
-    function handleResize() {
-      setIsDesktop(window.innerWidth >= 1024);
-      if (window.innerWidth < 1024) setShowCalendar(false);
-    }
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  useEffect(() => {
-    const onClickOutside = e => {
-      if (calendarRef.current && !calendarRef.current.contains(e.target)) {
-        setShowCalendar(false);
-      }
-    };
-    document.addEventListener("mousedown", onClickOutside);
-    return () => document.removeEventListener("mousedown", onClickOutside);
-  }, []);
-
-  // Bekreft calendar på mobil
-  function handleCalendarConfirm() {
-    setShowCalendar(false);
-    setTimeout(() => setShowSheet(true), 200);
-  }
-
-  // 🟢 "Edit dates" på mobil og desktop – åpner kalenderen
-  function handleEditDates() {
-    setShowSheet(false);
-    setTimeout(() => setShowCalendar(true), 200);
-  }
-
-  // Send booking til API
+  // Håndter booking-submit (samme som før)
   const handleBook = async formData => {
     const token = getAccessToken();
     if (!token) {
@@ -163,6 +131,7 @@ export default function VenueDetail() {
     }
   };
 
+  // BookingBar click-håndtering
   function handleBookingBarClick() {
     if (!getAccessToken()) {
       setShowLoginPrompt(true);
@@ -202,10 +171,8 @@ export default function VenueDetail() {
       py-8 pb-28
       bg-gradient-to-br from-gray-50 via-white to-purple-50 min-h-screen
     ">
-      {/* Image Carousel */}
       <ImageCarousel media={media} name={name} />
 
-      {/* Info section */}
       <VenueInfo
         name={name}
         location={location}
@@ -216,14 +183,11 @@ export default function VenueDetail() {
         onOpenCalendar={() => setShowCalendar(true)}
       />
 
-      {/* GRID: Description + Kalender på desktop */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-4">
-        {/* Beskrivelse */}
         <div className="col-span-1 lg:col-span-2">
           <VenueDescription description={description} />
-              <VenueMetaSection meta={venue.meta} />
+          <VenueMetaSection meta={venue.meta} />
         </div>
-        {/* Kalender på desktop */}
         {isDesktop && (
           <div className="col-span-1 flex justify-end">
             <div className="max-w-xs w-full">
@@ -232,7 +196,9 @@ export default function VenueDetail() {
                 disabledDates={disabledDates}
                 bookingRanges={bookingRanges}
                 pricePerNight={venue.price}
-                onSelectRange={(s, e) => setSelection({ startDate: s, endDate: e, key: "selection" })}
+                onSelectRange={(s, e) =>
+                  setSelection({ startDate: s, endDate: e, key: "selection" })
+                }
                 onClose={() => setShowCalendar(false)}
                 onConfirm={() => setShowCalendar(false)}
                 isInline
@@ -259,7 +225,6 @@ export default function VenueDetail() {
         </div>
       )}
 
-      {/* Booking bar */}
       <BookingBar
         priceString={priceString}
         nights={nights}
@@ -267,7 +232,6 @@ export default function VenueDetail() {
         submitting={submitting}
       />
 
-      {/* Booking modal */}
       {showSheet && (
         <BookingBottomSheet
           startDate={selection.startDate}
@@ -276,12 +240,11 @@ export default function VenueDetail() {
           priceString={priceString}
           maxGuests={availableGuests}
           onClose={() => setShowSheet(false)}
-          onEditDates={handleEditDates}  // Løsning for Edit dates på mobil!
+          onEditDates={handleEditDates}
           onComplete={handleBook}
         />
       )}
 
-      {/* Popups */}
       {showSuccess && (
         <BookingSuccessPopup
           onClose={() => {
@@ -294,7 +257,6 @@ export default function VenueDetail() {
         <LoginPromptPopup onClose={() => setShowLoginPrompt(false)} />
       )}
 
-      {/* Global error */}
       {errMsg && (
         <p className="fixed bottom-20 inset-x-0 text-center text-red-500 text-xs">
           {errMsg}

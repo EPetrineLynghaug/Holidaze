@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import RatingStars from "../../ui/RatingStars";
 import ProfileUserLink from "../../profile/shared/ProfileUserSearch";
 import StatsIcons from "./StatsIcons";
-import CalendarIconButton from "../../ui/buttons/CalendarIconButton";
 
 function toTitleCase(str) {
   return str.replace(/\w\S*/g, (txt) =>
@@ -19,11 +18,8 @@ export default function VenueInfo({
   maxGuests,
   description,
   onOpenCalendar,
-  onUserRate, 
 }) {
-
   const [starSize, setStarSize] = useState(26);
-  const [selectedRating, setSelectedRating] = useState(null);
 
   useEffect(() => {
     function handleResize() {
@@ -34,13 +30,6 @@ export default function VenueInfo({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  function handleRate(val) {
-    setSelectedRating(val);
-    if (typeof onUserRate === "function") {
-      onUserRate(val); // Sender rating til parent
-    }
-  }
-
   return (
     <section className="px-4 pt-2 pb-4">
       <div className="flex justify-between items-center mb-1">
@@ -48,12 +37,16 @@ export default function VenueInfo({
           {toTitleCase(name)}
         </h1>
         {onOpenCalendar && (
-          <CalendarIconButton
+          <button
             onClick={onOpenCalendar}
-            className="md:hidden"
-            ariaLabel="Open calendar"
+            className="flex items-center justify-center bg-[#3E35A2] hover:bg-[#271e8d] text-white rounded-full w-11 h-11 shadow transition-all duration-200 translate-y-1 md:hidden"
+            aria-label="Open calendar"
             style={{ fontSize: "1.7rem" }}
-          />
+          >
+            <span className="material-symbols-outlined text-2xl">
+              calendar_month
+            </span>
+          </button>
         )}
       </div>
 
@@ -65,12 +58,11 @@ export default function VenueInfo({
 
       <div className="flex flex-col mb-3">
         <RatingStars
-          value={selectedRating !== null ? selectedRating : rating}
+          value={rating}
           showValue={true}
           starSize={starSize}
-          interactive={!!onUserRate}
-          className="cursor-pointer"
-          onRate={handleRate}
+          interactive={false}       // Ikke interaktiv lenger
+          className="cursor-default"
         />
 
         <ProfileUserLink
