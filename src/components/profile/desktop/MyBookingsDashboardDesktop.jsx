@@ -57,9 +57,7 @@ export default function MyBookingsDashboardDesktop({ onClose, userName }) {
           <h1 className="text-4xl font-bold text-gray-900">My Bookings</h1>
           <p className="text-gray-600">Your bookings and history.</p>
         </div>
-        <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-xl">
-          ✕
-        </button>
+       
       </header>
 
       {/* Filters */}
