@@ -3,10 +3,11 @@ const PLACEHOLDER_IMG = "/images/australia.JPG";
 export default function HeroMobile() {
   return (
     <section className="relative h-70 w-screen overflow-hidden">
+   
       <img
         src="/images/heroMobile.png"
         alt="Hero background"
-        decoding="async"
+        decoding="sync"  
         className="absolute inset-0 w-full h-full object-cover"
         onError={e => {
           e.currentTarget.src = PLACEHOLDER_IMG;
