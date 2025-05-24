@@ -1,11 +1,10 @@
-import React from 'react';
-
+import WhyHolidazeFeature from './WhyHolidazeFeature';
 export default function WhyHolidazeSection() {
   const features = [
     {
       id: 1,
       iconName: 'language',
-      title: 'Global Community',
+      title: 'Global community',
       description: 'Be a part of thousands travelling and sharing places.',
     },
     {
@@ -23,77 +22,76 @@ export default function WhyHolidazeSection() {
     {
       id: 4,
       iconName: 'handshake',
-      title: 'Host & make a difference',
+      title:  'Host & create impact',
       description: 'Share your home - create memories and extra income.',
     },
   ];
 
   return (
-    <section className="mt-16 px-4 py-8 sm:py-12 bg-gray-50">
-      {/* Section header */}
-      <h2 className="text-2xl sm:text-2xl font-semibold text-center text-gray-900 mb-6">
+    <section className=" p-12">
+      {/* Overskrift */}
+      <h2 className="font-figtree text-3xl font-semibold text-gray-900 text-center md:text-left mb-12">
         Why Holidaze?
       </h2>
+{/* Features */}
+<div className="grid gap-y-10 gap-x-6 sm:gap-x-8 md:gap-x-10 lg:gap-x-16 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-20">
 
-      {/* Feature grid */}
-      <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-12">
-        {features.map((f) => (
-          <div key={f.id} className="flex items-start space-x-4">
-            <span className="material-symbols-outlined icon-purple w-8 h-8 flex-shrink-0 mt-1">
-              {f.iconName}
-            </span>
-            <div>
-              <h3 className="text-lg sm:text-xl text-gray-900 mb-0">
-                {f.title}
-              </h3>
-              <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
-                {f.description}
-              </p>
-            </div>
-          </div>
-        ))}
+  {features.map((f) => (
+    <WhyHolidazeFeature
+      key={f.id}
+      iconName={f.iconName}
+      title={f.title}
+      description={f.description}
+    />
+  ))}
+</div>
+
+      {/* Testimonial + Bilde */}
+      <div className="grid grid-cols-1 md:grid-cols-2 items-center gap-10 mb-12">
+        {/* Bilde */}
+        <div className="flex justify-center md:justify-end">
+          <img
+            src="/images/venue.png"
+            alt="Martin, host near Geiranger"
+            className="w-72 h-72 md:w-80 md:h-80 object-cover rounded-xl shadow"
+          />
+        </div>
+
+        {/* Sitat */}
+  <div className="text-center md:text-left max-w-sm mx-auto md:mx-0 flex flex-col justify-center md:h-80">
+
+          <blockquote className="relative italic text-gray-800 text-[18px] leading-relaxed px-2 max-w-[26ch]">
+            <span className="absolute -top-4 -left-4 text-3xl text-gray-300">❝</span>
+            <p className="mt-6 mb-4 whitespace-pre-line">
+              Hosting through Holidaze
+              {'\n'}gave me more than just bookings.
+              {'\n\n'}It brought people, stories,
+              {'\n'}and purpose into my everyday life.
+            </p>
+            <span className="absolute bottom-3 right-1 text-2xl text-gray-300">❞</span>
+          </blockquote>
+          <p className="mt-2 text-sm text-gray-600">Martin, host near Geiranger</p>
+        </div>
       </div>
-
-      {/* Testimonial */}
-      <div className="max-w-md mx-auto text-center mb-12 space-y-4">
-        <img
-          src="/images/venue.png"
-          alt="Martin, host near Geiranger"
-          className="mx-auto w-56 h-70 sm:w-64 sm:h-64 rounded-lg object-cover"
-        />
-        <blockquote className="relative mx-auto max-w-[16rem] px-4 py-4 italic text-gray-800 text-base leading-relaxed">
-          {/* Åpnings‐anførselstegn */}
-          <span className="absolute top-1 left-1 text-2xl text-gray-300">
-            ❝
-          </span>
-
-          <p className="mx-2 my-0">
-            Hosting through Holidaze gave me more than just bookings—it brought
-            people, stories, and purpose into my everyday life.
-          </p>
-
-          {/* Avslutnings‐anførselstegn */}
-          <span className="absolute bottom-1 right-1 text-2xl text-gray-300">
-            ❞
-          </span>
-        </blockquote>
-
-        <p className="text-sm sm:text-base text-gray-600 mb-4">
-  Martin, host near Geiranger
-</p>
-
-
-{/* Call to action */}
-<div className="text-center mb-8">
-  <button className="px-6 py-2 text-sm sm:text-base bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition mb-4">
-    Start sharing your space
-  </button>
-  <p className="text-xs sm:text-sm text-gray-500">
-    Your listing can be up in five minutes.
-  </p>
-</div>
-</div>
-
+  <div className="text-center mt-4 sm:mt-6 md:mt-8">
+        <button
+          className="
+            px-10 py-2 text-sm
+            sm:px-8 sm:py-2.7 sm:text-base
+            md:px-10 md:py-3 md:text-base
+            lg:px-12 lg:py-3.5 lg:text-lg
+            bg-indigo-600 text-white font-medium rounded-md
+            hover:bg-indigo-700 transition
+            mb-4 sm:mb-0
+          "
+        >
+          Start sharing your space
+        </button>
+        <p className="mt-2 text-xs sm:text-sm text-gray-500">
+          Your listing can be up in five minutes.
+        </p>
+      </div>
     </section>
   );
 }
+

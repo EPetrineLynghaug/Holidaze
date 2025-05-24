@@ -32,7 +32,7 @@ export default function DashboardMobileMenu({
   ];
 
   return (
-    <div className="md:hidden relative flex justify-end">
+    <div className="lg:hidden relative flex justify-end">
       <button
         onClick={() => setIsOpen(p => !p)}
         aria-label="Toggle dashboard menu"

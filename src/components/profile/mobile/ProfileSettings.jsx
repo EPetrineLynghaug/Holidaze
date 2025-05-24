@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import useProfileSettings from "../../../hooks/api/useProfileSettings";
 import ToggleSwitch from "../../ui/buttons/Toggle";
 import AlertPopup from "../../ui/popup/AlertPopup";
+import BottomSheet from "../../ui/popup/BottomSheet";
 
 export default function ProfileSettingsMobile({ userName, onSave, onClose }) {
   const {
@@ -21,7 +22,6 @@ export default function ProfileSettingsMobile({ userName, onSave, onClose }) {
     message: "",
   });
 
-  // Field updaters
   const handleField = (section, key) => (e) => {
     const value = e.target.value;
     setProfile((prev) => ({
@@ -30,12 +30,10 @@ export default function ProfileSettingsMobile({ userName, onSave, onClose }) {
     }));
   };
 
-  // Toggle venueManager
   const handleToggle = (enabled) => {
     setProfile((prev) => ({ ...prev, venueManager: enabled }));
   };
 
-  // Submit
   const onSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -62,7 +60,7 @@ export default function ProfileSettingsMobile({ userName, onSave, onClose }) {
   if (errorProfile) return <p className="text-red-500">{errorProfile}</p>;
 
   return (
-    <section className="fixed inset-x-0 bottom-0 h-4/5 z-50">
+    <BottomSheet title="Settings" onClose={onClose}>
       {/* ALERT POPUP */}
       {alert.open && (
         <AlertPopup
@@ -70,28 +68,12 @@ export default function ProfileSettingsMobile({ userName, onSave, onClose }) {
           type={alert.type}
           title={alert.title}
           message={alert.message}
-          onClose={() => setAlert(a => ({ ...a, open: false }))}
+          onClose={() => setAlert((a) => ({ ...a, open: false }))}
           duration={2200}
         />
       )}
 
-      <form
-        onSubmit={onSubmit}
-        className="absolute inset-0 bg-white rounded-t-3xl shadow-lg flex flex-col"
-      >
-        {/* Header */}
-        <div className="sticky top-0 bg-white z-10 flex items-center justify-between px-4 py-3 border-b border-purple-100">
-          <button
-            onClick={onClose}
-            type="button"
-            className="material-symbols-outlined text-xl text-purple-700"
-          >
-            close
-          </button>
-          <h2 className="text-lg font-semibold text-purple-900">Settings</h2>
-          <div className="w-6" />
-        </div>
-
+      <form onSubmit={onSubmit} className="flex flex-col h-full">
         {/* Content */}
         <div className="flex-1 overflow-auto p-4 space-y-6">
           <div className="flex items-center justify-between">
@@ -151,6 +133,6 @@ export default function ProfileSettingsMobile({ userName, onSave, onClose }) {
           {errorSave && <p className="text-red-500">{errorSave}</p>}
         </div>
       </form>
-    </section>
+    </BottomSheet>
   );
 }

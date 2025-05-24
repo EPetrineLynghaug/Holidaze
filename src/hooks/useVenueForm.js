@@ -29,10 +29,10 @@ export function useVenueForm(userName, onCreated) {
       key: "selection",
     },
     rentalDays: 1,
-    bookings: [], // ← lagt til
+    bookings: [],
     price: "",
     guests: 1,
-    type: "", // ← lagt til
+    type: "",
     location: {
       address: "",
       city: "",
@@ -45,11 +45,12 @@ export function useVenueForm(userName, onCreated) {
   });
   const [feedback, setFeedback] = useState({ error: "", success: "" });
 
-  // Generic updater for top‐level fields
+  // Setter ALLE felter i form på en gang, brukes for å populate skjemaet ved editing!
+  const setInitialValues = (values) => setForm(values);
+
   const updateField = (field, value) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
-  // Specific updater for nested location fields
   const updateLocationField = (field, value) =>
     setForm((prev) => ({
       ...prev,
@@ -89,14 +90,13 @@ export function useVenueForm(userName, onCreated) {
   const next = () => setStep((s) => Math.min(s + 1, STEPS.length - 1));
   const back = () => setStep((s) => Math.max(s - 1, 0));
 
-  // Compute inclusive number of days
-  const computeDays = (start, end) =>
-    Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1);
-
-  const submit = async () => {
+  /**
+   * SUBMIT: Opprett eller oppdater venue!
+   * @param {string | undefined} venueId
+   */
+  const submit = async (venueId) => {
     setFeedback({ error: "", success: "" });
     try {
-      // Build metadata flags
       const meta = {
         ...ENV_OPTIONS.reduce(
           (m, o) => ({ ...m, [o.key]: form.environments.includes(o.key) }),
@@ -113,43 +113,56 @@ export function useVenueForm(userName, onCreated) {
         bathrooms: form.bathrooms,
       };
 
-      // Assemble payload
       const payload = {
         name: form.title,
         description: form.description,
         media: form.images.filter((u) => u).map((url) => ({ url, alt: "" })),
         price: Number(form.price),
         maxGuests: Number(form.guests),
-
         rating: form.rating,
         meta,
         location: { ...form.location },
         availability: {
-          start: form.dateRange.startDate.toISOString().slice(0, 10),
-          end: form.dateRange.endDate.toISOString().slice(0, 10),
+          start: form.dateRange.startDate?.toISOString().slice(0, 10),
+          end: form.dateRange.endDate?.toISOString().slice(0, 10),
         },
         validUntil: new Date(
-          form.dateRange.endDate.getTime() + 24 * 60 * 60 * 1000
+          form.dateRange.endDate?.getTime() + 24 * 60 * 60 * 1000
         )
           .toISOString()
           .slice(0, 10),
       };
 
-      // POST to create venue
       const token = getAccessToken();
-      let res = await fetch(VENUES_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-          "X-Noroff-API-Key": import.meta.env.VITE_NOROFF_API_KEY,
-        },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) throw new Error(`Error ${res.status}`);
-      await res.json(); // ignore body
+      let res;
 
-      // Fetch updated list of this user's venues (with bookings)
+      if (venueId) {
+        // **OPPDATER** eksisterende venue
+        res = await fetch(`${VENUES_URL}/${venueId}`, {
+          method: "PUT", // eller "PATCH" hvis API tillater det
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+            "X-Noroff-API-Key": import.meta.env.VITE_NOROFF_API_KEY,
+          },
+          body: JSON.stringify(payload),
+        });
+      } else {
+        // **OPPRETT** nytt venue
+        res = await fetch(VENUES_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+            "X-Noroff-API-Key": import.meta.env.VITE_NOROFF_API_KEY,
+          },
+          body: JSON.stringify(payload),
+        });
+      }
+      if (!res.ok) throw new Error(`Error ${res.status}`);
+      await res.json();
+
+      // Hent oppdatert venues-liste for profilen
       res = await fetch(
         `${PROFILE_BY_NAME_VENUES_URL(userName)}?_bookings=true`,
         {
@@ -162,7 +175,12 @@ export function useVenueForm(userName, onCreated) {
       const listJson = await res.json();
       onCreated(listJson.data);
 
-      setFeedback({ success: "Venue created successfully!", error: "" });
+      setFeedback({
+        success: venueId
+          ? "Venue updated successfully!"
+          : "Venue created successfully!",
+        error: "",
+      });
     } catch (err) {
       setFeedback({ success: "", error: err.message });
     }
@@ -181,5 +199,6 @@ export function useVenueForm(userName, onCreated) {
     next,
     back,
     submit,
+    setInitialValues,
   };
 }

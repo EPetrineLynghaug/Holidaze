@@ -41,6 +41,10 @@ module.exports = {
           "60%": { transform: "scale(1.04)" },
           "100%": { transform: "scale(1)" },
         },
+        height: {
+          hero: "clamp(65vh, 75vh, 80vh)",
+          "hero-gradient": "clamp(15vh, 20vh, 25vh)",
+        },
       },
     },
   },

@@ -28,7 +28,7 @@ export default function VenueDetail() {
 
   const { data: venue, loading, error } = useVenueDetail(id);
 
-  // 👉 Hent modal-state/handlers fra hook
+ 
   const {
     showCalendar, setShowCalendar,
     showSheet, setShowSheet,
@@ -39,7 +39,7 @@ export default function VenueDetail() {
     handleEditDates,
   } = useSingleVenueModals();
 
-  // NB! Du har fortsatt noen få egen state som skal være her:
+ 
   const [submitting, setSubmitting] = useState(false);
   const [errMsg, setErrMsg]         = useState("");
 
@@ -49,7 +49,7 @@ export default function VenueDetail() {
     key:       "selection",
   });
 
-  // Beregn antall ledige gjester for valgt periode
+
   const availableGuests = useMemo(() => {
     if (!venue) return 0;
     const maxTotal = venue.maxGuests;
