@@ -1,17 +1,16 @@
+
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router';
+import { useNavigate, Link } from 'react-router-dom';
 import Logo from '../components/ui/Logo';
 import useForm from '../hooks/forms/useForm';
 import { login as loginService } from '../services/authService';
-import useAuthErrorMessage from '../hooks/auth/useAuthErrorMessage';
+
 
 const validate = (field, value) => {
-  const emailRegex = /^[^@\s]+@stud\.noroff\.no$/i;
-
   switch (field) {
     case 'email':
       if (!value) return 'Email is required';
-      if (!emailRegex.test(value)) return 'Email must be a stud.noroff.no address';
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(value)) return 'Invalid email address';
       return '';
     case 'password':
       if (!value) return 'Password is required';
@@ -22,18 +21,16 @@ const validate = (field, value) => {
   }
 };
 
-
 export default function Login() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-  const getErrorMessage = useAuthErrorMessage();
 
   const onSubmit = async (values, setErrors) => {
     try {
       await loginService({ email: values.email, password: values.password, remember: true });
       navigate('/', { replace: true });
     } catch (err) {
-      const message = getErrorMessage(err);
+      const message = err.message || 'Login failed';
       setErrors(prev => ({ ...prev, general: message }));
     }
   };
@@ -61,7 +58,7 @@ export default function Login() {
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-          {/* Email */}
+          {/* Email Field */}
           <div className="flex items-center border-[var(--color-border)] border rounded-md px-2 py-2 focus-within:ring-1 focus-within:ring-[var(--color-btn-light)]">
             <span className="material-symbols-outlined icon-gray text-xs mr-2">email</span>
             <input
@@ -78,10 +75,12 @@ export default function Login() {
             />
           </div>
           {touched.email && errors.email && (
-            <p id="email-error" className="text-red-500 text-xs text-left">{errors.email}</p>
+            <p id="email-error" className="text-red-500 text-xs text-left">
+              {errors.email}
+            </p>
           )}
 
-          {/* Password */}
+          {/* Password Field */}
           <div className="flex items-center border-[var(--color-border)] border rounded-md px-2 py-2 focus-within:ring-1 focus-within:ring-[var(--color-btn-light)] relative">
             <input
               name="password"
@@ -109,17 +108,19 @@ export default function Login() {
             )}
           </div>
           {touched.password && errors.password && (
-            <p id="password-error" className="text-red-500 text-xs text-left">{errors.password}</p>
+            <p id="password-error" className="text-red-500 text-xs text-left">
+              {errors.password}
+            </p>
           )}
 
-          {/* General error */}
+          {/* General Error */}
           {errors.general && (
             <p className="text-red-500 text-xs text-center" role="alert">
               {errors.general}
             </p>
           )}
 
-          {/* Submit */}
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={isSubmitting}
@@ -131,7 +132,10 @@ export default function Login() {
 
         <p className="text-center text-xs md:text-sm lg:text-sm text-black mt-6">
           Don't have an account?{' '}
-          <Link to="/register" className="text-[var(--color-btn-light)] hover:underline font-medium">
+          <Link
+            to="/register"
+            className="text-[var(--color-btn-light)] hover:underline font-medium"
+          >
             Sign up
           </Link>
         </p>

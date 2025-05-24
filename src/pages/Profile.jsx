@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import useProfileData from '../hooks/api/useProfileData';
 
 import ProfileHeader from '../components/profile/mobile/ProfileHeader';

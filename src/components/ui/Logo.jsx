@@ -1,5 +1,5 @@
 
-import { NavLink } from 'react-router';
+import { NavLink } from 'react-router-dom';
 
 export default function Logo({ className = '', ...props }) {
     const baseClasses = 'holidaze-logo flex items-center text-1xl font-bold';

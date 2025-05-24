@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router-dom';;
 import useForm from '../hooks/forms/useForm';
 import { register as registerService, login as loginService, isLoggedIn } from '../services/authService';
 import Logo from '../components/ui/Logo';

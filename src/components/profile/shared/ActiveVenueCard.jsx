@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import DeleteVenueButton from '../../ui/buttons/DeleteVenueButton';
 import EditVenueButton from '../../ui/buttons/EditVenueButton';
 import BookingBadge from '../../ui/styles/BookingBadge'; // <-- NY!

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
-import { useNavigate, useLocation, Link } from "react-router";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import useSearch from "../../../hooks/api/useSearch";
 import useAuthUser from "../../../hooks/auth/useAuthUser";
 
