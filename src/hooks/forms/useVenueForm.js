@@ -2,15 +2,15 @@ import { useState } from "react";
 import {
   VENUES_URL,
   PROFILE_BY_NAME_VENUES_URL,
-} from "../components/constants/api";
-import { getAccessToken } from "../services/tokenService";
+} from "../../components/constants/api";
+import { getAccessToken } from "../../services/tokenService";
 import {
   STEPS,
   MAX_IMAGES,
   ENV_OPTIONS,
   AUD_OPTIONS,
   FAC_OPTIONS,
-} from "../components/constants/VenueFormConfig";
+} from "../../components/constants/VenueFormConfig";
 
 export function useVenueForm(userName, onCreated) {
   const [step, setStep] = useState(0);
