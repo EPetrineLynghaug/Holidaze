@@ -5,7 +5,7 @@ export default function HeroMobile() {
     <section className="relative h-70 w-screen overflow-hidden">
 
       <img
-        src="/images/heroMobile.webp"
+        src="/images/heroMobile.png"
         alt="Hero background"
         decoding="async"
         className="absolute inset-0 w-full h-full object-cover"
