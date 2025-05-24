@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { VENUES_SEARCH, PROFILES_SEARCH } from "../components/constants/api";
-import { getAccessToken } from "../services/tokenService";
+import { VENUES_SEARCH, PROFILES_SEARCH } from "../../components/constants/api";
+import { getAccessToken } from "../../services/tokenService";
 
 export default function useSearch(query) {
   const [data, setData] = useState([]);

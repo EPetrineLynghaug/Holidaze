@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import useProfileData from '../hooks/useProfileData';
+import useProfileData from '../hooks/api/useProfileData';
 
 import ProfileHeader from '../components/profile/mobile/ProfileHeader';
 import DashboardInfoSection from '../components/profile/mobile/DashboardInfoSection';
@@ -23,7 +23,6 @@ export default function Profile() {
   const navigate = useNavigate();
   const { user, venues, bookings, loading, error } = useProfileData();
 
-  // Local UI state for modals
   const [showForm, setShowForm] = useState(false);
   const [showMyVenues, setShowMyVenues] = useState(false);
   const [showMyBookings, setShowMyBookings] = useState(false);
@@ -31,7 +30,6 @@ export default function Profile() {
   const [selectedVenue, setSelectedVenue] = useState(null);
   const [activeSection, setActiveSection] = useState('dashboard');
 
-  // Redirect to home if no user in localStorage
   useEffect(() => {
     if (!localStorage.getItem('user')) {
       navigate('/', { replace: true });
@@ -51,29 +49,35 @@ export default function Profile() {
     setActiveSection('dashboard');
   };
 
+  const handleListNew = () => {
+    if (user.venueManager) {
+      setShowForm(true);
+      setActiveSection('list');
+    }
+  };
+
   return (
     <div className="profile-container px-4 lg:px-0 font-figtree">
       <ProfileHeader user={user} />
 
-      {/* Mobile dashboard menu */}
       <div className="mt-4 lg:hidden">
-      <DashboardMobileMenu
-        hasBookings={bookings.length > 0}
-        onListNew={() => {setShowForm(true);setActiveSection('list');}}
-        onSettings={() => setActiveSection('settings')}
-        onMyVenues={() => { setShowMyVenues(true); setActiveSection('venues'); }}
-        onMyBookings={() => { setShowMyBookings(true); setActiveSection('bookings'); }}
-        onDashboard={() => setActiveSection('dashboard')}
-       activeSection={activeSection}
-      />
+        <DashboardMobileMenu
+          hasBookings={bookings.length > 0}
+          onListNew={handleListNew}
+          onSettings={() => setActiveSection('settings')}
+          onMyVenues={() => { setShowMyVenues(true); setActiveSection('venues'); }}
+          onMyBookings={() => { setShowMyBookings(true); setActiveSection('bookings'); }}
+          onDashboard={() => setActiveSection('dashboard')}
+          activeSection={activeSection}
+          isVenueManager={user.venueManager}
+        />
       </div>
 
-      {/* Desktop sidebar menu */}
       <div className="hidden lg:block">
         <DashboardDesktopMenu
           user={user}
           hasBookings={bookings.length > 0}
-          onListNew={() => { setShowForm(true); setActiveSection('list'); }}
+          onListNew={handleListNew}
           onSettings={() => setActiveSection('settings')}
           onMyVenues={() => { setShowMyVenues(true); setActiveSection('venues'); }}
           onMyBookings={() => { setShowMyBookings(true); setActiveSection('bookings'); }}
@@ -82,17 +86,16 @@ export default function Profile() {
         />
       </div>
 
-      {/* Dashboard Content */}
       {activeSection === 'dashboard' && (
         <>
           <div className="block lg:hidden mt-6">
             <DashboardInfoSection user={user} />
-                  <ProfileChartSection user={user} venues={venues} bookings={bookings} />
+            <ProfileChartSection user={user} venues={venues} bookings={bookings} />
           </div>
           <div className="hidden lg:grid lg:ml-64 lg:pl-12 lg:mt-6 lg:grid-cols-[1fr_1fr] lg:gap-6 lg:items-end px-9">
             <DashboardInfoSection user={user} />
             <div className="self-end mt-4 lg:mt-0">
-          <ProfileChartSection user={user} venues={venues} bookings={bookings} />
+              <ProfileChartSection user={user} venues={venues} bookings={bookings} />
             </div>
           </div>
 
@@ -117,10 +120,9 @@ export default function Profile() {
         </>
       )}
 
-      {/* Settings Section */}
       {activeSection === 'settings' && (
         <>
-    <div className="hidden lg:block mt-6 lg:ml-64 lg:pl-12 px-12">
+          <div className="hidden lg:block mt-6 lg:ml-64 lg:pl-12 px-12">
             <ProfileSettingsPage userName={user.name} onSave={handleSaveSettings} />
           </div>
           <div className="block lg:hidden">
@@ -135,40 +137,34 @@ export default function Profile() {
         </>
       )}
 
-{user.venueManager && showForm && activeSection === 'list' && (
-  <>
-    {/* Desktop */}
-    <div className="hidden lg:block lg:ml-64 lg:pl-2 px-16">
-      <AddVenuePage
-        userName={user.name}
-        onCreated={() => {
-          setShowForm(false);
-          setActiveSection('dashboard');
-        }}
-        hideHeader={true}
-      />
-    </div>
+      {user.venueManager && showForm && activeSection === 'list' && (
+        <>
+          <div className="hidden lg:block lg:ml-64 lg:pl-2 px-16">
+            <AddVenuePage
+              userName={user.name}
+              onCreated={() => {
+                setShowForm(false);
+                setActiveSection('dashboard');
+              }}
+              hideHeader={true}
+            />
+          </div>
+          <div className="block lg:hidden">
+            <AddVenueForm
+              userName={user.name}
+              onCreated={() => {
+                setShowForm(false);
+                setActiveSection('dashboard');
+              }}
+              onClose={() => {
+                setShowForm(false);
+                setActiveSection('dashboard');
+              }}
+            />
+          </div>
+        </>
+      )}
 
-    {/* Mobile */}
-    <div className="block lg:hidden">
-      <AddVenueForm
-        userName={user.name}
-        onCreated={() => {
-          setShowForm(false);
-          setActiveSection('dashboard');
-        }}
-        onClose={() => {
-          setShowForm(false);
-          setActiveSection('dashboard');
-        }}
-      />
-    </div>
-  </>
-)}
-
-
-
-      {/* Edit Venue Modal */}
       {showEditForm && selectedVenue && (
         <BottomSheet title="Edit Venue" onClose={() => setShowEditForm(false)}>
           <EditVenueForm
@@ -176,55 +172,59 @@ export default function Profile() {
             existingVenue={selectedVenue}
             onCreated={() => {
               setShowEditForm(false);
-              
             }}
             onClose={() => setShowEditForm(false)}
           />
         </BottomSheet>
       )}
-{/* My Venues Section */}
-{showMyVenues && activeSection === 'venues' && (
-  <>
-    {/* Desktop */}
-    <div className="hidden lg:block mt-6 lg:ml-64 lg:pl-12 px-12">
 
-      <MyVenuesDashboardDesktop onClose={() => setShowMyVenues(false)} />
-    </div>
-
-    {/* Mobile */}
-    <div className="block lg:hidden">
-      <BottomSheet
-        title="My Venues"
-        onClose={() => {
-          setShowMyVenues(false);
-          setActiveSection('dashboard');
-        }}
-      >
-        <MyVenuesDashboard
-          onClose={() => {
-            setShowMyVenues(false);
-            setActiveSection('dashboard');
-          }}
-        />
-      </BottomSheet>
-    </div>
-  </>
-)}
-
-
-{/* My Bookings Section */}
-{showMyBookings && activeSection === 'bookings' && (
+      {showMyVenues && activeSection === 'venues' && (
         <>
-         <div className="hidden lg:block mt-6 lg:ml-64 lg:pl-6 px-6 ">
-          <MyBookingsDashboardDesktop onClose={() => { setShowMyBookings(false); setActiveSection('dashboard'); }} />
+          <div className="hidden lg:block mt-6 lg:ml-64 lg:pl-12 px-12">
+            <MyVenuesDashboardDesktop onClose={() => setShowMyVenues(false)} />
+          </div>
+          <div className="block lg:hidden">
+            <BottomSheet
+              title="My Venues"
+              onClose={() => {
+                setShowMyVenues(false);
+                setActiveSection('dashboard');
+              }}
+            >
+              <MyVenuesDashboard
+                onClose={() => {
+                  setShowMyVenues(false);
+                  setActiveSection('dashboard');
+                }}
+              />
+            </BottomSheet>
+          </div>
+        </>
+      )}
+
+      {showMyBookings && activeSection === 'bookings' && (
+        <>
+          <div className="hidden lg:block mt-6 lg:ml-64 lg:pl-6 px-6">
+            <MyBookingsDashboardDesktop
+              onClose={() => {
+                setShowMyBookings(false);
+                setActiveSection('dashboard');
+              }}
+            />
           </div>
           <div className="block lg:hidden">
             <BottomSheet
               title="My Bookings"
-              onClose={() => { setShowMyBookings(false); setActiveSection('dashboard'); }}
+              onClose={() => {
+                setShowMyBookings(false);
+                setActiveSection('dashboard');
+              }}
             >
               <MyBookingsDashboard
-                onClose={() => { setShowMyBookings(false); setActiveSection('dashboard'); }}
+                onClose={() => {
+                  setShowMyBookings(false);
+                  setActiveSection('dashboard');
+                }}
               />
             </BottomSheet>
           </div>

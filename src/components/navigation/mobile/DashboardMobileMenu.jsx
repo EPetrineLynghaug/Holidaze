@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import useAuthUser from '../../../hooks/auth/useAuthUser';
 
 export default function DashboardMobileMenu({
   hasBookings = true,
@@ -7,6 +8,9 @@ export default function DashboardMobileMenu({
   onMyVenues = () => {},
   onMyBookings = () => {},
 }) {
+  const user = useAuthUser();
+  const isVenueManager = user?.venueManager === true;
+
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
@@ -24,11 +28,42 @@ export default function DashboardMobileMenu({
   }, [isOpen]);
 
   const menuItems = [
-    { icon: 'grid_view',       label: 'Dashboard',      onClick: () => {},           disabled: false,         active: true  },
-    { icon: 'add_business',    label: 'List New Venue', onClick: onListNew,         disabled: false,         active: false },
-    { icon: 'apartment',       label: 'My Venues',      onClick: onMyVenues,        disabled: false,         active: false },
-    { icon: 'calendar_month',  label: 'Bookings',       onClick: onMyBookings,      disabled: !hasBookings,   active: false },
-    { icon: 'settings',        label: 'Settings',       onClick: onSettings,        disabled: false,         active: false },
+    {
+      icon: 'grid_view',
+      label: 'Dashboard',
+      onClick: () => {},
+      disabled: false,
+      active: true,
+    },
+    {
+      icon: 'add_business',
+      label: 'List New Venue',
+      onClick: onListNew,
+      disabled: !isVenueManager,
+      active: false,
+    },
+    {
+      icon: 'apartment',
+      label: 'My Venues',
+      onClick: onMyVenues,
+      disabled: false,
+      active: false,
+    },
+  {
+  icon: 'calendar_month',
+  label: 'Bookings',
+  onClick: onMyBookings,
+  disabled: false,
+  active: false,
+},
+
+    {
+      icon: 'settings',
+      label: 'Settings',
+      onClick: onSettings,
+      disabled: false,
+      active: false,
+    },
   ];
 
   return (
@@ -56,7 +91,10 @@ export default function DashboardMobileMenu({
         style={{ maxHeight: '60vh' }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-center pt-2"><div className="w-16 h-1.5 bg-gray-300 rounded-full" /></div>
+        <div className="flex justify-center pt-2">
+          <div className="w-16 h-1.5 bg-gray-300 rounded-full" />
+        </div>
+
         <div className="sticky top-0 flex items-center justify-between px-4 py-3 bg-white border-b border-[var(--color-border-soft)] z-10">
           <button onClick={() => setIsOpen(false)} aria-label="Close dashboard menu" className="text-[var(--profile-btn-text)]">
             <span
@@ -74,7 +112,12 @@ export default function DashboardMobileMenu({
           {menuItems.map(({ icon, label, onClick, disabled, active }, idx) => (
             <button
               key={idx}
-              onClick={() => { setIsOpen(false); onClick(); }}
+              onClick={() => {
+                if (!disabled) {
+                  setIsOpen(false);
+                  onClick();
+                }
+              }}
               disabled={disabled}
               className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl border w-full transition duration-200 overflow-hidden relative group ${
                 disabled

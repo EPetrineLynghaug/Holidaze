@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import useAuthUser from "./useAuthUser";
-import { getAccessToken } from "../services/tokenService";
+import useAuthUser from "../auth/useAuthUser";
+import { getAccessToken } from "../../services/tokenService";
 import {
   PROFILE_BY_NAME_VENUES_URL,
   PROFILE_BY_NAME_BOOKINGS_URL,
-} from "../components/constants/api";
+} from "../../components/constants/api";
 
 export default function useProfileData() {
   const user = useAuthUser();

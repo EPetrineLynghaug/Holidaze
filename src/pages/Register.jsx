@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router';
-import useForm from '../hooks/useForm';
+import useForm from '../hooks/forms/useForm';
 import { register as registerService, login as loginService, isLoggedIn } from '../services/authService';
 import Logo from '../components/ui/Logo';
 
@@ -8,18 +8,15 @@ export default function Register() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
 
- 
   useEffect(() => {
     if (isLoggedIn()) {
       navigate('/', { replace: true });
     }
   }, [navigate]);
 
-  // Hent lagret account-type
   const storedType = localStorage.getItem('venueManager');
   const initialVenueManager = storedType === 'true';
 
-  // Valideringsfunksjon
   const validate = (field, value) => {
     if (field === 'venueManager') return '';
     const v = String(value);
@@ -31,7 +28,7 @@ export default function Register() {
       case 'email':
         return emailRegex.test(v)
           ? ''
-          : 'Email must be a stud.noroff.no address';
+          : 'Email must be a valid @stud.noroff.no address';
       case 'password':
         return passwordRegex.test(v)
           ? ''
@@ -41,26 +38,22 @@ export default function Register() {
     }
   };
 
-  // Submit: registrer, lagre type, login, redirect
   const onSubmit = async (values, setErrors) => {
     try {
-      // Registrer bruker
       await registerService({
         name: values.name,
         email: values.email,
         password: values.password,
       });
-      // Lagre account-type
-      localStorage.setItem(
-        'venueManager',
-        JSON.stringify(values.venueManager)
-      );
-      // Logg inn umiddelbart
+
+      localStorage.setItem('venueManager', JSON.stringify(values.venueManager));
+
       await loginService({
         email: values.email,
         password: values.password,
         remember: true,
       });
+
       navigate('/', { replace: true });
     } catch (err) {
       setErrors(prev => ({ ...prev, general: err.message }));
@@ -87,7 +80,6 @@ export default function Register() {
     onSubmit,
   });
 
-  // Velg profil-type
   const handleSelectType = isManager => {
     setFieldValue('venueManager', isManager);
     localStorage.setItem('venueManager', JSON.stringify(isManager));
@@ -101,7 +93,6 @@ export default function Register() {
           Create your account
         </h2>
 
-        {/* Velg konto-type */}
         <div className="text-xs text-gray-700 mb-8 bg-white/75 backdrop-blur-sm px-4 py-2 rounded-2xl border border-[#D1D1D1] shadow-lg">
           What type of account would you like to create?
         </div>
@@ -112,16 +103,8 @@ export default function Register() {
             className="flex-1 rounded-xl overflow-hidden shadow-lg hover:-translate-y-1 transition"
           >
             <div className="relative h-36 lg:h-48">
-              <img
-                src="/images/traveler.png"
-                alt="Traveler"
-                className="w-full h-full object-cover"
-              />
-              <span
-                className={`material-symbols-outlined icon-gray text-xs absolute -bottom-4 left-1/2 -translate-x-1/2 p-1 rounded-full bg-white transition-colors ${
-                  !form.venueManager ? 'filled' : ''
-                }`}
-              >
+              <img src="/images/traveler.png" alt="Traveler" className="w-full h-full object-cover" />
+              <span className={`material-symbols-outlined icon-gray text-xs absolute -bottom-4 left-1/2 -translate-x-1/2 p-1 rounded-full bg-white transition-colors ${!form.venueManager ? 'filled' : ''}`}>
                 person
               </span>
             </div>
@@ -135,16 +118,8 @@ export default function Register() {
             className="flex-1 rounded-xl overflow-hidden shadow-lg hover:-translate-y-1 transition"
           >
             <div className="relative h-36 lg:h-48">
-              <img
-                src="/images/hosting-key.png"
-                alt="Host"
-                className="w-full h-full object-cover"
-              />
-              <span
-                className={`material-symbols-outlined icon-gray text-xs absolute -bottom-4 left-1/2 -translate-x-1/2 p-1 rounded-full bg-white transition-colors ${
-                  form.venueManager ? 'filled' : ''
-                }`}
-              >
+              <img src="/images/hosting-key.png" alt="Host" className="w-full h-full object-cover" />
+              <span className={`material-symbols-outlined icon-gray text-xs absolute -bottom-4 left-1/2 -translate-x-1/2 p-1 rounded-full bg-white transition-colors ${form.venueManager ? 'filled' : ''}`}>
                 family_home
               </span>
             </div>
@@ -154,13 +129,10 @@ export default function Register() {
           </button>
         </div>
 
-        {/* Registreringsskjema */}
         <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           {/* Name */}
           <div className="flex items-center border rounded-md px-2 py-2 focus-within:ring-1 focus-within:ring-[var(--color-btn-light)]">
-            <span className="material-symbols-outlined icon-gray text-xs mr-2">
-              person
-            </span>
+            <span className="material-symbols-outlined icon-gray text-xs mr-2">person</span>
             <input
               name="name"
               type="text"
@@ -175,34 +147,33 @@ export default function Register() {
             />
           </div>
           {touched.name && errors.name && (
-            <p id="name-error" className="text-red-500 text-xs text-left">
-              {errors.name}
-            </p>
+            <p id="name-error" className="text-red-500 text-xs text-left">{errors.name}</p>
           )}
 
           {/* Email */}
-          <div className="flex items-center border rounded-md px-2 py-2 focus-within:ring-1 focus-within:ring-[var(--color-btn-light)]">
-            <span className="material-symbols-outlined icon-gray text-xs mr-2">
-              email
-            </span>
-            <input
-              name="email"
-              type="email"
-              placeholder="eksempel@stud.noroff.no"
-              value={form.email}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              aria-invalid={!!errors.email}
-              aria-describedby={errors.email && touched.email ? 'email-error' : undefined}
-              required
-              className="w-full text-xs lg:text-sm text-gray-800 placeholder-gray-400 outline-none"
-            />
-          </div>
-          {touched.email && errors.email && (
-            <p id="email-error" className="text-red-500 text-xs text-left">
-              {errors.email}
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center border rounded-md px-2 py-2 focus-within:ring-1 focus-within:ring-[var(--color-btn-light)]">
+              <span className="material-symbols-outlined icon-gray text-xs mr-2">email</span>
+              <input
+                name="email"
+                type="email"
+                placeholder="yourname@stud.noroff.no"
+                value={form.email}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                aria-invalid={!!errors.email}
+                aria-describedby={errors.email && touched.email ? 'email-error' : undefined}
+                required
+                className="w-full text-xs lg:text-sm text-gray-800 placeholder-gray-400 outline-none"
+              />
+            </div>
+            <p className="text-[10px] text-gray-500 text-left ml-1">
+              Must be a <strong>@stud.noroff.no</strong> email address.
             </p>
-          )}
+            {touched.email && errors.email && (
+              <p id="email-error" className="text-red-500 text-xs text-left">{errors.email}</p>
+            )}
+          </div>
 
           {/* Password */}
           <div className="flex items-center justify-between border rounded-md px-2 py-2 focus-within:ring-1 focus-within:ring-[var(--color-btn-light)] relative">
@@ -228,19 +199,13 @@ export default function Register() {
             </button>
           </div>
           {touched.password && errors.password && (
-            <p id="password-error" className="text-red-500 text-xs text-left">
-              {errors.password}
-            </p>
+            <p id="password-error" className="text-red-500 text-xs text-left">{errors.password}</p>
           )}
 
-          {/* General Error */}
           {errors.general && (
-            <p className="text-red-500 text-xs text-center" role="alert">
-              {errors.general}
-            </p>
+            <p className="text-red-500 text-xs text-center" role="alert">{errors.general}</p>
           )}
 
-          {/* Submit */}
           <button
             type="submit"
             disabled={isSubmitting}

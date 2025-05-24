@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { getAccessToken } from "../services/tokenService";
+import { getAccessToken } from "../../services/tokenService";
 import {
   PROFILE_BY_NAME_URL,
   PROFILE_BY_NAME_VENUES_URL,
-} from "../components/constants/api";
+} from "../../components/constants/api";
 
 export default function useProfileDetail(username) {
   const [profile, setProfile] = useState(null);

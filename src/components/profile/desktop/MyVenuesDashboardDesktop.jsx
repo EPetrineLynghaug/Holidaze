@@ -4,7 +4,6 @@ import useVenues from "../../../hooks/api/useVenues";
 import BookingCancelledPopup from "../../ui/popup/BookingCancelledPopup";
 import VenueCard from "../shared/VenueCard";
 
-// Seksjon-header med stil
 const Section = ({ icon, title, children }) => (
           <section className="bg-white shadow rounded-lg p-6 md:p-8 space-y-6 ring-1 ring-gray-100">
             <h2 className="flex items-center gap-2 text-lg md:text-xl font-semibold text-purple-700">
@@ -44,29 +43,30 @@ export default function MyVenuesDashboardDesktop() {
           <p className="text-gray-600">All your listings and booking history.</p>
         </header>
 
-        {/* Venue Listings */}
-        <Section icon="location_city" title="Your Venues">
+ <Section icon="location_city" title="Your Venues">
   <div className="w-full flex flex-col gap-8">
+    {loading ? (
+      <p className="text-center text-gray-500 py-20">Loading…</p>
+    ) : error ? (
+      <p className="text-center text-red-600">{error}</p>
+    ) : venues.length === 0 ? (
+      <div className="text-gray-600 text-sm">
+        <p>You haven't listed any venues yet.</p>
 
-            {loading ? (
-              <p className="text-center text-gray-500 py-20">Loading…</p>
-            ) : error ? (
-              <p className="text-center text-red-600">{error}</p>
-            ) : venues.length === 0 ? (
-              <p className="italic text-gray-500">You haven't listed any venues yet.</p>
-            ) : (
-              venues.filter(Boolean).map(v => (
-                <VenueCard
-                  key={v.id}
-                  venue={v}
-                  onDeleteVenue={delV}
-                  onEditVenue={edit}
-                  onViewVenue={view}
-                />
-              ))
-            )}
-          </div>
-        </Section>
+      </div>
+    ) : (
+      venues.filter(Boolean).map(v => (
+        <VenueCard
+          key={v.id}
+          venue={v}
+          onDeleteVenue={delV}
+          onEditVenue={edit}
+          onViewVenue={view}
+        />
+      ))
+    )}
+  </div>
+</Section>
 
         {/* Cancel Booking Popup */}
         {selectedBookingId && (

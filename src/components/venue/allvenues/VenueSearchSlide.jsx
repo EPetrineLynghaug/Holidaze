@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { useNavigate, useLocation, Link } from "react-router";
-import useSearch from "../../../hooks/useSearch";
-import useAuthUser from "../../../hooks/useAuthUser";
+import useSearch from "../../../hooks/api/useSearch";
+import useAuthUser from "../../../hooks/auth/useAuthUser";
 
 const TABS = [
   { key: "all", label: "All" },
