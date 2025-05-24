@@ -6,6 +6,7 @@ import SearchBox from '../components/home/hero/mobile/SearchBox';
 import FeaturedExperiencesSection from '../components/home/sections/ExperienceCard/FeaturedExperiencesSection';
 import WhyHolidazeSection from '../components/home/sections/WhyHolidaze/WhyHolidazeSection';
 import MostPopularSection from '../components/home/sections/MostPopular/Destinations';
+
 export default function Home() {
   return (
     <div className="font-figtree tracking-10p text-3xl">
@@ -43,8 +44,10 @@ export default function Home() {
         <WhyHolidazeSection />
         <MostPopularSection />
       </main>
+
     </div>
   );
+
 }
 
 

@@ -1,4 +1,3 @@
-import React from 'react';
 
 export default function DashboardDesktopMenu({
   user,
@@ -27,7 +26,8 @@ export default function DashboardDesktopMenu({
   const capitalizedFirstName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
 
   return (
-    <aside className="hidden lg:block fixed top-[64px] left-0 w-64 h-[calc(100vh-64px)] bg-white shadow-md overflow-y-auto z-40">
+    <aside className="hidden lg:block absolute top-16 left-0 w-64 h-[calc(146vh-1rem)]  overflow-y-auto">
+
       <div className="flex flex-col items-center px-6 pb-4">
         <div className="relative">
           <img

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router";
 import useAuthUser from "../../../hooks/useAuthUser";
 import Logo from "../../ui/Logo";
@@ -10,7 +10,7 @@ export default function MainDesktopMenu() {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef();
 
-  React.useEffect(() => {
+  useEffect(() => {
     function handleClickOutside(e) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setOpen(false);
@@ -21,9 +21,11 @@ export default function MainDesktopMenu() {
   }, []);
 
   const handleLogout = () => {
+    localStorage.removeItem("user");
     localStorage.removeItem("profileUrl");
     localStorage.removeItem("bannerUrl");
     localStorage.removeItem("venueManager");
+    window.dispatchEvent(new Event("authChange"));
     navigate("/");
   };
 
@@ -35,20 +37,15 @@ export default function MainDesktopMenu() {
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-lg border-b border-slate-200 h-16 shadow-sm font-figtree">
       <div className="flex items-center h-16 px-3 sm:px-8">
-        {/* Logo venstre */}
         <div className="flex items-center">
           <Logo className="h-8" />
         </div>
 
-        {/* Spacer mellom logo og høyre meny */}
         <div className="flex-1" />
 
-        {/* Høyre side: søk + meny linker + profil */}
         <div className="flex items-center gap-4 ml-auto">
-          {/* Søk */}
           <VenueSearchSlide />
 
-          {/* Meny-linker */}
           <nav className="flex gap-2 md:gap-4">
             {mainLinks.map((link) => (
               <NavLink
@@ -81,12 +78,26 @@ export default function MainDesktopMenu() {
             ))}
           </nav>
 
-          {/* Profil dropdown */}
-          <div className="flex items-center gap-4 ml-6" ref={dropdownRef}>
+          <div
+            className={`flex items-center ${
+              !user ? "gap-3 ml-2" : "gap-4 ml-4"
+            }`}
+            ref={dropdownRef}
+          >
             {!user ? (
               <>
-                <NavLink to="/login" className="px-3 py-2 text-slate-700 font-medium text-base rounded hover:bg-accent/10 transition-all">Log in</NavLink>
-                <NavLink to="/register" className="px-3 py-2 text-white bg-accent font-semibold text-base rounded hover:bg-accent-dark transition-all">Register</NavLink>
+                <NavLink
+                  to="/login"
+                  className="px-3 py-2 text-slate-700 font-medium text-base rounded hover:bg-accent/10 transition-all"
+                >
+                  Log in
+                </NavLink>
+                <NavLink
+                  to="/register"
+                  className="px-3 py-2 text-white bg-accent font-semibold text-base rounded hover:bg-accent-dark transition-all"
+                >
+                  Register
+                </NavLink>
               </>
             ) : (
               <div className="relative">
@@ -110,13 +121,29 @@ export default function MainDesktopMenu() {
                   <span className="text-base font-normal text-slate-900 tracking-wide capitalize">
                     {user.name}
                   </span>
-                  <svg className={`ml-1 w-4 h-4 text-accent transition-transform ${open ? "rotate-180" : ""}`} fill="none" viewBox="0 0 20 20">
-                    <path d="M6 8l4 4 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  <svg
+                    className={`ml-1 w-4 h-4 text-accent transition-transform ${
+                      open ? "rotate-180" : ""
+                    }`}
+                    fill="none"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      d="M6 8l4 4 4-4"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
                   </svg>
                 </button>
                 {open && (
                   <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-100 shadow-xl rounded-xl py-1 animate-fadein">
-                    <NavLink to="/profile" className="block px-4 py-2 text-slate-700 text-base hover:bg-accent/10 rounded transition-all">Profile</NavLink>
+                    <NavLink
+                      to="/profile"
+                      className="block px-4 py-2 text-slate-700 text-base hover:bg-accent/10 rounded transition-all"
+                    >
+                      Profile
+                    </NavLink>
                     <button
                       onClick={handleLogout}
                       className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 rounded transition-all text-base"
