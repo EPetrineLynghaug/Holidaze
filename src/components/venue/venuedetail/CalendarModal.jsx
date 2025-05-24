@@ -3,6 +3,7 @@ import BottomSheet from "../../ui/popup/BottomSheet";
 import { DateRange } from "react-date-range";
 import useWindowSize from "../../../hooks/utills/useWindowSize";
 import BookingNextButton from "../../ui/buttons/BookingNextButton";
+import { getAccessToken } from "../../../services/tokenService";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 
@@ -22,6 +23,7 @@ export default function CalendarModal({
   const ref = useRef(null);
   const { width } = useWindowSize();
   const isMobile = width < 600;
+  const isLoggedIn = !!getAccessToken();
 
   const nights = useMemo(() => {
     const diffMs = selection.endDate - selection.startDate;
@@ -71,9 +73,10 @@ export default function CalendarModal({
       >
         <DateRange
           ranges={[selection]}
-          onChange={(item) =>
-            onSelectRange(item.selection.startDate, item.selection.endDate)
-          }
+          onChange={(item) => {
+            if (!isLoggedIn) return;
+            onSelectRange(item.selection.startDate, item.selection.endDate);
+          }}
           disabledDates={disabledDates}
           months={1}
           direction="horizontal"
@@ -105,9 +108,10 @@ export default function CalendarModal({
       >
         <DateRange
           ranges={[selection]}
-          onChange={(item) =>
-            onSelectRange(item.selection.startDate, item.selection.endDate)
-          }
+          onChange={(item) => {
+            if (!isLoggedIn) return;
+            onSelectRange(item.selection.startDate, item.selection.endDate);
+          }}
           disabledDates={disabledDates}
           months={1}
           direction="horizontal"
@@ -118,6 +122,7 @@ export default function CalendarModal({
           minDate={new Date()}
         />
       </div>
+
       <div
         className={`
           fixed left-0 right-0 bottom-0
@@ -127,40 +132,23 @@ export default function CalendarModal({
           z-[10000]
           text-center
           w-full
-          flex justify-center
+          px-4  
+          pb-5   
         `}
-        style={{
-          padding: isMobile
-            ? "1.05rem 0 1.15rem 0"
-            : "1.25rem 0 1.35rem 0",
-          maxWidth: "100vw",
-        }}
       >
-      <div
-  className={`
-    fixed left-0 right-0 bottom-0
-    bg-white/95
-    rounded-b-[1.15rem]
-    shadow-2xl
-    z-[10000]
-    text-center
-    w-full
-    px-4  
-    pb-5   
-  `}
->
-  <BookingNextButton
-    onClick={() => {
-      onConfirm();
-      onClose();
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }}
-    ariaLabel={`Confirm booking for ${nights} night${nights > 1 ? "s" : ""}, total ${totalString}`}
-    className="w-full max-w-sm mx-auto py-3"
-  >
-    Confirm · {totalString}
-  </BookingNextButton>
-</div>
+        <BookingNextButton
+          disabled={!isLoggedIn}
+          onClick={() => {
+            if (!isLoggedIn) return;
+            onConfirm();
+            onClose();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+          ariaLabel={`Confirm booking for ${nights} night${nights > 1 ? "s" : ""}, total ${totalString}`}
+          className="w-full max-w-sm mx-auto py-3"
+        >
+          Confirm · {totalString}
+        </BookingNextButton>
       </div>
     </BottomSheet>
   );

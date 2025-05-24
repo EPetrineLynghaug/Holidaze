@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { NavLink, useNavigate } from "react-router";
 import useAuthUser from "../../../hooks/auth/useAuthUser";
 import { logout as logoutService } from "../../../services/authService";
 import Logo from "../../ui/Logo";
 import VenueSearchSlide from "../../venue/allvenues/VenueSearchSlide";
 
-// Chevon-ikon
 function Chevron() {
   return (
     <span className="opacity-0 group-hover:opacity-100 transition-opacity material-symbols-outlined text-sm text-[#3E35A2]">
@@ -14,11 +13,10 @@ function Chevron() {
   );
 }
 
-// Generisk meny-lenke
 function MenuItem({ as: Component = NavLink, to, onClick, className = "", children }) {
   const base = "flex items-center justify-between group text-gray-700 hover:text-[#3E35A2] transition-colors";
   return (
-    <Component to={to} onClick={onClick} className={`${base} ${className}`.trim()}>
+    <Component to={to} onClick={onClick} className={`${base} ${className}`}>
       <span>{children}</span>
       <Chevron />
     </Component>
@@ -32,20 +30,18 @@ export default function MainMobileMenu() {
   const menuRef = useRef(null);
   const openButtonRef = useRef(null);
 
-  // Lås scroll når meny er åpen
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [open]);
 
-  // ESC-lukk og fokkustrapping
   useEffect(() => {
-    function onKey(e) {
+    const onKey = (e) => {
       if (e.key === "Escape") {
         setOpen(false);
         openButtonRef.current?.focus();
       }
-    }
+    };
     if (open) {
       window.addEventListener("keydown", onKey);
       menuRef.current?.querySelector("button, a")?.focus();
@@ -59,7 +55,6 @@ export default function MainMobileMenu() {
 
   const handleLogout = () => {
     logoutService();
-    ["profileUrl", "bannerUrl", "venueManager"].forEach((k) => localStorage.removeItem(k));
     closeMenu();
     navigate("/");
   };
@@ -76,11 +71,9 @@ export default function MainMobileMenu() {
 
   return (
     <>
-      {/* Topbar */}
       <header className="static bg-white shadow-md px-4 py-3 flex justify-between" aria-label="Main navigation">
         <Logo className="h-10 mb-1" />
         <div className="flex items-center gap-2">
-          {/* <-- Search-ikonet kun på "/venues" */}
           <VenueSearchSlide />
           <button
             ref={openButtonRef}
@@ -94,7 +87,6 @@ export default function MainMobileMenu() {
         </div>
       </header>
 
-      {/* Slide-in meny */}
       <aside
         ref={menuRef}
         className={`
@@ -105,7 +97,6 @@ export default function MainMobileMenu() {
         role="dialog"
         aria-modal="true"
       >
-        {/* Lukk knapp */}
         <div className="flex justify-end mb-6">
           <button
             onClick={closeMenu}
@@ -116,21 +107,19 @@ export default function MainMobileMenu() {
           </button>
         </div>
 
-        {/* Lenker */}
         <nav className="flex flex-col gap-5 text-base mb-6" aria-label="Mobile menu links">
-          {mainLinks.map((link) => (
+          {mainLinks.map(link => (
             <MenuItem key={link.to} to={link.to} onClick={closeMenu}>
               {link.label}
             </MenuItem>
           ))}
-          {!user && guestLinks.map((link) => (
+          {!user && guestLinks.map(link => (
             <MenuItem key={link.to} to={link.to} onClick={closeMenu}>
               {link.label}
             </MenuItem>
           ))}
         </nav>
 
-        {/* Profil-lenke */}
         {user && (
           <MenuItem as={NavLink} to="/profile" onClick={closeMenu} className="py-2 mb-8">
             <div className="flex items-center gap-3 pl-[2px]">
@@ -146,7 +135,6 @@ export default function MainMobileMenu() {
 
         <div className="flex-grow" />
 
-        {/* Logg ut */}
         {user && (
           <div className="pt-8 border-t border-gray-200">
             <button
@@ -160,7 +148,6 @@ export default function MainMobileMenu() {
         )}
       </aside>
 
-      {/* Backdrop */}
       {open && (
         <div
           className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 transition-opacity"

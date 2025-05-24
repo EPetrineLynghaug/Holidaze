@@ -1,23 +1,23 @@
 import React, { useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router";
 
-import useVenueDetail      from "../hooks/api/useVenueDetail";
-import CalendarModal       from "../components/venue/venuedetail/CalendarModal";
-import ImageCarousel       from "../components/venue/venuedetail/ImageCarousel";
-import VenueInfo           from "../components/venue/venuedetail/VenueInfo";
-import BookingBar          from "../components/venue/venuedetail/BookingBar";
-import BookingBottomSheet  from "../components/venue/venuedetail/Booking";
-import VenueSkeleton       from "../components/venue/venuedetail/VenueSkeleton";
-import VenueDescription    from "../components/venue/venuedetail/VenueDescription";
-import VenueMetaSection    from "../components/venue/venuedetail/VenueMetaSection";
+import useVenueDetail from "../hooks/api/useVenueDetail";
+import CalendarModal from "../components/venue/venuedetail/CalendarModal";
+import ImageCarousel from "../components/venue/venuedetail/ImageCarousel";
+import VenueInfo from "../components/venue/venuedetail/VenueInfo";
+import BookingBar from "../components/venue/venuedetail/BookingBar";
+import BookingBottomSheet from "../components/venue/venuedetail/Booking";
+import VenueSkeleton from "../components/venue/venuedetail/VenueSkeleton";
+import VenueDescription from "../components/venue/venuedetail/VenueDescription";
+import VenueMetaSection from "../components/venue/venuedetail/VenueMetaSection";
 
-import useBookingRanges    from "../hooks/data/useBookingRanges";
+import useBookingRanges from "../hooks/data/useBookingRanges";
 import BookingSuccessPopup from "../components/ui/popup/BookingSuccessPopup";
-import LoginPromptPopup    from "../components/ui/popup/LoginPromptPopup";
+import LoginPromptPopup from "../components/ui/popup/LoginPromptPopup";
 
-import { BOOKINGS_URL }    from "../components/constants/api";
-import { getAccessToken }  from "../services/tokenService";
-import useSingleVenueModals from "../hooks/utills/useSingleVenueModals"; 
+import { BOOKINGS_URL } from "../components/constants/api";
+import { getAccessToken } from "../services/tokenService";
+import useSingleVenueModals from "../hooks/utills/useSingleVenueModals";
 
 const formatNOK = n =>
   `${new Intl.NumberFormat("nb-NO", { minimumFractionDigits: 0 }).format(n)} NOK`;
@@ -25,10 +25,10 @@ const formatNOK = n =>
 export default function VenueDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const isLoggedIn = !!getAccessToken();
 
   const { data: venue, loading, error } = useVenueDetail(id);
 
- 
   const {
     showCalendar, setShowCalendar,
     showSheet, setShowSheet,
@@ -39,16 +39,14 @@ export default function VenueDetail() {
     handleEditDates,
   } = useSingleVenueModals();
 
- 
   const [submitting, setSubmitting] = useState(false);
-  const [errMsg, setErrMsg]         = useState("");
+  const [errMsg, setErrMsg] = useState("");
 
   const [selection, setSelection] = useState({
     startDate: new Date(),
-    endDate:   new Date(),
-    key:       "selection",
+    endDate: new Date(),
+    key: "selection",
   });
-
 
   const availableGuests = useMemo(() => {
     if (!venue) return 0;
@@ -65,7 +63,7 @@ export default function VenueDetail() {
       const day = new Date(startDate.getTime() + i * dayMs);
       const bookedThisDay = bookings.reduce((sum, b) => {
         const from = new Date(b.dateFrom);
-        const to   = new Date(b.dateTo);
+        const to = new Date(b.dateTo);
         if (day >= from && day < to) {
           return sum + b.guests;
         }
@@ -73,8 +71,7 @@ export default function VenueDetail() {
       }, 0);
       maxBooked = Math.max(maxBooked, bookedThisDay);
     }
-    const avail = maxTotal - maxBooked;
-    return avail > 0 ? avail : 0;
+    return Math.max(0, maxTotal - maxBooked);
   }, [venue, selection]);
 
   const ratingNum = useMemo(() => {
@@ -91,7 +88,6 @@ export default function VenueDetail() {
 
   const priceString = formatNOK((venue?.price || 0) * nights);
 
-  // Håndter booking-submit (samme som før)
   const handleBook = async formData => {
     const token = getAccessToken();
     if (!token) {
@@ -100,24 +96,24 @@ export default function VenueDetail() {
     }
 
     const body = {
-      venueId:       id,
-      dateFrom:      selection.startDate.toISOString().slice(0, 10),
-      dateTo:        selection.endDate.toISOString().slice(0, 10),
-      guests:        formData.guests || 1,
-      firstName:     formData.firstName,
-      lastName:      formData.lastName,
-      phone:         formData.phone,
+      venueId: id,
+      dateFrom: selection.startDate.toISOString().slice(0, 10),
+      dateTo: selection.endDate.toISOString().slice(0, 10),
+      guests: formData.guests || 1,
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      phone: formData.phone,
       paymentMethod: formData.paymentMethod,
     };
 
     try {
       setSubmitting(true);
       const res = await fetch(BOOKINGS_URL, {
-        method:  "POST",
+        method: "POST",
         headers: {
-          "Content-Type":     "application/json",
+          "Content-Type": "application/json",
           "X-Noroff-API-Key": import.meta.env.VITE_NOROFF_API_KEY,
-          Authorization:      `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(body),
       });
@@ -131,28 +127,27 @@ export default function VenueDetail() {
     }
   };
 
-  // BookingBar click-håndtering
   function handleBookingBarClick() {
-    if (!getAccessToken()) {
+    if (!isLoggedIn) {
       setShowLoginPrompt(true);
-    } else if (!isDesktop) {
-      if (
-        selection.startDate &&
-        selection.endDate &&
-        selection.endDate > selection.startDate
-      ) {
-        setShowSheet(true);
-      } else {
-        setShowCalendar(true);
-      }
+      return;
+    }
+
+    const validRange =
+      selection.startDate &&
+      selection.endDate &&
+      selection.endDate > selection.startDate;
+
+    if (!validRange) {
+      setShowCalendar(true);
     } else {
       setShowSheet(true);
     }
   }
 
   if (loading) return <VenueSkeleton />;
-  if (error)   return <p className="text-center py-10 text-red-500">{error}</p>;
-  if (!venue)  return null;
+  if (error) return <p className="text-center py-10 text-red-500">{error}</p>;
+  if (!venue) return null;
 
   const {
     name,
@@ -196,9 +191,13 @@ export default function VenueDetail() {
                 disabledDates={disabledDates}
                 bookingRanges={bookingRanges}
                 pricePerNight={venue.price}
-                onSelectRange={(s, e) =>
-                  setSelection({ startDate: s, endDate: e, key: "selection" })
-                }
+                onSelectRange={(s, e) => {
+                  if (!isLoggedIn) {
+                    setShowLoginPrompt(true);
+                    return;
+                  }
+                  setSelection({ startDate: s, endDate: e, key: "selection" });
+                }}
                 onClose={() => setShowCalendar(false)}
                 onConfirm={() => setShowCalendar(false)}
                 isInline
@@ -208,7 +207,6 @@ export default function VenueDetail() {
         )}
       </div>
 
-      {/* Kalender-popup på mobil/tablet */}
       {showCalendar && !isDesktop && (
         <div ref={calendarRef}>
           <CalendarModal
@@ -216,9 +214,13 @@ export default function VenueDetail() {
             disabledDates={disabledDates}
             bookingRanges={bookingRanges}
             pricePerNight={venue.price}
-            onSelectRange={(s, e) =>
-              setSelection({ startDate: s, endDate: e, key: "selection" })
-            }
+            onSelectRange={(s, e) => {
+              if (!isLoggedIn) {
+                setShowLoginPrompt(true);
+                return;
+              }
+              setSelection({ startDate: s, endDate: e, key: "selection" });
+            }}
             onClose={() => setShowCalendar(false)}
             onConfirm={handleCalendarConfirm}
           />
@@ -232,7 +234,7 @@ export default function VenueDetail() {
         submitting={submitting}
       />
 
-      {showSheet && (
+      {showSheet && isLoggedIn && (
         <BookingBottomSheet
           startDate={selection.startDate}
           endDate={selection.endDate}
@@ -253,6 +255,7 @@ export default function VenueDetail() {
           }}
         />
       )}
+
       {showLoginPrompt && (
         <LoginPromptPopup onClose={() => setShowLoginPrompt(false)} />
       )}

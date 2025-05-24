@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router";
 import useAuthUser from "../../../hooks/auth/useAuthUser";
+import { logout } from "../../../services/authService"; // ✅ Bruk riktig logout
 import Logo from "../../ui/Logo";
 import VenueSearchSlide from "../../venue/allvenues/VenueSearchSlide";
 
@@ -21,11 +22,7 @@ export default function MainDesktopMenu() {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("profileUrl");
-    localStorage.removeItem("bannerUrl");
-    localStorage.removeItem("venueManager");
-    window.dispatchEvent(new Event("authChange"));
+    logout();        // ✅ Fjerner tokens og brukerdata riktig
     navigate("/");
   };
 
