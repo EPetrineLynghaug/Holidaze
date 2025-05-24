@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router";
-
+import MobileCloseButton from "../buttons/MobileCloseButton"; 
 export default function LoginPromptPopup({
   onClose,
   loginPath = "/login",
@@ -15,13 +15,10 @@ export default function LoginPromptPopup({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="relative w-11/12 max-w-sm bg-white rounded-2xl shadow-xl p-6 text-center">
-        {/* close */}
-        <button
+        <MobileCloseButton
           onClick={onClose}
-          className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
-        >
-          <span className="material-symbols-outlined text-lg">close</span>
-        </button>
+          className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2"
+        />
 
         {/* icon */}
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-purple-100">

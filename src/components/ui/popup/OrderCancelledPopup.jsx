@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import MobileCloseButton from "../buttons/MobileCloseButton";
 
 const ORDER_CANCEL_REASONS = [
   { key: 'mind', label: 'Changed my mind' },
@@ -18,15 +19,13 @@ export function OrderCancelledPopup({ onClose, onConfirm }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="relative w-11/12 max-w-sm bg-white rounded-2xl shadow-xl p-6 text-center">
         {/* Close Button */}
-        <button
+        <MobileCloseButton
           onClick={onClose}
-          className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
-        >
-          <span className="material-symbols-outlined text-lg">close</span>
-        </button>
+          className="!absolute !top-1.5 !right-1.5 sm:!top-2 sm:!right-2"
+        />
 
-                {/* Cancel Icon */}
-                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-100">
+        {/* Cancel Icon */}
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-100">
           <span className="material-symbols-outlined text-4xl text-red-600">block</span>
         </div>
 
