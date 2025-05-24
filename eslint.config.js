@@ -6,6 +6,7 @@ import tailwindcss from "eslint-plugin-tailwindcss";
 
 export default [
   { ignores: ["dist", "node_modules"] },
+  { ignores: ["dist", "node_modules", "**/*.css"] },
   { ignores: ["**/*.css", "**/*.pcss"] },
   {
     files: ["**/*.{js,jsx}"],
