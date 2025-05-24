@@ -1,13 +1,13 @@
 const destinations = [
-  { id: 1, name: 'Norway', img: '/images/norway.JPG' },
-  { id: 2, name: 'Italy', img: '/images/italia.JPG' },
-  { id: 3, name: 'Japan', img: '/images/japan.JPG' },
-  { id: 4, name: 'Brazil', img: '/images/brasil.JPG' },
-  { id: 5, name: 'Canada', img: '/images/canada.JPG' },
-  { id: 6, name: 'Australia', img: '/images/australia.JPG' },
+  { id: 1, name: 'Norway', img: '/images/norway.webp' },
+  { id: 2, name: 'Italy', img: '/images/italia.webp' },
+  { id: 3, name: 'Japan', img: '/images/japan.webp' },
+  { id: 4, name: 'Brazil', img: '/images/brasil.webp' },
+  { id: 5, name: 'Canada', img: '/images/canada.webp' },
+  { id: 6, name: 'Australia', img: '/images/australia.webp' },
 ];
 
-const PLACEHOLDER_IMG = "/images/australia.JPG";
+const PLACEHOLDER_IMG = "/images/australia.webp";
 
 export default function CountriesSection() {
   const handleImgError = (e) => {

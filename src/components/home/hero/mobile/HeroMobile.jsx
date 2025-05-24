@@ -1,15 +1,16 @@
-const PLACEHOLDER_IMG = "/images/australia.JPG";
+const PLACEHOLDER_IMG = "/images/australia.webp";
 
 export default function HeroMobile() {
   return (
     <section className="relative h-70 w-screen overflow-hidden">
-   
+
       <img
-        src="/images/heroMobile.png"
+        src="/images/heroMobile.webp"
         alt="Hero background"
-        decoding="sync"  
+        decoding="async"
         className="absolute inset-0 w-full h-full object-cover"
         onError={e => {
+          e.currentTarget.onerror = null; 
           e.currentTarget.src = PLACEHOLDER_IMG;
         }}
         draggable={false}
