@@ -1,23 +1,27 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
 
+const PLACEHOLDER_IMG =
+  "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80";
+
 export default function ImageCarousel({ media = [], name = "" }) {
   const [mainIdx, setMainIdx] = useState(0);
   const navigate = useNavigate();
 
-  if (!media.length) {
-    return <div className="w-full h-44 bg-gray-100 rounded-xl" />;
-  }
+  // Hvis ingen media, bruk placeholder
+  const validMedia = media.length > 0
+    ? media
+    : [{ url: PLACEHOLDER_IMG, alt: "Placeholder image" }];
 
   // Mobil-navigasjon
-  const prevMobile = () => setMainIdx(i => (i - 1 + media.length) % media.length);
-  const nextMobile = () => setMainIdx(i => (i + 1) % media.length);
+  const prevMobile = () => setMainIdx(i => (i - 1 + validMedia.length) % validMedia.length);
+  const nextMobile = () => setMainIdx(i => (i + 1) % validMedia.length);
 
-  const total = media.length;
+  const total = validMedia.length;
 
   // Spesialcase: to bilder
   if (total === 2) {
-    const otherIdx = media[0] === media[mainIdx] ? 1 : 0;
+    const otherIdx = validMedia[0] === validMedia[mainIdx] ? 1 : 0;
     return (
       <div className="w-full">
         {/* Desktop: 2-kolonne split 50/50 */}
@@ -25,8 +29,8 @@ export default function ImageCarousel({ media = [], name = "" }) {
           {/* Første eller nåværende hovedbilde */}
           <div className="relative">
             <img
-              src={media[mainIdx].url}
-              alt={media[mainIdx].alt || name}
+              src={validMedia[mainIdx].url}
+              alt={validMedia[mainIdx].alt || name}
               loading="lazy"
               decoding="async"
               className="w-full h-full object-cover"
@@ -51,8 +55,8 @@ export default function ImageCarousel({ media = [], name = "" }) {
             className="relative overflow-hidden"
           >
             <img
-              src={media[otherIdx].url}
-              alt={media[otherIdx].alt || name}
+              src={validMedia[otherIdx].url}
+              alt={validMedia[otherIdx].alt || name}
               loading="lazy"
               decoding="async"
               className="w-full h-full object-cover"
@@ -64,8 +68,8 @@ export default function ImageCarousel({ media = [], name = "" }) {
         <div className="block md:hidden w-full">
           <div className="relative w-full h-64 rounded-xl overflow-hidden bg-gray-100 shadow mb-2">
             <img
-              src={media[mainIdx].url}
-              alt={media[mainIdx].alt || name}
+              src={validMedia[mainIdx].url}
+              alt={validMedia[mainIdx].alt || name}
               className="w-full h-full object-cover"
               loading="lazy"
               decoding="async"
@@ -101,7 +105,7 @@ export default function ImageCarousel({ media = [], name = "" }) {
           </div>
           {total > 1 && (
             <div className="flex gap-2 overflow-x-auto pb-1 justify-center">
-              {media.map((img, idx) => (
+              {validMedia.map((img, idx) => (
                 <button
                   key={idx}
                   onClick={() => setMainIdx(idx)}
@@ -130,7 +134,7 @@ export default function ImageCarousel({ media = [], name = "" }) {
   }
 
   // Generelt case: 1 eller >2
-  const thumbsGeneral = media.filter((_, idx) => idx !== mainIdx).slice(0, 6);
+  const thumbsGeneral = validMedia.filter((_, idx) => idx !== mainIdx).slice(0, 6);
   const m = thumbsGeneral.length;
   const areasGeneral =
     m <= 1
@@ -184,8 +188,8 @@ export default function ImageCarousel({ media = [], name = "" }) {
       >
         <div style={{ gridArea: "main" }} className="relative w-full h-full">
           <img
-            src={media[mainIdx].url}
-            alt={media[mainIdx].alt || name}
+            src={validMedia[mainIdx].url}
+            alt={validMedia[mainIdx].alt || name}
             loading="lazy"
             decoding="async"
             className="w-full h-full object-cover rounded-lg"
@@ -200,12 +204,12 @@ export default function ImageCarousel({ media = [], name = "" }) {
             <span className="material-symbols-outlined text-base text-gray-800">arrow_back</span>
           </button>
           <span className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm">
-            {mainIdx + 1}/{media.length}
+            {mainIdx + 1}/{validMedia.length}
           </span>
         </div>
 
         {thumbsGeneral.map((img, i) => {
-          const idx = media.indexOf(img);
+          const idx = validMedia.indexOf(img);
           return (
             <button
               key={idx}
@@ -217,8 +221,8 @@ export default function ImageCarousel({ media = [], name = "" }) {
               aria-label={`Bilde ${idx + 1}`}
             >
               <img
-                src={media[idx].url}
-                alt={media[idx].alt || name}
+                src={validMedia[idx].url}
+                alt={validMedia[idx].alt || name}
                 loading="lazy"
                 decoding="async"
                 className="w-full h-full object-cover"
@@ -233,14 +237,14 @@ export default function ImageCarousel({ media = [], name = "" }) {
       <div className="block md:hidden w-full">
         <div className="relative w-full h-64 rounded-xl overflow-hidden bg-gray-100 shadow mb-2">
           <img
-            src={media[mainIdx].url}
-            alt={media[mainIdx].alt || name}
+            src={validMedia[mainIdx].url}
+            alt={validMedia[mainIdx].alt || name}
             className="w-full h-full object-cover"
             loading="lazy"
             decoding="async"
             draggable={false}
           />
-          {media.length > 1 && (
+          {validMedia.length > 1 && (
             <>
               <button
                 onClick={prevMobile}
@@ -265,18 +269,19 @@ export default function ImageCarousel({ media = [], name = "" }) {
             <span className="material-symbols-outlined text-sm text-gray-800">arrow_back</span>
           </button>
           <span className="absolute bottom-2 left-2 bg-black/70 text-white px-2 py-0.5 rounded-full text-xs">
-            {mainIdx + 1}/{media.length}
+            {mainIdx + 1}/{validMedia.length}
           </span>
         </div>
-        {media.length > 1 && (
+        {validMedia.length > 1 && (
           <div className="flex gap-2 overflow-x-auto pb-1 justify-center">
-            {media.map((img, idx) => (
+            {validMedia.map((img, idx) => (
               <button
                 key={idx}
                 onClick={() => setMainIdx(idx)}
                 type="button"
-                className={`rounded-lg border-2 shadow-sm flex-shrink-0 transition-transform duration-200
-                  ${idx === mainIdx ? "border-blue-600 scale-105" : "border-gray-200 opacity-80 hover:opacity-100"}`}
+                className={`rounded-lg border-2 shadow-sm flex-shrink-0 transition-transform duration-200 ${
+                  idx === mainIdx ? "border-blue-600 scale-105" : "border-gray-200 opacity-80 hover:opacity-100"
+                }`}
                 style={{ width: 56, height: 38 }}
                 aria-label={`Bilde ${idx + 1}`}
               >
