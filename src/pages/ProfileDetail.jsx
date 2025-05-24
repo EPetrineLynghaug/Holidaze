@@ -1,6 +1,6 @@
 import React from "react";
 import { useParams } from "react-router";
-import useProfileDetail from "../hooks/useProfileDetail";
+import useProfileDetail from "../hooks/api/useProfileDetail";
 import UserProfileHeader from "../components/User-profiles/UserProfileHeader";
 import VenueCardCompact from "../components/User-profiles/VenueCardCompact"; 
 

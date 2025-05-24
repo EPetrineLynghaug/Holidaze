@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import useProfileData from '../hooks/useProfileData';
+import useProfileData from '../hooks/api/useProfileData';
 
 import ProfileHeader from '../components/profile/mobile/ProfileHeader';
 import DashboardInfoSection from '../components/profile/mobile/DashboardInfoSection';

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { NavLink, useNavigate } from "react-router";
-import useAuthUser from "../../../hooks/useAuthUser";
+import useAuthUser from "../../../hooks/auth/useAuthUser";
 import { logout as logoutService } from "../../../services/authService";
 import Logo from "../../ui/Logo";
 import VenueSearchSlide from "../../venue/allvenues/VenueSearchSlide";
