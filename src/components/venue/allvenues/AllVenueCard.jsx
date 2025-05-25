@@ -1,8 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import RatingStars from "../../ui/RatingStars";
 
-const PLACEHOLDER_IMG =
-  "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80";
+const PLACEHOLDER_IMG = "/images/heroMobile.webp";
 
 export default function AllVenueCard({ venue }) {
   const navigate = useNavigate();
@@ -38,8 +37,9 @@ export default function AllVenueCard({ venue }) {
           alt={imgAlt}
           className="w-full aspect-[16/9] object-cover rounded-t-2xl"
           loading="lazy"
+          aria-label={imgAlt}
           onError={e => {
-            if (e.currentTarget.src !== PLACEHOLDER_IMG) {
+            if (!e.currentTarget.src.endsWith("heroMobile.webp")) {
               e.currentTarget.src = PLACEHOLDER_IMG;
             }
           }}
@@ -79,13 +79,13 @@ export default function AllVenueCard({ venue }) {
         </p>
         <RatingStars value={rating} starSize={15} showValue className="mt-0.5 mb-1" />
 
-<div className="flex items-center justify-end mt-0">
-  <span className="text-[18px] text-gray-900 font-bold flex items-center gap-1">
-    {Number(price || 0).toLocaleString("no-NO")}
-    <span className="text-[14px] font-medium text-gray-500">NOK</span>
-    <span className="text-[13px] text-gray-400 ml-1 font-medium">/ night</span>
-  </span>
-</div>
+        <div className="flex items-center justify-end mt-0">
+          <span className="text-[18px] text-gray-900 font-bold flex items-center gap-1">
+            {Number(price || 0).toLocaleString("no-NO")}
+            <span className="text-[14px] font-medium text-gray-500">NOK</span>
+            <span className="text-[13px] text-gray-400 ml-1 font-medium">/ night</span>
+          </span>
+        </div>
       </div>
     </div>
   );
