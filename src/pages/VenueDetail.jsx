@@ -1,5 +1,7 @@
+// src/pages/VenueDetail.jsx
+
 import React, { useState, useMemo } from "react";
-import { useParams, useNavigate } from "react-router";
+import { useParams, useNavigate } from "react-router-dom";
 
 import useVenueDetail from "../hooks/api/useVenueDetail";
 import CalendarModal from "../components/venue/venuedetail/CalendarModal";
