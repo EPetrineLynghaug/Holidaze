@@ -1,6 +1,4 @@
-// src/components/WhyHolidazeSection.jsx
-
-import React from "react";
+import { Link } from "react-router-dom";
 import WhyHolidazeFeature from "./WhyHolidazeFeature";
 
 export default function WhyHolidazeSection() {
@@ -94,7 +92,10 @@ export default function WhyHolidazeSection() {
 
       {/* Call-to-action */}
       <div className="text-center mt-4 sm:mt-6 md:mt-8">
-        <button className="
+        <Link
+          to="/register"
+          className="
+            inline-block
             px-10 py-2 text-sm
             sm:px-8 sm:py-2.7 sm:text-base
             md:px-10 md:py-3 md:text-base
@@ -102,13 +103,14 @@ export default function WhyHolidazeSection() {
             bg-indigo-600 text-white font-medium rounded-md
             hover:bg-indigo-700 transition
             mb-4 sm:mb-0
-          ">
+          "
+        >
           Start sharing your space
-        </button>
+        </Link>
         <p className="mt-2 text-xs sm:text-sm text-gray-500">
           Your listing can be up in five minutes.
         </p>
       </div>
     </section>
-  );
+);
 }

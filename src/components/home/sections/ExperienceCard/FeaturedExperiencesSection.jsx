@@ -1,11 +1,10 @@
-
-
-import ExperienceCard from './ExperienceCard';
+import { Link } from "react-router-dom";
+import ExperienceCard from "./ExperienceCard";
 
 const experiences = [
-  { id: 1, src: '/images/lake.webp',   title: 'Lakeside',   price: 160, unit: 'night' },
-  { id: 2, src: '/images/city.webp',   title: 'City Break', price:  90, unit: 'night' },
-  { id: 3, src: '/images/cabins.webp', title: 'Cabins',     price: 130, unit: 'night' },
+  { id: 1, src: "/images/lake.webp",   title: "Lakeside",   price: 160, unit: "night" },
+  { id: 2, src: "/images/city.webp",   title: "City Break", price:  90, unit: "night" },
+  { id: 3, src: "/images/cabins.webp", title: "Cabins",     price: 130, unit: "night" },
 ];
 
 export default function FeaturedExperiencesSection() {
@@ -17,12 +16,13 @@ export default function FeaturedExperiencesSection() {
 
       <div className="grid gap-6 grid-cols-1 md:grid-cols-3 place-items-center md:place-items-start">
         {experiences.map((exp) => (
-          <div
+          <Link
             key={exp.id}
+            to="/venues"
             className="w-full max-w-[280px] md:max-w-[300px] lg:max-w-[340px] transition hover:-translate-y-0.5"
           >
             <ExperienceCard {...exp} />
-          </div>
+          </Link>
         ))}
       </div>
     </section>

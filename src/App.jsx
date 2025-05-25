@@ -12,6 +12,7 @@ const Profile       = lazy(() => import("./pages/Profile"));
 const ProfileDetail = lazy(() => import("./pages/ProfileDetail"));
 const Login         = lazy(() => import("./pages/Login"));
 const Register      = lazy(() => import("./pages/Register"));
+const SearchResults = lazy(() => import("./pages/SearchResults"));
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
             <Route path="venues/:id"       element={<VenueDetail />} />
             <Route path="profile"          element={<Profile />} />
             <Route path="profile/:username" element={<ProfileDetail />} />
+             <Route path="search" element={<SearchResults />} />
             {/* <Route path="*" element={<NotFound />} /> */}
           </Route>
         </Routes>

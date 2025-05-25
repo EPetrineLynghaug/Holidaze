@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 
 const destinations = [
   { id: 1, name: "australia" },
@@ -13,12 +14,10 @@ const PLACEHOLDER = "/images/australia.webp";
 export default function CountriesSection() {
   const handleImgError = (e) => {
     e.currentTarget.onerror = null;
-   
     const jpg = `/images/${e.currentTarget.dataset.name.toLowerCase()}.JPG`;
     if (e.currentTarget.src.endsWith(".webp")) {
       e.currentTarget.src = jpg;
     } else {
-      
       e.currentTarget.src = PLACEHOLDER;
     }
   };
@@ -32,7 +31,11 @@ export default function CountriesSection() {
         {destinations.map((dest) => {
           const webpSrc = `/images/${dest.name}.webp`;
           return (
-            <div key={dest.id} className="flex flex-col items-center">
+            <Link
+              key={dest.id}
+              to="/venues"
+              className="flex flex-col items-center transition hover:-translate-y-0.5"
+            >
               <img
                 data-name={dest.name}
                 src={webpSrc}
@@ -47,7 +50,7 @@ export default function CountriesSection() {
               <span className="mt-2 text-sm text-gray-700">
                 {dest.name.charAt(0).toUpperCase() + dest.name.slice(1)}
               </span>
-            </div>
+            </Link>
           );
         })}
       </div>
