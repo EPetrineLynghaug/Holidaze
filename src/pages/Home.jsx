@@ -11,7 +11,7 @@ export default function Home() {
   return (
     <div className="font-figtree tracking-10p text-3xl">
 
-<div className="hidden md:block relative min-h-[55vh] md:min-h-[65vh] lg:min-h-[80vh] bg-gradient-to-b from-[#dec5a2] via-[#f4e7d7] to-[#FAFAFA]">
+<div className="hidden md:block relative min-h-[55vh] md:min-h-[65vh] lg:min-h-[85vh] bg-gradient-to-b from-[#dec5a2] via-[#f4e7d7] to-[#FAFAFA]">
 
         <HeroDesktop />
 
