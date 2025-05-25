@@ -7,8 +7,8 @@ import LoadMoreButton from "../components/ui/buttons/LoadMoreVenuesButton";
 import RefreshButton from "../components/ui/buttons/RefreshVenuesButton";
 import { useAllVenues } from "../hooks/api/useAllVenues";
 
-export default function AllVenues() {
-  const [activeCategory, setActiveCategory] = useState("all");
+export default function AllVenues({ initialCategory = "all" }) {
+ const [activeCategory, setActiveCategory] = useState(initialCategory);
   const {
     venues,
     setVenues,

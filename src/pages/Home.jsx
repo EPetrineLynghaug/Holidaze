@@ -1,4 +1,4 @@
-
+import { useNavigate } from "react-router-dom";
 import HeroMobile from '../components/home/hero/mobile/HeroMobile';
 import HeroDesktop from '../components/home/hero/mobile/HeroDesctop';
 import SearchBox from '../components/home/hero/mobile/SearchBox';
@@ -8,6 +8,12 @@ import WhyHolidazeSection from '../components/home/sections/WhyHolidaze/WhyHolid
 import MostPopularSection from '../components/home/sections/MostPopular/Destinations';
 
 export default function Home() {
+   const navigate = useNavigate();
+
+  function handleSearch({ where, guests, when }) {
+    // Naviger til søkeside med søkeparametre i URL
+    navigate(`/search?where=${encodeURIComponent(where)}&guests=${guests}&when=${when}`);
+  }
   return (
     <div className="font-figtree tracking-10p text-3xl">
 
@@ -24,7 +30,7 @@ export default function Home() {
             transform -translate-x-1/2 -translate-y-1/2
           `}
         >
-          <SearchBox />
+           <SearchBox onSearch={handleSearch} />
         </div>
 
         <div className="w-full max-w-screen-xl mx-auto px-4 pt-[25vh] pb-16">
@@ -34,7 +40,7 @@ export default function Home() {
 
 
       <div className="block md:hidden">
-        <HeroMobile />
+        <HeroMobile onSearch={handleSearch} />
         <div className="w-full max-w-screen-xl mx-auto px-4 pt-8 pb-16">
           <FeaturedExperiencesSection />
         </div>

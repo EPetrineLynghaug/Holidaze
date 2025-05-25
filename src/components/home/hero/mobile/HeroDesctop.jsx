@@ -11,18 +11,15 @@ export default function HeroDesktop() {
   }, []);
 
   return (
-    <section className="
-      relative w-full overflow-hidden
-
-      aspect-video
-    ">
+    <section className="relative w-full overflow-hidden aspect-video">
       {/* Bilde for mobil (sm og mindre) */}
       <div className="block md:hidden absolute inset-0 w-full h-full">
         <img
-          src="https://via.placeholder.com/1280x720?text=Hero+Mobile+Image"
-          alt="Hero mobile placeholder"
+          src="/images/heroMobile.webp"
+          alt="Hero mobile"
           className="w-full h-full object-cover"
           loading="eager"
+          onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = "/images/placeholderMovie.webp"; }}
         />
       </div>
       
@@ -30,10 +27,11 @@ export default function HeroDesktop() {
       <div className="hidden md:block absolute inset-0 w-full h-full">
         {!showVideo ? (
           <img
-            src="https://via.placeholder.com/1280x720?text=Hero+Video+Fallback"
-            alt="Hero video placeholder"
+            src="/images/heroVideoFallback.webp"
+            alt="Hero video fallback"
             className="w-full h-full object-cover"
             loading="eager"
+            onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = "/images/placeholderMovie.webp"; }}
           />
         ) : (
           <iframe
@@ -41,7 +39,7 @@ export default function HeroDesktop() {
             loading="lazy"
             allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
             allowFullScreen
-            title="VideoHero"
+            title="Hero video"
             className="w-full h-full object-cover"
             style={{ border: "none" }}
           />
@@ -49,11 +47,13 @@ export default function HeroDesktop() {
       </div>
       
       {/* Gradient overlay */}
-      <div className="
-        absolute bottom-0 left-0 w-full
-        h-[25%] bg-gradient-to-b from-transparent to-[#f4e7d7]
-        pointer-events-none z-10
-      " />
+      <div
+        className="
+          absolute bottom-0 left-0 w-full
+          h-[25%] bg-gradient-to-b from-transparent to-[#f4e7d7]
+          pointer-events-none z-10
+        "
+      />
     </section>
   );
 }
