@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import RatingStars from "../../ui/RatingStars";
 
 const PLACEHOLDER_IMG =

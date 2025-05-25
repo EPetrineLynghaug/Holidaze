@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useProfileData from '../hooks/api/useProfileData';
 
-import ProfileHeader from '../components/profile/mobile/ProfileHeader';
+import ProfileHeader from '../components/profile/shared/ProfileHeader';
 import DashboardInfoSection from '../components/profile/mobile/DashboardInfoSection';
-import ProfileChartSection from '../components/profile/mobile/ProfileChart';
+import ProfileChartSection from '../components/profile/shared/ProfileChart';
 import ActiveVenuesSection from '../components/profile/shared/ActiveVenueCard';
 import DashboardMobileMenu from '../components/navigation/mobile/DashboardMobileMenu';
 import DashboardDesktopMenu from '../components/navigation/desktop/DashboardDesctopMeny';
 import AddVenueForm from '../components/profile/mobile/ListNewVenue';
-import EditVenueForm from '../components/profile/mobile/EditVenueModal';
+import EditVenueForm from '../components/profile/shared/EditVenueModal';
 import ProfileSettings from '../components/profile/mobile/ProfileSettings';
 import MyVenuesDashboard from '../components/profile/mobile/MyVenuesDashboard';
 import MyBookingsDashboard from '../components/profile/mobile/MyBookingsDashboard';

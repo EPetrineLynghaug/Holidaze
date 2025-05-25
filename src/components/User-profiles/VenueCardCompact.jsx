@@ -1,5 +1,4 @@
-import React from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { FAC_OPTIONS } from "../constants/VenueFormConfig";
 
 export default function VenueCardCompact({ venue })  {

@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import HeroMobile from '../components/home/hero/mobile/HeroMobile';
-import HeroDesktop from '../components/home/hero/mobile/HeroDesctop';
-import SearchBox from '../components/home/hero/mobile/SearchBox';
+import HeroDesktop from '../components/home/hero/desctop/HeroDesctop';
+import SearchBox from '../components/home/hero/desctop/SearchBox';
 
 import FeaturedExperiencesSection from '../components/home/sections/ExperienceCard/FeaturedExperiencesSection';
 import WhyHolidazeSection from '../components/home/sections/WhyHolidaze/WhyHolidazeSection';
