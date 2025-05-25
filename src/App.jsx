@@ -13,6 +13,8 @@ const ProfileDetail = lazy(() => import("./pages/ProfileDetail"));
 const Login         = lazy(() => import("./pages/Login"));
 const Register      = lazy(() => import("./pages/Register"));
 const SearchResults = lazy(() => import("./pages/SearchResults"));
+const Favorites = lazy(() => import("./pages/Favorites"));
+
 
 export default function App() {
   return (
@@ -30,6 +32,7 @@ export default function App() {
             <Route path="profile"          element={<Profile />} />
             <Route path="profile/:username" element={<ProfileDetail />} />
              <Route path="search" element={<SearchResults />} />
+               <Route path="favorites" element={<Favorites />} />
             {/* <Route path="*" element={<NotFound />} /> */}
           </Route>
         </Routes>

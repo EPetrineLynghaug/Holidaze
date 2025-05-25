@@ -2,8 +2,9 @@ import React from "react";
 import { useParams } from "react-router";
 import useProfileDetail from "../hooks/api/useProfileDetail";
 import UserProfileHeader from "../components/User-profiles/UserProfileHeader";
-import VenueCardCompact from "../components/User-profiles/VenueCardCompact"; 
+import VenueCardCompact from "../components/User-profiles/VenueCardCompact";
 
+// Loader-komponent
 function Loading() {
   return (
     <div className="flex justify-center py-10">
@@ -12,6 +13,7 @@ function Loading() {
   );
 }
 
+// Feilhåndtering
 function ErrorFallback({ message, onRetry }) {
   return (
     <div className="text-center py-10">
@@ -39,7 +41,12 @@ export default function ProfileDetail() {
 
   if (loadingProfile) return <Loading />;
   if (errorProfile)
-    return <ErrorFallback message={errorProfile} onRetry={() => window.location.reload()} />;
+    return (
+      <ErrorFallback
+        message={errorProfile}
+        onRetry={() => window.location.reload()}
+      />
+    );
 
   return (
     <div className="max-w-5xl mx-auto p-4 space-y-8">
@@ -66,13 +73,16 @@ export default function ProfileDetail() {
 
         {loadingVenues && <Loading />}
         {errorVenues && (
-          <ErrorFallback message={errorVenues} onRetry={() => window.location.reload()} />
+          <ErrorFallback
+            message={errorVenues}
+            onRetry={() => window.location.reload()}
+          />
         )}
         {!loadingVenues && venues.length === 0 && (
           <p className="text-center text-gray-500">No venues created yet.</p>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
           {venues.map((venue) => (
             <VenueCardCompact key={venue.id} venue={venue} />
           ))}
