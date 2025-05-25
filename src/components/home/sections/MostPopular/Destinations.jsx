@@ -1,18 +1,26 @@
+
 const destinations = [
-  { id: 1, name: 'Norway', img: '/images/norway.webp' },
-  { id: 2, name: 'Italy', img: '/images/italia.webp' },
-  { id: 3, name: 'Japan', img: '/images/japan.webp' },
-  { id: 4, name: 'Brazil', img: '/images/brasil.webp' },
-  { id: 5, name: 'Canada', img: '/images/canada.webp' },
-  { id: 6, name: 'Australia', img: '/images/australia.webp' },
+  { id: 1, name: "australia" },
+  { id: 2, name: "brasil" },
+  { id: 3, name: "canada" },
+  { id: 4, name: "italia" },
+  { id: 5, name: "japan" },
+  { id: 6, name: "norway" },
 ];
 
-const PLACEHOLDER_IMG = "/images/australia.webp";
+const PLACEHOLDER = "/images/australia.webp";
 
 export default function CountriesSection() {
   const handleImgError = (e) => {
-    e.currentTarget.onerror = null; // unngå infinite loop
-    e.currentTarget.src = PLACEHOLDER_IMG;
+    e.currentTarget.onerror = null;
+   
+    const jpg = `/images/${e.currentTarget.dataset.name.toLowerCase()}.JPG`;
+    if (e.currentTarget.src.endsWith(".webp")) {
+      e.currentTarget.src = jpg;
+    } else {
+      
+      e.currentTarget.src = PLACEHOLDER;
+    }
   };
 
   return (
@@ -21,21 +29,27 @@ export default function CountriesSection() {
         Featured Destinations
       </h3>
       <div className="grid gap-6 grid-cols-3 sm:grid-cols-6 place-items-center">
-        {destinations.map(dest => (
-          <div key={dest.id} className="flex flex-col items-center">
-            <img
-              src={dest.img}
-              alt={dest.name}
-              loading="lazy"
-              decoding="async"
-              className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover shadow-sm"
-              onError={handleImgError}
-              width={80}
-              height={80}
-            />
-            <span className="mt-2 text-sm text-gray-700">{dest.name}</span>
-          </div>
-        ))}
+        {destinations.map((dest) => {
+          const webpSrc = `/images/${dest.name}.webp`;
+          return (
+            <div key={dest.id} className="flex flex-col items-center">
+              <img
+                data-name={dest.name}
+                src={webpSrc}
+                alt={dest.name}
+                loading="lazy"
+                decoding="async"
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover shadow-sm"
+                width={80}
+                height={80}
+                onError={handleImgError}
+              />
+              <span className="mt-2 text-sm text-gray-700">
+                {dest.name.charAt(0).toUpperCase() + dest.name.slice(1)}
+              </span>
+            </div>
+          );
+        })}
       </div>
     </section>
   );
