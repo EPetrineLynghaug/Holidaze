@@ -1,35 +1,46 @@
+
+
 export default function HeroDesktop() {
   return (
     <section
       className="
         relative w-full overflow-hidden
-        h-[55vh]    
-        md:h-[60vh] 
-        lg:h-[75vh] 
+        h-[55vh]
+        md:h-[55vh]
+        lg:h-[70vh]
       "
     >
-      <video
-        className="
-          absolute inset-0
-          w-full h-full
-          object-cover
-          object-center       
-          md:object-[center_20%] 
-          lg:object-center     
-        "
-        autoPlay
-        muted
-        loop
-        playsInline
-      >
-        <source src="/video/VideoHero.mp4" type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
+      <div className="absolute inset-0 w-full h-full">
+        <div
+          style={{
+            position: "relative",
+            width: "100%",
+            height: "100%",
+            paddingTop: "56.25%", // 16:9 aspect ratio
+          }}
+        >
+          <iframe
+            src="https://player.vimeo.com/video/1087466002?h=55ab3c81fe&badge=0&autopause=0&player_id=0&app_id=58479&controls=0&autoplay=1&muted=1&loop=1&background=1"
+            loading="lazy"
+            allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
+            allowFullScreen
+            title="VideoHero"
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              border: "none",
+            }}
+          ></iframe>
+        </div>
+      </div>
 
       <div
         className="
           absolute bottom-0 left-0 w-full
-          h-[15vh] sm:h-[18vh] md:h-[20vh] lg:h-[22vh]
+          h-[20%] sm:h-[22%] md:h-[25%] lg:h-[25%]
           bg-gradient-to-b from-transparent to-[#f4e7d7]
           pointer-events-none z-10
         "
