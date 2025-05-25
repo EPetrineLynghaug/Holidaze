@@ -1,20 +1,23 @@
+import { useState } from "react";
+
+
 const PLACEHOLDER_IMG = "/images/australia.webp";
 
 export default function HeroMobile() {
+  const [showImage, setShowImage] = useState(true);
+
   return (
     <section className="relative h-70 w-screen overflow-hidden">
-
-      <img
-        src="/images/heroMobile.png"
-        alt="Hero background"
-        decoding="async"
-        className="absolute inset-0 w-full h-full object-cover"
-        onError={e => {
-          e.currentTarget.onerror = null; 
-          e.currentTarget.src = PLACEHOLDER_IMG;
-        }}
-        draggable={false}
-      />
+      {showImage && (
+        <img
+          src="/images/heroMobile.webp"
+          alt="Hero background"
+          decoding="async"
+          className="absolute inset-0 w-full h-full object-cover"
+          onError={() => setShowImage(false)} 
+          draggable={false}
+        />
+      )}
 
       {/* Overlay med innhold */}
       <div className="absolute inset-0 flex items-center justify-center bg-white/75 backdrop-blur-sm rounded-2xl p-6 mx-auto max-w-lg shadow-lg border border-[#D1D1D1] m-4">
