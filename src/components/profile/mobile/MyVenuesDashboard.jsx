@@ -8,6 +8,7 @@ export default function MyVenuesDashboard() {
   const navigate = useNavigate();
   const { venues, loading, error, setVenues } = useVenues(navigate);
   const [selectedBookingId, setSelectedBookingId] = useState(null);
+  const cancelBooking = bookingId => setSelectedBookingId(bookingId);
 
   const view = id => navigate(`/venues/${id}`);
   const edit = id => navigate(`/venues/${id}/edit`);
@@ -35,7 +36,7 @@ export default function MyVenuesDashboard() {
         ) : error ? (
           <p className="text-center text-red-600">{error}</p>
         ) : venues.length === 0 ? (
-          <p className="italic text-gray-500 text-center">You haven’t listed any venues yet.</p>
+          <p className="italic text-gray-500 text-center">You haven't listed any venues yet.</p>
         ) : (
           venues.map(v => (
             <VenueCard
@@ -45,6 +46,7 @@ export default function MyVenuesDashboard() {
               onEditVenue={edit}
               onViewVenue={view}
               onAskCancel={bid => setSelectedBookingId(bid)}
+               onCancelBooking={cancelBooking} 
             />
           ))
         )}

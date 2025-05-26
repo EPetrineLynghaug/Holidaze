@@ -425,19 +425,11 @@ return (
    {/* Feedback & Actions */}
    {feedback.error && <p className="text-red-500 text-sm">{feedback.error}</p>}
       {feedback.success && <p className="text-green-600 text-sm">{feedback.success}</p>}
-      <div className="pt-6 flex flex-col sm:flex-row gap-4 mb-30">
-  <button
-    type="button"
-    onClick={() => console.log('Preview venue', form)}
-    className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md border border-purple-500 text-purple-600 font-semibold hover:bg-purple-50 active:bg-purple-100 transition"
-  >
-    <span className="material-symbols-outlined">visibility</span> Preview venue
-  </button>
-
+   <div className="pt-6 mb-30">
   <button
     type="submit"
     disabled={!allRequiredValid}
-    className={`flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md font-semibold transition
+    className={`w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md font-semibold transition
       ${allRequiredValid
         ? 'bg-purple-600 text-white shadow-md hover:bg-purple-700 active:bg-purple-800'
         : 'bg-gray-200 text-gray-500 cursor-not-allowed'

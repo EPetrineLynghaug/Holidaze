@@ -119,7 +119,7 @@ export default function MyBookingsDashboardDesktop({ onClose, userName }) {
             </div>
 
             {/* Details panel */}
-            <div className="md:col-span-4 self-start mt-[-1.5rem] overflow-y-auto max-h-[calc(100vh-250px)] flex flex-col">
+            <div className="md:col-span-4 self-start mt-[-1.5rem] overflow-y-auto max-h-[calc(100vh-250px)] flex flex-col ">
               {current ? (
                 <Section
                   icon={filter === 'upcoming' ? 'event' : 'history'}

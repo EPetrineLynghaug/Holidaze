@@ -29,7 +29,6 @@ export default function MyBookingsDashboard({ onClose, userName }) {
   const upcoming  = bookings.filter(b => !isExpired(b));
   const displayed = filter === 'expired' ? expired : upcoming;
 
-  /* ---------------- HELPERS ---------------- */
   const pillClass = active =>
     `px-6 py-2 rounded-md text-sm font-medium transition ${
       active ? 'bg-purple-600 text-white' : 'bg-white text-gray-700 ring-1 ring-gray-300'
@@ -64,7 +63,7 @@ export default function MyBookingsDashboard({ onClose, userName }) {
 
   return (
     <BottomSheet title="My Bookings" onClose={onClose}>
-      <div className="px-6 py-4 space-y-6">
+      <div className="px-6 py-4 space-y-6 max-h-[80vh]      pb-90  ">
         {/* Header */}
         <div className="flex items-center justify-between">
           <h2 className="text-3xl font-bold text-purple-700">My Bookings</h2>
@@ -108,7 +107,7 @@ export default function MyBookingsDashboard({ onClose, userName }) {
 
                 {/* Booking Details (only show when selected) */}
                 {selectedId === b.id && (
-                  <div className="mt-3 w-full bg-white rounded-lg ring-1 ring-gray-100 shadow p-4">
+                  <div className="mt-3 w-full bg-white rounded-lg ring-1 ring-gray-100 shadow p-4 mb">
                     {/* Image */}
                     <div className="relative h-40 w-full overflow-hidden rounded-lg">
                       {b.venue?.media?.[0]?.url ? (
