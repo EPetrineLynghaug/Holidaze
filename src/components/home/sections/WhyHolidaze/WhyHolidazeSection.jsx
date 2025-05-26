@@ -30,7 +30,7 @@ export default function WhyHolidazeSection() {
   ];
 
   return (
-    <section className="p-12">
+    <section className="p-12 mt-12">
       {/* Overskrift */}
       <h2 className="font-figtree text-3xl font-semibold text-gray-900 text-center md:text-left mb-12">
         Why Holidaze?
