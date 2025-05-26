@@ -1,11 +1,14 @@
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import RatingStars from "../../ui/RatingStars";
+import { useFavorites } from "../../context/FavoritesContext";
+import FavoriteButton from "../../ui/buttons/FavoriteButton"; 
 
-const PLACEHOLDER_IMG =
-  "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80";
+const PLACEHOLDER_IMG = "/images/heroMobile.webp";
 
 export default function AllVenueCard({ venue }) {
   const navigate = useNavigate();
+  const { favorites, toggleFavorite } = useFavorites();
+
   const {
     id,
     name,
@@ -18,6 +21,7 @@ export default function AllVenueCard({ venue }) {
   const imgSrc = media[0]?.url || PLACEHOLDER_IMG;
   const imgAlt = media[0]?.alt || name || "Venue image";
   const imageCount = media.length;
+  const isFavorite = favorites.some((fav) => fav.id === id);
 
   return (
     <div
@@ -30,7 +34,7 @@ export default function AllVenueCard({ venue }) {
       onClick={() => navigate(`/venues/${id}`)}
       tabIndex={0}
       role="button"
-      aria-label={`Vis venue ${name}`}
+      aria-label={`View venue ${name}`}
     >
       <div className="relative">
         <img
@@ -38,8 +42,9 @@ export default function AllVenueCard({ venue }) {
           alt={imgAlt}
           className="w-full aspect-[16/9] object-cover rounded-t-2xl"
           loading="lazy"
+          aria-label={imgAlt}
           onError={e => {
-            if (e.currentTarget.src !== PLACEHOLDER_IMG) {
+            if (!e.currentTarget.src.endsWith("heroMobile.webp")) {
               e.currentTarget.src = PLACEHOLDER_IMG;
             }
           }}
@@ -51,18 +56,16 @@ export default function AllVenueCard({ venue }) {
               "linear-gradient(to top, rgba(34,34,34,0.12) 0%, rgba(255,255,255,0.0) 90%)",
           }}
         />
-        <button
-          className="
-            absolute top-2 right-2 bg-white/70 rounded-full
-            p-1 flex items-center justify-center border border-gray-200
-            shadow hover:bg-white transition
-          "
-          tabIndex={-1}
-          aria-label="Favoritt"
-          onClick={e => e.stopPropagation()}
-        >
-          <span className="material-symbols-outlined text-base text-purple-700">favorite</span>
-        </button>
+        <div className="absolute top-2 right-2 z-10">
+          <FavoriteButton
+            active={isFavorite}
+            onClick={e => {
+              e.stopPropagation();
+              toggleFavorite(venue);
+            }}
+            size={32}
+          />
+        </div>
         <span className="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-0.5 rounded-full">
           {`1/${imageCount || 1}`}
         </span>
@@ -79,13 +82,13 @@ export default function AllVenueCard({ venue }) {
         </p>
         <RatingStars value={rating} starSize={15} showValue className="mt-0.5 mb-1" />
 
-<div className="flex items-center justify-end mt-0">
-  <span className="text-[18px] text-gray-900 font-bold flex items-center gap-1">
-    {Number(price || 0).toLocaleString("no-NO")}
-    <span className="text-[14px] font-medium text-gray-500">NOK</span>
-    <span className="text-[13px] text-gray-400 ml-1 font-medium">/ night</span>
-  </span>
-</div>
+        <div className="flex items-center justify-end mt-0">
+          <span className="text-[18px] text-gray-900 font-bold flex items-center gap-1">
+            {Number(price || 0).toLocaleString("no-NO")}
+            <span className="text-[14px] font-medium text-gray-500">NOK</span>
+            <span className="text-[13px] text-gray-400 ml-1 font-medium">/ night</span>
+          </span>
+        </div>
       </div>
     </div>
   );

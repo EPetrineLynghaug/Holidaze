@@ -1,5 +1,4 @@
-import React from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { FAC_OPTIONS } from "../constants/VenueFormConfig";
 
 export default function VenueCardCompact({ venue })  {
@@ -16,7 +15,8 @@ export default function VenueCardCompact({ venue })  {
   } = venue;
 
   const { city = "", country = "" } = location;
-  const imgUrl = media[0]?.url || "https://via.placeholder.com/400x240.png?text=No+Image";
+  
+  const imgUrl = media[0]?.url || "/images/heroMobile.webp";
 
   const now = new Date();
   const isBookedNow = bookings?.some(
@@ -42,8 +42,11 @@ export default function VenueCardCompact({ venue })  {
       <div className="relative aspect-[16/9] overflow-hidden">
         <img
           src={imgUrl}
-          alt={name}
+          alt={name ? `${name} main image` : "Venue image"}
           className="object-cover w-full h-full"
+          loading="lazy"
+          aria-label={name ? `${name} main image` : "Venue image"}
+          onError={e => { e.currentTarget.src = "/images/heroMobile.webp"; }}
         />
         <span
           className={`absolute top-2 right-2 px-2 py-0.5 rounded-full text-xs font-semibold ${

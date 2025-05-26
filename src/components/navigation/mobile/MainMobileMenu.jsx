@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { NavLink, useNavigate } from "react-router";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import useAuthUser from "../../../hooks/auth/useAuthUser";
 import { logout as logoutService } from "../../../services/authService";
 import Logo from "../../ui/Logo";
 import VenueSearchSlide from "../../venue/allvenues/VenueSearchSlide";
+import { useFavorites } from "../../context/FavoritesContext"; // <-- FAVORITES
 
 function Chevron() {
   return (
@@ -29,6 +30,8 @@ export default function MainMobileMenu() {
   const navigate = useNavigate();
   const menuRef = useRef(null);
   const openButtonRef = useRef(null);
+
+  const { favorites } = useFavorites(); // <-- FAVORITES
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -113,6 +116,22 @@ export default function MainMobileMenu() {
               {link.label}
             </MenuItem>
           ))}
+
+          {/* Favorites vises kun hvis man er innlogget */}
+          {user && (
+            <MenuItem to="/favorites" onClick={closeMenu} className="relative">
+              <span className="flex items-center gap-2">
+               
+                Favorites
+                {favorites.length > 0 && (
+                  <span className="ml-1 bg-[#3E35A2] text-white text-xs rounded-full px-2 py-0.5">
+                    {favorites.length}
+                  </span>
+                )}
+              </span>
+            </MenuItem>
+          )}
+
           {!user && guestLinks.map(link => (
             <MenuItem key={link.to} to={link.to} onClick={closeMenu}>
               {link.label}

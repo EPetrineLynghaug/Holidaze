@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router";
+import  { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-const PLACEHOLDER_IMG =
-  "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80";
+// Bruk lokal placeholder
+const PLACEHOLDER_IMG = "/images/heroMobile.webp";
 
 export default function ImageCarousel({ media = [], name = "" }) {
   const [mainIdx, setMainIdx] = useState(0);
@@ -35,6 +35,7 @@ export default function ImageCarousel({ media = [], name = "" }) {
               decoding="async"
               className="w-full h-full object-cover"
               draggable={false}
+              onError={e => { if (e.currentTarget.src !== PLACEHOLDER_IMG) e.currentTarget.src = PLACEHOLDER_IMG; }}
             />
             <button
               onClick={e => { e.stopPropagation(); navigate(-1); }}
@@ -61,6 +62,7 @@ export default function ImageCarousel({ media = [], name = "" }) {
               decoding="async"
               className="w-full h-full object-cover"
               draggable={false}
+              onError={e => { if (e.currentTarget.src !== PLACEHOLDER_IMG) e.currentTarget.src = PLACEHOLDER_IMG; }}
             />
           </button>
         </div>
@@ -74,6 +76,7 @@ export default function ImageCarousel({ media = [], name = "" }) {
               loading="lazy"
               decoding="async"
               draggable={false}
+              onError={e => { if (e.currentTarget.src !== PLACEHOLDER_IMG) e.currentTarget.src = PLACEHOLDER_IMG; }}
             />
             {total > 1 && (
               <>
@@ -123,6 +126,7 @@ export default function ImageCarousel({ media = [], name = "" }) {
                     decoding="async"
                     className="w-full h-full object-cover"
                     draggable={false}
+                    onError={e => { if (e.currentTarget.src !== PLACEHOLDER_IMG) e.currentTarget.src = PLACEHOLDER_IMG; }}
                   />
                 </button>
               ))}
@@ -194,6 +198,7 @@ export default function ImageCarousel({ media = [], name = "" }) {
             decoding="async"
             className="w-full h-full object-cover rounded-lg"
             draggable={false}
+            onError={e => { if (e.currentTarget.src !== PLACEHOLDER_IMG) e.currentTarget.src = PLACEHOLDER_IMG; }}
           />
           <button
             onClick={e => { e.stopPropagation(); navigate(-1); }}
@@ -227,6 +232,7 @@ export default function ImageCarousel({ media = [], name = "" }) {
                 decoding="async"
                 className="w-full h-full object-cover"
                 draggable={false}
+                onError={e => { if (e.currentTarget.src !== PLACEHOLDER_IMG) e.currentTarget.src = PLACEHOLDER_IMG; }}
               />
             </button>
           );
@@ -243,6 +249,7 @@ export default function ImageCarousel({ media = [], name = "" }) {
             loading="lazy"
             decoding="async"
             draggable={false}
+            onError={e => { if (e.currentTarget.src !== PLACEHOLDER_IMG) e.currentTarget.src = PLACEHOLDER_IMG; }}
           />
           {validMedia.length > 1 && (
             <>
@@ -292,6 +299,7 @@ export default function ImageCarousel({ media = [], name = "" }) {
                   decoding="async"
                   className="w-full h-full object-cover"
                   draggable={false}
+                  onError={e => { if (e.currentTarget.src !== PLACEHOLDER_IMG) e.currentTarget.src = PLACEHOLDER_IMG; }}
                 />
               </button>
             ))}

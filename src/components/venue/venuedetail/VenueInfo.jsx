@@ -1,7 +1,9 @@
-import  { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import RatingStars from "../../ui/RatingStars";
-import ProfileUserLink from "../../profile/shared/ProfileUserSearch";
+import ProfileUserLink from "../../User-profiles/UserProfileLink";
 import StatsIcons from "./StatsIcons";
+import { getAccessToken } from "../../../services/tokenService";
+import LoginToViewProfilePopup from "../../ui/popup/LoginToViewProfilePopup";
 
 function toTitleCase(str) {
   return str.replace(/\w\S*/g, (txt) =>
@@ -20,6 +22,8 @@ export default function VenueInfo({
   onOpenCalendar,
 }) {
   const [starSize, setStarSize] = useState(26);
+  const [showLoginPopup, setShowLoginPopup] = useState(false);
+  const isLoggedIn = !!getAccessToken();
 
   useEffect(() => {
     function handleResize() {
@@ -29,6 +33,13 @@ export default function VenueInfo({
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  // avatar & name-fallbacks
+  const nameString = owner?.displayName || owner?.name || "";
+  const avatar =
+    typeof owner?.avatar === "string"
+      ? owner.avatar
+      : owner?.avatar?.url || "/images/default-avatar.jpg";
 
   return (
     <section className="px-4 pt-2 pb-4">
@@ -56,20 +67,43 @@ export default function VenueInfo({
         {location.country}
       </p>
 
-      <div className="flex flex-col mb-3">
+      <div className="flex flex-col  gap-3 mb-3">
         <RatingStars
           value={rating}
           showValue={true}
           starSize={starSize}
-          interactive={false}       // Ikke interaktiv lenger
+          interactive={false}
           className="cursor-default"
         />
 
-        <ProfileUserLink
-          user={owner}
-          size="xs"
-          className="text-xs bg-transparent shadow-none"
-        />
+        {isLoggedIn ? (
+          <ProfileUserLink
+            user={owner}
+            size="xs"
+            className="text-base font-semibold text-indigo-700 capitalize bg-transparent shadow-none"
+          />
+        ) : (
+          <>
+            <button
+              type="button"
+              className="flex items-center gap-3 text-base font-semibold text-indigo-700 capitalize bg-transparent shadow-none"
+              onClick={() => setShowLoginPopup(true)}
+              style={{ outline: "none" }}
+            >
+              <img
+                src={avatar}
+                onError={e => { e.currentTarget.src = "/images/default-avatar.jpg"; }}
+                alt={nameString}
+                className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                loading="lazy"
+              />
+              <span>{nameString}</span>
+            </button>
+            {showLoginPopup && (
+              <LoginToViewProfilePopup onClose={() => setShowLoginPopup(false)} />
+            )}
+          </>
+        )}
       </div>
 
       <div>

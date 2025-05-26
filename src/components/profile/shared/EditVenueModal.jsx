@@ -1,7 +1,7 @@
 // src/components/profile/mobile/EditVenueForm.jsx
 
 import React, { useEffect, useState } from "react";
-import DateRangePicker from "../../../components/ui/calender/DateRangePicker";
+import DateRangePicker from "../../ui/calender/DateRangePicker";
 import { useVenueForm } from "../../../hooks/forms/useVenueForm";
 import useBookingRanges from "../../../hooks/data/useBookingRanges";
 import {

@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import MobileCloseButton from "../buttons/MobileCloseButton"; 
 
 export default function AlertPopup({
