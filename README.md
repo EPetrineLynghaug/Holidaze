@@ -1,11 +1,62 @@
-# 🏖️ Holidaze – Vacation Booking Platform
+# 🏖️ Holidaze – Vacation Booking Platform Exam
 
-**Holidaze** is a modern web application built with **React** and **Vite** to browse and manage vacation accommodations. It uses **Tailwind CSS** for styling and is deployable with **Netlify**.
+
+
+**Holidaze** is a fictional accommodation booking website, inspired by platforms like Airbnb and Booking.com. Built as the final exam for Noroff's Front-End Development program, this project showcases skills in UI/UX design, modern frontend development, and API integration.
+
+🌐 **Live Site:** [View the deployed app on Netlify](https://flourishing-brigadeiros-fad739.netlify.app/)
 
 ---
 
-## 📁 Project Structure
+## 📖 About the Project
 
+Holidaze is a full-featured front-end application that allows users to browse, search, and book holiday venues. Venue managers can register, create venues, and manage bookings. The goal of the project is to demonstrate a complete design-to-deployment process using modern technologies like React and Tailwind CSS.
+
+---
+
+## 🚀 Getting Started
+
+To run this project locally, follow these steps:
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/your-username/holidaze.git
+cd holidaze
+```
+
+### 2. Install Dependencies
+
+```bash
+npm install
+```
+
+### 3. Run the Development Server
+
+```bash
+npm run dev
+```
+
+The app will be available at `http://localhost:5173/`.
+
+---
+
+## 📦 Available Scripts
+
+```json
+{
+  "dev": "vite",
+  "build": "vite build",
+  "preview": "vite preview",
+  "lint": "eslint .",
+  "analyze": "vite build && open dist/stats.html"
+}
+```
+
+
+## 📁 Project Structure
+<details>
+  <summary><strong>Click to read more</strong></summary>
 ```bash
 HOLIDAZE/
 ├── .vscode/                # VS Code editor settings
@@ -230,7 +281,7 @@ HOLIDAZE/
 ├── vite.config.js
 └── README.md
 ```
-
+</details>
 
 
 
