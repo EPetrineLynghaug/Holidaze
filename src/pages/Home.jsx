@@ -19,8 +19,7 @@ export default function Home() {
     <div className="font-figtree tracking-tight text-3xl">
 
 {/* DESKTOP HERO */}
-{/* DESKTOP HERO */}
-<div className="hidden md:block relative w-screen h-[80vh] overflow-visible bg-black">
+<div className="hidden md:block relative w-screen max-h-[88vh] aspect-video overflow-visible bg-black">
   {/* Kun video + overlay i egen wrapper med overflow-hidden */}
   <div className="absolute inset-0 overflow-hidden">
     <HeroDesktop className="w-full h-full object-cover" />
@@ -34,6 +33,8 @@ export default function Home() {
       w-full max-w-lg
       -translate-x-1/2 translate-y-1/2
       z-50
+        md:bottom-0 md:translate-y-1/2
+        
     "
   >
     <SearchBox onSearch={handleSearch} />

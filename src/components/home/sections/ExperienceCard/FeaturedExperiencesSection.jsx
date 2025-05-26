@@ -9,8 +9,8 @@ const experiences = [
 
 export default function FeaturedExperiencesSection() {
   return (
-    <section className="px-4 py-6 sm:px-6 md:px-8 lg:px-12">
-      <h1 className="font-figtree font-semibold text-xl sm:text-2xl md:text-3xl text-center md:text-left mb-6 md:mb-8">
+    <section className="px-4 py-6 sm:px-6 md:px-8 lg:px-12 lg:mt-30 md:mt-20 sm-mt-3">
+      <h1 className="font-figtree font-semibold  sm:text-3xl md:text-3xl text-center md:text-left sm:mb-0 mb-6 md:mb-8">
         Explore Experience
       </h1>
 

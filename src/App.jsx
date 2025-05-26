@@ -1,10 +1,10 @@
-// App.jsx
+
 import React, { lazy, Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 
 import Layout from "./components/Layout";
 
-// Lazy-loaded pages
+
 const Home          = lazy(() => import("./pages/Home"));
 const Venues        = lazy(() => import("./pages/AllVenues"));
 const VenueDetail   = lazy(() => import("./pages/VenueDetail"));
