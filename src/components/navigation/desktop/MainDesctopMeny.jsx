@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom"; 
 import useAuthUser from "../../../hooks/auth/useAuthUser";
 import { logout } from "../../../services/authService";
@@ -29,6 +29,7 @@ export default function MainDesktopMenu() {
   const mainLinks = [
     { to: "/", label: "Home" },
     { to: "/venues", label: "All Venues" },
+    ...(user ? [{ to: "/favorites", label: "Favorites" }] : [])
   ];
 
   return (
@@ -38,7 +39,7 @@ export default function MainDesktopMenu() {
     >
       <div className="flex items-center h-16 px-3 sm:px-8">
         <div className="flex items-center">
-          <Logo className="h-8" />
+          <Logo className="h-8" aria-label="Holidaze logo" />
         </div>
 
         <div className="flex-1" />
@@ -46,7 +47,7 @@ export default function MainDesktopMenu() {
         <div className="flex items-center gap-4 ml-auto">
           <VenueSearchSlide />
 
-          <nav aria-label="Primary navigation" className="flex gap-2 md:gap-4">
+          <nav aria-label="Primary navigation" role="navigation" className="flex gap-2 md:gap-4">
             {mainLinks.map(({ to, label }) => (
               <NavLink
                 key={to}
@@ -114,7 +115,8 @@ export default function MainDesktopMenu() {
                   {user.avatar?.url ? (
                     <img
                       src={user.avatar.url}
-                      alt={`${user.name}'s profile`}
+                      alt=""
+                      aria-hidden="true"
                       className="w-8 h-8 rounded-full object-cover border border-slate-200 shadow-sm"
                     />
                   ) : (
