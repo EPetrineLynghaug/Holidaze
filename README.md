@@ -57,7 +57,7 @@ The app will be available at `http://localhost:5173/`.
 ## 📁 Project Structure
 <details>
   <summary><strong>Click to read more</strong></summary>
-  
+
 ```bash
 HOLIDAZE/
 ├── .vscode/                # VS Code editor settings
@@ -287,3 +287,104 @@ HOLIDAZE/
 
 
 
+## 🎓 Background: Noroff D2 Exam Project
+<details>
+  <summary><strong>Click to read more</strong></summary>
+
+This project was developed as part of Noroff's second-year Front-End Development final exam.
+
+### ✅ Learning Outcomes
+
+- Plan and build a web application from scratch
+- Use modern UI libraries and frameworks
+- Implement and style responsive user interfaces
+- Work with APIs for real-time data
+- Deploy and test using modern tools
+
+### 🧰 Tools & Tech
+
+- **Framework:** React
+- **Styling:** Tailwind CSS, Styled Components
+- **State Management:** React Context / Hooks
+- **Routing:** React Router DOM
+- **Hosting:** Netlify
+- **Design:** Figma
+- **Planning:** Trello or GitHub Projects
+
+### 👤 Roles
+
+- **Visitor:** Can browse and view venues
+- **Customer:** Can register, book, and manage profile
+- **Venue Manager:** Can register, manage venues and bookings
+
+---
+
+
+
+
+## 📋 Project Summary
+
+Holidaze is a web application inspired by Airbnb, allowing users to book accommodations, publish venues, and manage hotel listings. 
+
+One of the key features I focused on was the **dashboard menu** – a navigation experience aimed at making the platform easier to use. It is simple, structured, and provides intuitive options tailored for a booking site. There are two versions of the dashboard menu: one for desktop and one for mobile, each with unique designs.
+
+Users can **toggle between regular user and Venue Manager mode**. As a Venue Manager, additional options are unlocked, such as posting new venues, viewing bookings, and managing current listings. It's also possible to cancel bookings (as required by the API, cancellation must include a reason).
+
+I extended the default API metadata, which only included 3–4 fields, to enrich the venue information and provide a better user experience. 
+
+**Ratings** are available visually in the UI, although the API does not support rating other venues – only your own. I found this limitation odd but included star visuals to maintain good UI consistency.
+
+The app includes a **search feature** where users can find both profiles and venues. Some searches require the user to be logged in.
+
+I also created a full **hi-fidelity design in Figma** as part of the planning and design process.
+
+Some files became long due to the complexity of the logic, and a few minor visual issues remain due to limited time.
+
+### 🧪 Performance & Testing
+
+I’ve run **Lighthouse reports** from Google Chrome and used **bundle analyzers** to reduce file sizes and optimize the build.
+
+### ✅ User Stories Implemented
+
+_(See assignment for full details – all user types and key features were included in the implementation.)_
+
+### 📋 Exam Brief Summary
+
+Holidaze is a fictional accommodation booking service. Students were tasked with creating a brand new front-end for the platform using official API documentation. The product needed to cover two key areas:
+
+- A **customer-facing** site where users can search and book venues  
+- An **admin-facing** interface where Venue Managers can create, update, and manage venues and bookings
+
+---
+
+### 👥 Roles & User Stories
+
+**Visitor**  
+- Can view and search for venues  
+- Can view venue details  
+- Can register as customer or venue manager  
+
+**Customer**  
+- Can log in/out  
+- Can book a venue  
+- Can view and manage their bookings  
+- Can update avatar/profile picture  
+
+**Venue Manager**  
+- Can create/edit/delete venues  
+- Can view bookings on their venues  
+- Can update avatar/profile picture  
+
+
+### 🚦 Submission Requirements
+
+- GitHub repo with committed code  
+- Gantt chart (roadmap view)  
+- Kanban board with detailed task breakdown  
+- Style guide (Figma)  
+- Figma wireframes/prototype (desktop + mobile)  
+- Deployed app (Netlify or GitHub Pages)  
+- Comprehensive README.md  
+- Lighthouse and bundle analyzer reports  
+- Manual testing of all user stories
+</details>
