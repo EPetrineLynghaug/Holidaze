@@ -57,6 +57,7 @@ The app will be available at `http://localhost:5173/`.
 ## 📁 Project Structure
 <details>
   <summary><strong>Click to read more</strong></summary>
+  
 ```bash
 HOLIDAZE/
 ├── .vscode/                # VS Code editor settings
