@@ -284,45 +284,9 @@ HOLIDAZE/
 ```
 </details>
 
-
-
-
-## 🎓 Background: Noroff D2 Exam Project
+## 📋 Project Summary
 <details>
   <summary><strong>Click to read more</strong></summary>
-
-This project was developed as part of Noroff's second-year Front-End Development final exam.
-
-### ✅ Learning Outcomes
-
-- Plan and build a web application from scratch
-- Use modern UI libraries and frameworks
-- Implement and style responsive user interfaces
-- Work with APIs for real-time data
-- Deploy and test using modern tools
-
-### 🧰 Tools & Tech
-
-- **Framework:** React
-- **Styling:** Tailwind CSS, Styled Components
-- **State Management:** React Context / Hooks
-- **Routing:** React Router DOM
-- **Hosting:** Netlify
-- **Design:** Figma
-- **Planning:** Trello or GitHub Projects
-
-### 👤 Roles
-
-- **Visitor:** Can browse and view venues
-- **Customer:** Can register, book, and manage profile
-- **Venue Manager:** Can register, manage venues and bookings
-
----
-
-
-
-
-## 📋 Project Summary
 
 Holidaze is a web application inspired by Airbnb, allowing users to book accommodations, publish venues, and manage hotel listings. 
 
@@ -354,6 +318,40 @@ Holidaze is a fictional accommodation booking service. Students were tasked with
 
 - A **customer-facing** site where users can search and book venues  
 - An **admin-facing** interface where Venue Managers can create, update, and manage venues and bookings
+
+---
+</details>
+
+
+## 🎓 Background: Noroff D2 Exam Project
+<details>
+  <summary><strong>Click to read more</strong></summary>
+
+This project was developed as part of Noroff's second-year Front-End Development final exam.
+
+### ✅ Learning Outcomes
+
+- Plan and build a web application from scratch
+- Use modern UI libraries and frameworks
+- Implement and style responsive user interfaces
+- Work with APIs for real-time data
+- Deploy and test using modern tools
+
+### 🧰 Tools & Tech
+
+- **Framework:** React
+- **Styling:** Tailwind CSS, Styled Components
+- **State Management:** React Context / Hooks
+- **Routing:** React Router DOM
+- **Hosting:** Netlify
+- **Design:** Figma
+- **Planning:** Trello or GitHub Projects
+
+### 👤 Roles
+
+- **Visitor:** Can browse and view venues
+- **Customer:** Can register, book, and manage profile
+- **Venue Manager:** Can register, manage venues and bookings
 
 ---
 
