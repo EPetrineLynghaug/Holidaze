@@ -1,5 +1,3 @@
-// src/components/profile/mobile/EditVenueForm.jsx
-
 import React, { useEffect, useState } from "react";
 import DateRangePicker from "../../ui/calender/DateRangePicker";
 import { useVenueForm } from "../../../hooks/forms/useVenueForm";
@@ -29,9 +27,10 @@ export default function EditVenueForm({
     addImage,
     setImage,
     removeImage,
+    submit,   
     next,
     back,
-    submit,
+   
     setInitialValues,
   } = useVenueForm(userName, onCreated);
 

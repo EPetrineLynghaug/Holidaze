@@ -10,14 +10,13 @@ export default function useManageVenues() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Fetch user's venues
+  // Hent brukerens venues
   const fetchVenues = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
       const stored = localStorage.getItem("user");
-      if (!stored)
-        throw new Error("Brukerdata mangler. Vennligst logg inn igjen.");
+      if (!stored) throw new Error("Brukerdata mangler. Logg inn på nytt.");
       const { name } = JSON.parse(stored);
       const token = getAccessToken();
       const res = await fetch(
@@ -35,13 +34,13 @@ export default function useManageVenues() {
       data.sort((a, b) => new Date(b.created) - new Date(a.created));
       setVenues(data);
     } catch (e) {
-      setError(e.message || "Noe gikk galt");
+      setError(e.message);
     } finally {
       setLoading(false);
     }
   }, []);
 
-  // Create a new venue
+  // Opprett med payload
   const createVenue = useCallback(async (payload) => {
     setLoading(true);
     setError("");
@@ -68,7 +67,32 @@ export default function useManageVenues() {
     }
   }, []);
 
-  // Update an existing venue
+  // Opprett uten payload (tom POST)
+  const createVenueEmpty = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const token = getAccessToken();
+      const res = await fetch(VENUES_URL, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "X-Noroff-API-Key": import.meta.env.VITE_NOROFF_API_KEY,
+        },
+      });
+      if (!res.ok) throw new Error(`Kunne ikke opprette venue: ${res.status}`);
+      const newVenue = await res.json();
+      setVenues((prev) => [newVenue, ...prev]);
+      return newVenue;
+    } catch (e) {
+      setError(e.message);
+      throw e;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Oppdater eksisterende venue
   const updateVenue = useCallback(async (id, payload) => {
     setLoading(true);
     setError("");
@@ -95,7 +119,7 @@ export default function useManageVenues() {
     }
   }, []);
 
-  // Delete a venue
+  // Slett venue
   const deleteVenue = useCallback(async (id) => {
     setLoading(true);
     setError("");
@@ -128,6 +152,7 @@ export default function useManageVenues() {
     error,
     refresh: fetchVenues,
     createVenue,
+    createVenueEmpty,
     updateVenue,
     deleteVenue,
   };

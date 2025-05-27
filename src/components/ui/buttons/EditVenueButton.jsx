@@ -1,6 +1,4 @@
-import React from 'react';
 
-// NB! Google Material Symbols må være importert i prosjektet ditt.
 export default function EditVenueButton({ onClick, disabled, loading, className = '', ...props }) {
   return (
     <button
