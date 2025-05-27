@@ -4,11 +4,14 @@ import useAuthUser from "../../../hooks/auth/useAuthUser";
 import { logout as logoutService } from "../../../services/authService";
 import Logo from "../../ui/Logo";
 import VenueSearchSlide from "../../venue/allvenues/VenueSearchSlide";
-import { useFavorites } from "../../context/FavoritesContext"; // <-- FAVORITES
+import { useFavorites } from "../../context/FavoritesContext";
 
 function Chevron() {
   return (
-    <span className="opacity-0 group-hover:opacity-100 transition-opacity material-symbols-outlined text-sm text-[#3E35A2]">
+    <span
+      aria-hidden="true"
+      className="opacity-0 group-hover:opacity-100 transition-opacity material-symbols-outlined text-sm text-[#3E35A2]"
+    >
       chevron_right
     </span>
   );
@@ -31,11 +34,13 @@ export default function MainMobileMenu() {
   const menuRef = useRef(null);
   const openButtonRef = useRef(null);
 
-  const { favorites } = useFavorites(); // <-- FAVORITES
+  const { favorites } = useFavorites();
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [open]);
 
   useEffect(() => {
@@ -75,7 +80,7 @@ export default function MainMobileMenu() {
   return (
     <>
       <header className="static bg-white shadow-md px-4 py-3 flex justify-between" aria-label="Main navigation">
-        <Logo className="h-10 mb-1" />
+        <Logo className="h-10 mb-1" aria-label="Holidaze logo" />
         <div className="flex items-center gap-2">
           <VenueSearchSlide />
           <button
@@ -85,7 +90,9 @@ export default function MainMobileMenu() {
             aria-expanded={open}
             className="rounded-full p-2 text-black transition hover:scale-110 active:scale-95 hover:rotate-3"
           >
-            <span className="material-symbols-outlined text-3xl">menu</span>
+            <span className="material-symbols-outlined text-3xl" aria-hidden="true">
+              menu
+            </span>
           </button>
         </div>
       </header>
@@ -99,32 +106,38 @@ export default function MainMobileMenu() {
         `}
         role="dialog"
         aria-modal="true"
+        aria-labelledby="mainMenuHeading"
       >
+        <h2 id="mainMenuHeading" className="sr-only">Main menu</h2>
+
         <div className="flex justify-end mb-6">
           <button
             onClick={closeMenu}
             aria-label="Close menu"
             className="w-10 h-10 flex items-center justify-center bg-white border border-black rounded-full shadow-md transition-transform hover:rotate-90 hover:scale-105"
           >
-            <span className="material-symbols-outlined text-lg text-gray-800 leading-none">close</span>
+            <span className="material-symbols-outlined text-lg text-gray-800 leading-none" aria-hidden="true">
+              close
+            </span>
           </button>
         </div>
 
-        <nav className="flex flex-col gap-5 text-base mb-6" aria-label="Mobile menu links">
-          {mainLinks.map(link => (
+        <nav className="flex flex-col gap-5 text-base mb-6" aria-label="Mobile menu links" role="navigation">
+          {mainLinks.map((link) => (
             <MenuItem key={link.to} to={link.to} onClick={closeMenu}>
               {link.label}
             </MenuItem>
           ))}
 
-          {/* Favorites vises kun hvis man er innlogget */}
           {user && (
             <MenuItem to="/favorites" onClick={closeMenu} className="relative">
               <span className="flex items-center gap-2">
-               
                 Favorites
                 {favorites.length > 0 && (
-                  <span className="ml-1 bg-[#3E35A2] text-white text-xs rounded-full px-2 py-0.5">
+                  <span
+                    className="ml-1 bg-[#3E35A2] text-white text-xs rounded-full px-2 py-0.5"
+                    aria-label={`${favorites.length} favorite items`}
+                  >
                     {favorites.length}
                   </span>
                 )}
@@ -132,11 +145,12 @@ export default function MainMobileMenu() {
             </MenuItem>
           )}
 
-          {!user && guestLinks.map(link => (
-            <MenuItem key={link.to} to={link.to} onClick={closeMenu}>
-              {link.label}
-            </MenuItem>
-          ))}
+          {!user &&
+            guestLinks.map((link) => (
+              <MenuItem key={link.to} to={link.to} onClick={closeMenu}>
+                {link.label}
+              </MenuItem>
+            ))}
         </nav>
 
         {user && (
@@ -144,7 +158,8 @@ export default function MainMobileMenu() {
             <div className="flex items-center gap-3 pl-[2px]">
               <img
                 src={avatarSrc}
-                alt={user.name || "User avatar"}
+                alt=""
+                aria-hidden="true"
                 className="w-9 h-9 rounded-full object-cover border border-gray-300"
               />
               <span className="text-sm font-medium capitalize truncate">{user.name}</span>
