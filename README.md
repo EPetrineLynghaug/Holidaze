@@ -306,7 +306,12 @@ Some files became long due to the complexity of the logic, and a few minor visua
 
 ### 🧪 Performance & Testing
 
+
 I’ve run **Lighthouse reports** from Google Chrome and used **bundle analyzers** to reduce file sizes and optimize the build.
+
+<p align="center">
+  <img src="public/readmeimg/LR.png" alt="Lighthouse performance report" />
+</p>
 
 
 
