@@ -14,7 +14,7 @@ Holidaze is a full-featured front-end application that allows users to browse, s
 
 ---
 
-## 🚀 Getting Started
+##  Getting Started
 
 To run this project locally, follow these steps:
 
@@ -41,7 +41,7 @@ The app will be available at `http://localhost:5173/`.
 
 ---
 
-## 📦 Available Scripts
+##  Available Scripts
 
 ```json
 {
@@ -54,7 +54,7 @@ The app will be available at `http://localhost:5173/`.
 ```
 
 
-## 📁 Project Structure
+##  Project Structure
 <details>
   <summary><strong>Click to read more</strong></summary>
 
@@ -284,7 +284,7 @@ HOLIDAZE/
 ```
 </details>
 
-## 📋 Project Summary
+##  Project Summary
 <details>
   <summary><strong>Click to read more</strong></summary>
 
@@ -308,9 +308,7 @@ Some files became long due to the complexity of the logic, and a few minor visua
 
 I’ve run **Lighthouse reports** from Google Chrome and used **bundle analyzers** to reduce file sizes and optimize the build.
 
-### ✅ User Stories Implemented
 
-_(See assignment for full details – all user types and key features were included in the implementation.)_
 
 ### 📋 Exam Brief Summary
 
@@ -323,7 +321,7 @@ Holidaze is a fictional accommodation booking service. Students were tasked with
 </details>
 
 
-## 🎓 Background: Noroff D2 Exam Project
+##  Background: Noroff D2 Exam Project
 <details>
   <summary><strong>Click to read more</strong></summary>
 
@@ -337,7 +335,7 @@ This project was developed as part of Noroff's second-year Front-End Development
 - Work with APIs for real-time data
 - Deploy and test using modern tools
 
-### 🧰 Tools & Tech
+###  Tools & Tech
 
 - **Framework:** React
 - **Styling:** Tailwind CSS, Styled Components
@@ -347,7 +345,7 @@ This project was developed as part of Noroff's second-year Front-End Development
 - **Design:** Figma
 - **Planning:** Trello or GitHub Projects
 
-### 👤 Roles
+###  Roles
 
 - **Visitor:** Can browse and view venues
 - **Customer:** Can register, book, and manage profile
@@ -355,7 +353,7 @@ This project was developed as part of Noroff's second-year Front-End Development
 
 ---
 
-### 👥 Roles & User Stories
+###  Roles & User Stories
 
 **Visitor**  
 - Can view and search for venues  
@@ -374,7 +372,7 @@ This project was developed as part of Noroff's second-year Front-End Development
 - Can update avatar/profile picture  
 
 
-### 🚦 Submission Requirements
+###  Submission Requirements
 
 - GitHub repo with committed code  
 - Gantt chart (roadmap view)  
